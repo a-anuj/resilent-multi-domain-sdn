@@ -66,7 +66,7 @@ from topology.multi_domain_topo import (
     CTRL_A_PORT, CTRL_B_PORT, CTRL_C_PORT,
 )
 
-CONNECT_WAIT = 8    # seconds after RSTP before pinging
+CONNECT_WAIT = 20   # max seconds to wait for all switches to connect
 PING_TIMEOUT = 2    # seconds per individual ping
 
 PASS = '✅ PASS'
@@ -93,6 +93,34 @@ def ctrl_reachable(port: int) -> bool:
             return True
     except OSError:
         return False
+
+
+def wait_for_all_switches(net, timeout: int = CONNECT_WAIT) -> bool:
+    """
+    Poll every OVS bridge until is_connected=true, up to `timeout` seconds.
+    Returns True if all connected, False if timed out.
+    """
+    log.info('Waiting for all 9 switches to establish OF connections...')
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        not_yet = []
+        for sw in net.switches:
+            raw = sw.cmd(
+                f'ovs-vsctl get controller {sw.name} is_connected 2>/dev/null'
+            ).strip()
+            if raw != 'true':
+                not_yet.append(sw.name)
+        if not not_yet:
+            log.info('All %d switches connected to their controllers. ✓',
+                     len(net.switches))
+            return True
+        log.info('  Still waiting for: %s  (%.0fs remaining)',
+                 ', '.join(not_yet), deadline - time.time())
+        time.sleep(2)
+
+    log.error('Timed out after %ds — switches still disconnected: %s',
+              timeout, ', '.join(not_yet))
+    return False
 
 
 # ── Check 1: Controller reachability ─────────────────────────────────────────
@@ -324,11 +352,16 @@ def main():
 
     log.info('Starting network...')
     net.start()
-    assign_controllers(net)
-    enable_rstp(net, wait=8)
 
-    log.info('Waiting %ds for OF handshake + flow settle...', CONNECT_WAIT)
-    time.sleep(CONNECT_WAIT)
+    # RSTP FIRST — let port states settle before triggering OF connections.
+    # If RSTP runs after assign_controllers(), OVS is busy doing port-state
+    # transitions while trying to connect, causing backoff delays for s7-s9.
+    enable_rstp(net, wait=8)
+    assign_controllers(net)
+
+    if not wait_for_all_switches(net, timeout=60):   # 60s for 9 switches across 3 controllers
+        log.warning('Proceeding despite some switches not connected — '
+                    'results may be incomplete.')
 
     try:
         check_switch_assignment(net)
