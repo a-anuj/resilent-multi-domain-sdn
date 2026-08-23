@@ -493,9 +493,19 @@ class EWController(app_manager.RyuApp):
             il['dst_port'] for il in _inter_links
             if il.get('dst_port') and il['dst_dpid'] == dpid
         }
+        
+        _intra_in_ports = {
+            l['src_port'] for l in _DOMAIN_INTRA_LINKS.get(DOMAIN_ID, [])
+            if l['src_dpid'] == dpid
+        } | {
+            l['dst_port'] for l in _DOMAIN_INTRA_LINKS.get(DOMAIN_ID, [])
+            if l['dst_dpid'] == dpid
+        }
+
         if src != 'ff:ff:ff:ff:ff:ff':
             if in_port not in _inter_in_ports:
                 self.mac_to_port[dpid][src] = in_port
+            if in_port not in _inter_in_ports and in_port not in _intra_in_ports:
                 gt.update_host(src, dpid, in_port, ip=ip_src)
 
         table = self.mac_to_port[dpid]
