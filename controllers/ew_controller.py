@@ -496,7 +496,7 @@ class EWController(app_manager.RyuApp):
         if src != 'ff:ff:ff:ff:ff:ff':
             if in_port not in _inter_in_ports:
                 self.mac_to_port[dpid][src] = in_port
-            gt.update_host(src, dpid, in_port, ip=ip_src)
+                gt.update_host(src, dpid, in_port, ip=ip_src)
 
         table = self.mac_to_port[dpid]
 
