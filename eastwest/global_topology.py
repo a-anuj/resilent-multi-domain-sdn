@@ -109,6 +109,12 @@ def get_host(mac: str) -> dict | None:
         return _state['hosts'].get(mac)
 
 
+def get_hosts() -> dict:
+    with _LOCK:
+        import copy
+        return copy.deepcopy(_state['hosts'])
+
+
 def get_peer_meta() -> dict:
     with _LOCK:
         return dict(_state['peer_meta'])
