@@ -49,6 +49,7 @@ _domain_id    : str  = 'UNKNOWN'
 _api_port     : int  = 8080
 _ew_log_path  : str  = 'results/eastwest_traffic.log'
 _local_topo_fn       = None    # callable() → dict with switches/links/inter_links
+_flow_install_fn     = None    # callable(data: dict) → str  — registered by ew_controller
 _seq          : int  = 0
 _seq_lock             = threading.Lock()
 
@@ -94,11 +95,12 @@ def get_topology():
 
 @_app.route('/linkstate', methods=['GET'])
 def get_linkstate():
-    """Return current per-port utilization stats."""
+    """Return current per-port utilization stats including live bytes/sec rates."""
     data = {
-        'domain_id':  _domain_id,
-        'link_state': gt.get_link_state(),
-        'timestamp':  datetime.utcnow().isoformat() + 'Z',
+        'domain_id':   _domain_id,
+        'link_state':  gt.get_link_state(),
+        'util_rates':  gt.get_utilization_rates(),  # NEW: live bps + ratio
+        'timestamp':   datetime.utcnow().isoformat() + 'Z',
     }
     body = json.dumps(data)
     _ew_log('SEND', '*', '/linkstate', len(body))
@@ -133,10 +135,81 @@ def post_update():
         gt.merge_peer_topology(peer_domain, data)
     elif update_type == 'linkstate':
         gt.merge_peer_link_state(peer_domain, data)
+        # Also merge util_rates if present
+        if 'util_rates' in data:
+            with gt._LOCK:
+                for dpid, ports in data['util_rates'].items():
+                    if dpid not in gt._state['util_rates']:
+                        gt._state['util_rates'][dpid] = {}
+                    gt._state['util_rates'][dpid].update(ports)
     else:
         log.warning('[EW-API] Unknown update type: %s', update_type)
 
     return jsonify({'status': 'accepted', 'domain': _domain_id}), 200
+
+
+@_app.route('/install_path', methods=['POST'])
+def install_path():
+    """
+    Instruct this controller to install a flow rule segment for TE routing.
+
+    Expected JSON body:
+    {
+      "eth_dst"    : "aa:bb:cc:dd:ee:ff",
+      "eth_src"    : "11:22:33:44:55:66",   (optional — for exact match)
+      "dpid"       : 3,                       (which switch to program)
+      "in_port"    : 2,                       (match in_port)
+      "out_port"   : 4,                       (output action)
+      "priority"   : 50,
+      "idle_to"    : 30,
+      "hard_to"    : 300,
+      "flow_id"    : "abc123"                 (opaque ID for TE log correlation)
+    }
+
+    # ── DELIBERATE BASELINE VULNERABILITY ──────────────────────────────────
+    # Flow installation is accepted without authentication.  A compromised
+    # peer can inject arbitrary flow rules into this domain's switches.
+    # This is intentional for Phase 4 attack experiments.
+    # ─────────────────────────────────────────────────────────────────────
+    """
+    body       = request.get_data()
+    peer_domain = request.headers.get('X-Domain-Id', 'UNKNOWN')
+    _ew_log('RECV', peer_domain, '/install_path', len(body))
+
+    try:
+        data = json.loads(body)
+    except json.JSONDecodeError as exc:
+        return jsonify({'error': str(exc)}), 400
+
+    # Delegate to the flow-install callback registered by the controller
+    if _flow_install_fn is None:
+        return jsonify({'error': 'flow_install_fn not registered'}), 503
+
+    try:
+        result = _flow_install_fn(data)
+        return jsonify({'status': 'ok', 'result': result}), 200
+    except Exception as exc:
+        log.error('[EW-API] /install_path error: %s', exc)
+        return jsonify({'error': str(exc)}), 500
+
+
+@_app.route('/te_path', methods=['GET'])
+def get_te_path():
+    """
+    Diagnostic: compute and return the TE-selected path between two DPIDs.
+    Query params: src_dpid=<int>&dst_dpid=<int>&te=<0|1>
+    """
+    try:
+        from te.path_selector import compute_path, summarize_path
+        src  = int(request.args.get('src_dpid', 0))
+        dst  = int(request.args.get('dst_dpid', 0))
+        te   = request.args.get('te', '1') != '0'
+        ls   = gt.get_link_state()
+        path = compute_path(src, dst, ls, te_enabled=te)
+        summary = summarize_path(path, ls)
+        return jsonify({'path': path, 'summary': summary, 'te_enabled': te}), 200
+    except Exception as exc:
+        return jsonify({'error': str(exc)}), 500
 
 
 @_app.route('/peers', methods=['GET'])
@@ -154,23 +227,26 @@ def get_globalview():
 # ── Server startup ─────────────────────────────────────────────────────────────
 
 def start_api(domain_id: str, api_port: int, local_topo_fn,
-              ew_log_path: str = 'results/eastwest_traffic.log'):
+              ew_log_path: str = 'results/eastwest_traffic.log',
+              flow_install_fn=None):
     """
     Start the Flask REST API in a background daemon thread.
 
     Parameters
     ──────────
-    domain_id    : 'A', 'B', or 'C'
-    api_port     : TCP port (8080 / 8081 / 8082)
-    local_topo_fn: callable() → dict with 'switches', 'links', 'inter_links'
-    ew_log_path  : path for the East-West traffic log
+    domain_id      : 'A', 'B', or 'C'
+    api_port       : TCP port (8080 / 8081 / 8082)
+    local_topo_fn  : callable() → dict with 'switches', 'links', 'inter_links'
+    ew_log_path    : path for the East-West traffic log
+    flow_install_fn: optional callable(data: dict) called by POST /install_path
     """
-    global _domain_id, _api_port, _ew_log_path, _local_topo_fn
+    global _domain_id, _api_port, _ew_log_path, _local_topo_fn, _flow_install_fn
 
-    _domain_id    = domain_id
-    _api_port     = api_port
-    _ew_log_path  = ew_log_path
-    _local_topo_fn = local_topo_fn
+    _domain_id       = domain_id
+    _api_port        = api_port
+    _ew_log_path     = ew_log_path
+    _local_topo_fn   = local_topo_fn
+    _flow_install_fn = flow_install_fn
 
     # Suppress Flask's noisy startup banner and request logs
     import logging as _lg

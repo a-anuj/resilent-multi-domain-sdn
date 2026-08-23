@@ -9,6 +9,9 @@ ryu
 requests
 flask
 
+# === Graph algorithms (TE path computation) ===
+networkx
+
 # === Packet Crafting & Network Analysis ===
 scapy
 

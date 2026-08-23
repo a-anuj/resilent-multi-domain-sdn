@@ -45,13 +45,17 @@ _state: dict[str, Any] = {
     'links':       [],   # intra-domain edges (from all peers)
     'inter_links': [],   # cross-domain boundary edges
     'hosts':       {},   # mac -> {dpid, port, ip}
-    'link_state':  {},   # dpid_str -> {port_no -> stats dict}
+    'link_state':  {},   # dpid_str -> {port_no -> cumulative stats dict}
+    'util_rates':  {},   # dpid_str -> {port_no -> bytes/sec utilization ratio}
     'peer_meta':   {},   # domain_id -> {last_seen_ts, seq}
 }
 
 # ── Route cache: dst_mac -> (next_hop_dpid, out_port) ────────────────────────
 # Populated lazily by inter-domain forwarding logic.  Cleared on topology update.
 _route_cache: dict[str, tuple[int, int]] = {}
+
+# ── Previous sample cache for rate computation ───────────────────────────────
+_prev_stats: dict[str, dict[str, dict]] = {}  # dpid_str -> {port_str -> prev sample}
 
 
 # ── Public accessors ──────────────────────────────────────────────────────────
@@ -79,8 +83,25 @@ def get_inter_links() -> list:
 
 
 def get_link_state() -> dict:
+    """Returns raw cumulative byte/packet counters per port."""
     with _LOCK:
         return dict(_state['link_state'])
+
+
+def get_utilization_rates() -> dict:
+    """
+    Returns per-port utilization ratios (0.0–1.0, bytes/sec basis).
+    Updated every time update_link_state_local() is called.
+    """
+    with _LOCK:
+        import copy
+        return copy.deepcopy(_state['util_rates'])
+
+
+def get_port_utilization(dpid: int, port: int) -> float:
+    """Convenience: get a single port's utilization ratio (0.0 if unknown)."""
+    with _LOCK:
+        return _state['util_rates'].get(str(dpid), {}).get(str(port), 0.0)
 
 
 def get_host(mac: str) -> dict | None:
@@ -188,9 +209,15 @@ def update_host(mac: str, dpid: int, port: int, ip: str = ''):
         }
 
 
+# Link capacity in bits/sec (10 Mbps to match LINK_BW in topology)
+_LINK_BW_BPS = 10 * 1_000_000
+
+
 def update_link_state_local(dpid: int, port_stats: list):
     """
     Called by the Ryu PortStatsReply handler to update local link utilization.
+    Computes instantaneous bytes/sec rates and utilization ratios alongside
+    cumulative counters.
     port_stats : list of OFPPortStats objects.
     """
     ts = time.time()
@@ -198,14 +225,45 @@ def update_link_state_local(dpid: int, port_stats: list):
     with _LOCK:
         if dpid_str not in _state['link_state']:
             _state['link_state'][dpid_str] = {}
+        if dpid_str not in _state['util_rates']:
+            _state['util_rates'][dpid_str] = {}
+        if dpid_str not in _prev_stats:
+            _prev_stats[dpid_str] = {}
+
         for stat in port_stats:
-            pno = stat.port_no
-            _state['link_state'][dpid_str][str(pno)] = {
-                'tx_bytes': stat.tx_bytes,
-                'rx_bytes': stat.rx_bytes,
+            pno     = stat.port_no
+            pno_str = str(pno)
+            tx_bytes = stat.tx_bytes
+            rx_bytes = stat.rx_bytes
+
+            # Store cumulative counters
+            _state['link_state'][dpid_str][pno_str] = {
+                'tx_bytes': tx_bytes,
+                'rx_bytes': rx_bytes,
                 'tx_pkts':  stat.tx_packets,
                 'rx_pkts':  stat.rx_packets,
                 'timestamp': ts,
+            }
+
+            # Compute instantaneous rate
+            prev = _prev_stats[dpid_str].get(pno_str)
+            if prev is not None:
+                dt = ts - prev['ts']
+                if dt > 0:
+                    bps_tx = (tx_bytes - prev['tx_bytes']) * 8.0 / dt
+                    bps_rx = (rx_bytes - prev['rx_bytes']) * 8.0 / dt
+                    ratio  = min(max(bps_tx, bps_rx) / _LINK_BW_BPS, 1.0)
+                    _state['util_rates'][dpid_str][pno_str] = {
+                        'bps_tx':  round(bps_tx, 2),
+                        'bps_rx':  round(bps_rx, 2),
+                        'ratio':   round(ratio, 4),
+                        'timestamp': ts,
+                    }
+
+            _prev_stats[dpid_str][pno_str] = {
+                'tx_bytes': tx_bytes,
+                'rx_bytes': rx_bytes,
+                'ts': ts,
             }
 
 
