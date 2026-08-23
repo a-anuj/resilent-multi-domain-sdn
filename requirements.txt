@@ -1,0 +1,19 @@
+# SDN Multi-Controller Research Testbed — Python Dependencies
+# Note: mininet is assumed to be system-installed (via apt/dnf)
+# Activate the Ryu venv first: source ~/ryu311/bin/activate
+
+# === SDN Controller Framework ===
+ryu
+
+# === Web / REST API ===
+requests
+flask
+
+# === Packet Crafting & Network Analysis ===
+scapy
+
+# === Data Science & Visualization ===
+matplotlib
+pandas
+numpy
+scikit-learn
