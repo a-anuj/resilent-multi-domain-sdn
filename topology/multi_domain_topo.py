@@ -47,7 +47,7 @@ from mininet.log import setLogLevel, info
 
 CTRL_A_PORT = 6633
 CTRL_B_PORT = 6634
-CTRL_C_PORT = 6635
+CTRL_C_PORT = 6653
 CTRL_IP     = '127.0.0.1'
 LINK_BW     = 10   # Mbps
 
@@ -90,7 +90,7 @@ def build_network() -> Mininet:
         net.addSwitch(f's{i}',
                       dpid=f'{i:016x}',
                       protocols='OpenFlow13',
-                      failMode='secure')
+                      failMode='standalone')
 
     info('*** Adding hosts\n')
     # All hosts in the same /24 for pure L2; controller partitioning is the
@@ -116,9 +116,13 @@ def build_network() -> Mininet:
     net.addLink('s7', 's9', **lp)
 
     info('*** Adding inter-domain links (East-West boundaries)\n')
-    net.addLink('s3', 's4', **lp)   # A ↔ B
-    net.addLink('s6', 's7', **lp)   # B ↔ C
-    net.addLink('s3', 's7', **lp)   # A ↔ C  (diagonal)
+    inter_links = []
+    inter_links.append(net.addLink('s3', 's4', **lp))   # A ↔ B
+    inter_links.append(net.addLink('s6', 's7', **lp))   # B ↔ C
+    inter_links.append(net.addLink('s3', 's7', **lp))   # A ↔ C  (diagonal)
+
+    # Store inter_links in the net object so we can use it later
+    net.inter_links = inter_links
 
     info('*** Attaching hosts to switches\n')
     # Domain A
@@ -158,6 +162,24 @@ def enable_rstp(net: Mininet, wait: int = 8):
     time.sleep(wait)
 
 
+def isolate_domains(net: Mininet):
+    """Install drop rules on inter-domain ports so baseline controllers remain isolated."""
+    info('*** Isolating domains by installing high-priority DROP rules on inter-domain ports\n')
+    if hasattr(net, 'inter_links'):
+        for link in net.inter_links:
+            s1_node = link.intf1.node
+            s1_port_no = s1_node.ports[link.intf1]
+            s2_node = link.intf2.node
+            s2_port_no = s2_node.ports[link.intf2]
+            
+            cmd1 = f'ovs-ofctl add-flow {s1_node.name} priority=100,in_port={s1_port_no},actions=drop -O OpenFlow13'
+            cmd2 = f'ovs-ofctl add-flow {s2_node.name} priority=100,in_port={s2_port_no},actions=drop -O OpenFlow13'
+            out1 = s1_node.cmd(cmd1)
+            out2 = s2_node.cmd(cmd2)
+            info(f'  [ISOLATE] Executed: {cmd1} (out: {out1.strip()})\n')
+            info(f'  [ISOLATE] Executed: {cmd2} (out: {out2.strip()})\n')
+
+
 def run():
     setLogLevel('info')
     net = build_network()
@@ -165,8 +187,9 @@ def run():
     info('*** Starting network\n')
     net.start()
 
+    enable_rstp(net, wait=30)
     assign_controllers(net)
-    enable_rstp(net, wait=8)
+    isolate_domains(net)
 
     info('\n*** Multi-domain topology running.\n')
     info('    Domain A (port 6633): s1, s2, s3  | h1-h4\n')

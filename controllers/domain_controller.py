@@ -15,7 +15,7 @@ Launch (one process per domain):
 
     DOMAIN_ID=C DOMAIN_DPIDS=7,8,9 \
         ryu-manager controllers/domain_controller.py \
-        --ofp-tcp-listen-port 6635
+        --ofp-tcp-listen-port 6653
 
 Environment variables
 ---------------------

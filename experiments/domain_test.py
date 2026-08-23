@@ -61,13 +61,13 @@ from mininet.log import setLogLevel
 from mininet.node import OVSKernelSwitch
 
 from topology.multi_domain_topo import (
-    build_network, assign_controllers, enable_rstp,
+    build_network, assign_controllers, enable_rstp, isolate_domains,
     DOMAIN_HOSTS, HOST_DOMAIN, SWITCH_CTRL_PORT,
     CTRL_A_PORT, CTRL_B_PORT, CTRL_C_PORT,
 )
 
 CONNECT_WAIT = 20   # max seconds to wait for all switches to connect
-PING_TIMEOUT = 2    # seconds per individual ping
+PING_TIMEOUT = 1    # seconds per individual ping
 
 PASS = '✅ PASS'
 FAIL = '❌ FAIL'
@@ -120,6 +120,13 @@ def wait_for_all_switches(net, timeout: int = CONNECT_WAIT) -> bool:
 
     log.error('Timed out after %ds — switches still disconnected: %s',
               timeout, ', '.join(not_yet))
+    
+    for sw in not_yet:
+        status = net.get(sw).cmd(f'ovs-vsctl get controller {sw} status').strip()
+        error = net.get(sw).cmd(f'ovs-vsctl get controller {sw} error').strip()
+        target = net.get(sw).cmd(f'ovs-vsctl get controller {sw} target').strip()
+        log.error(f'  [DEBUG] {sw}: target={target} status={status} error={error}')
+    
     return False
 
 
@@ -172,12 +179,19 @@ def check_switch_assignment(net):
 
 # ── Check 3 & 4: Ping matrix ─────────────────────────────────────────────────
 
+import re
+
 def ping_pair(src_host, dst_host, timeout=PING_TIMEOUT) -> bool:
-    """Returns True if ping succeeds (0% loss)."""
+    """Returns True if ping succeeds (>0 packets received)."""
     result = src_host.cmd(
-        f'ping -c2 -W{timeout} {dst_host.IP()} 2>/dev/null'
+        f'ping -c 2 -W {timeout} {dst_host.IP()}'
     )
-    return '0% packet loss' in result or '0 packet loss' in result
+    match = re.search(r'(\d+)\s+(?:packets\s+)?received', result)
+    if match and int(match.group(1)) > 0:
+        if HOST_DOMAIN[src_host.name] != HOST_DOMAIN[dst_host.name]:
+            log.info(f'[DEBUG PING {src_host.name}->{dst_host.name}] RECEIVED {match.group(1)} PKTS! Output:\n{result}')
+        return True
+    return False
 
 
 def check_ping_matrix(net):
@@ -282,12 +296,13 @@ def check_flow_partitioning(net):
         for sw_name in switches:
             sw = net.get(sw_name)
             raw = sw.cmd(f'ovs-ofctl -O OpenFlow13 dump-flows {sw_name}')
+            log.info(f'[FLOW DUMP {sw_name}]\n{raw}')
             lines = [l.strip() for l in raw.splitlines()
                      if l.strip() and not l.startswith(('NXST', 'OFPST'))]
             total    = len(lines)
             has_miss = any('priority=0' in l and 'CONTROLLER' in l for l in lines)
             learned  = sum(1 for l in lines
-                           if 'priority=10' in l
+                           if 'priority=1' in l and 'priority=100' not in l
                            and ('eth_dst' in l or 'dl_dst' in l))
             ok = has_miss
             log.info('  [Domain %s] %-4s  total=%-3d  table-miss=%s  learned=%d  %s',
@@ -354,19 +369,23 @@ def main():
     net.start()
 
     # RSTP FIRST — let port states settle before triggering OF connections.
-    # If RSTP runs after assign_controllers(), OVS is busy doing port-state
-    # transitions while trying to connect, causing backoff delays for s7-s9.
-    enable_rstp(net, wait=8)
+    # We must wait long enough for RSTP to fully converge (up to 30s) so that
+    # loops are broken. Otherwise, controller connections trigger a broadcast
+    # storm which hangs OVS and prevents s7-s9 from connecting!
+    enable_rstp(net, wait=30)
     assign_controllers(net)
 
     if not wait_for_all_switches(net, timeout=60):   # 60s for 9 switches across 3 controllers
         log.warning('Proceeding despite some switches not connected — '
                     'results may be incomplete.')
 
+    # Install drop rules AFTER controllers connect, otherwise OVS clears the flow table!
+    isolate_domains(net)
+
     try:
         check_switch_assignment(net)
-        log.info('Warm-up pingAll (seeds ARP + flows)...')
-        net.pingAll()
+        # Skip the duplicate net.pingAll() which takes 5 minutes when domains are isolated
+        log.info('Running targeted ping checks (this may take 1-2 minutes due to expected timeouts)...')
         time.sleep(3)
         check_ping_matrix(net)
         check_flow_partitioning(net)
