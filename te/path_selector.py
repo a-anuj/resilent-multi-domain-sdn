@@ -188,7 +188,9 @@ def build_graph(utilization: dict[str, dict[str, float]]) -> nx.DiGraph:
 
 def compute_path(src_dpid: int, dst_dpid: int,
                  link_state: dict,
-                 te_enabled: bool = True) -> list[tuple[int, int]]:
+                 src_in_port: int,
+                 dst_out_port: int,
+                 te_enabled: bool = True) -> list[tuple[int, int, int]]:
     """
     Compute the best path from src_dpid to dst_dpid.
 
@@ -201,7 +203,7 @@ def compute_path(src_dpid: int, dst_dpid: int,
 
     Returns
     ───────
-    List of (dpid, out_port) tuples from src to dst (inclusive), or []
+    List of (dpid, in_port, out_port) tuples from src to dst (inclusive), or []
     if no path exists.
     """
     if src_dpid == dst_dpid:
@@ -232,8 +234,10 @@ def compute_path(src_dpid: int, dst_dpid: int,
             return []
         utilization = {}  # empty for no-TE path
 
-    # Convert node sequence → (dpid, out_port) sequence
-    result: list[tuple[int, int]] = []
+    # Convert node sequence → (dpid, in_port, out_port) sequence
+    result: list[tuple[int, int, int]] = []
+    current_in_port = src_in_port
+    
     for i in range(len(node_path) - 1):
         u = node_path[i]
         v = node_path[i + 1]
@@ -241,38 +245,44 @@ def compute_path(src_dpid: int, dst_dpid: int,
         if edge_data is None:
             log.error('[TE] Missing edge %d→%d in graph', u, v)
             return []
-        result.append((u, edge_data['src_port']))
+        out_port = edge_data['src_port']
+        result.append((u, current_in_port, out_port))
+        current_in_port = edge_data['dst_port']
+        
+    # Add the final hop
+    last_dpid = node_path[-1]
+    result.append((last_dpid, current_in_port, dst_out_port))
 
     log.info('[TE] Path %d→%d: %s  (TE=%s)',
              src_dpid, dst_dpid,
-             ' → '.join(f's{u}:p{p}' for u, p in result),
+             ' → '.join(f's{d}:in{i}->out{o}' for d, i, o in result),
              'ON' if te_enabled else 'OFF')
     return result
 
 
-def path_utilizations(path: list[tuple[int, int]],
+def path_utilizations(path: list[tuple[int, int, int]],
                       link_state: dict) -> list[float]:
     """
     Return the utilization ratio for each hop in the path.
     Useful for logging and congestion detection.
     """
     rates = compute_utilization_rates(link_state)
-    return [rates.get(str(dpid), {}).get(str(port), 0.0) for dpid, port in path]
+    return [rates.get(str(dpid), {}).get(str(out_port), 0.0) for dpid, in_port, out_port in path]
 
 
-def is_congested(path: list[tuple[int, int]], link_state: dict) -> bool:
+def is_congested(path: list[tuple[int, int, int]], link_state: dict) -> bool:
     """Return True if any link on the path exceeds CONGESTION_THRESHOLD."""
     return any(u >= CONGESTION_THRESHOLD
                for u in path_utilizations(path, link_state))
 
 
-def summarize_path(path: list[tuple[int, int]],
+def summarize_path(path: list[tuple[int, int, int]],
                    link_state: dict) -> dict[str, Any]:
     """
     Return a dict suitable for logging to te_decisions.log.
     """
     utils = path_utilizations(path, link_state)
-    hop_strs = [f's{dpid}:p{port}' for dpid, port in path]
+    hop_strs = [f's{dpid}:p{out_port}' for dpid, in_port, out_port in path]
     return {
         'hops':          hop_strs,
         'utilizations':  [round(u, 4) for u in utils],

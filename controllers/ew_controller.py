@@ -543,8 +543,10 @@ class EWController(app_manager.RyuApp):
         parser = dp.ofproto_parser
         ls     = gt.get_link_state()
 
+        dst_out_port = host_info['port'] if host_info else 1
+
         # Compute path
-        path = compute_path(src_dpid, dst_dpid, ls, te_enabled=TE_ENABLED)
+        path = compute_path(src_dpid, dst_dpid, ls, src_in_port=in_port, dst_out_port=dst_out_port, te_enabled=TE_ENABLED)
         if not path:
             self.logger.warning('[Domain %s][TE] No path from dpid=%d to %d — flooding',
                                 DOMAIN_ID, src_dpid, dst_dpid)
@@ -560,12 +562,11 @@ class EWController(app_manager.RyuApp):
         self.logger.info(
             '[Domain %s][TE] flow=%s  %d→%d  path=%s  max_util=%.1f%%  TE=%s',
             DOMAIN_ID, flow_id, src_dpid, dst_dpid,
-            '→'.join(f's{d}:p{p}' for d, p in path),
+            '→'.join(f's{d}:p{p}' for d, _, p in path),
             summary['max_util'] * 100, TE_ENABLED)
 
         # Install flow rules hop by hop
-        for i, (hop_dpid, out_port) in enumerate(path):
-            in_p  = path[i - 1][1] if i > 0 else in_port   # incoming port
+        for i, (hop_dpid, in_p, out_port) in enumerate(path):
             hop_domain = DPID_DOMAIN.get(hop_dpid)
 
             if hop_domain == DOMAIN_ID:
@@ -599,7 +600,7 @@ class EWController(app_manager.RyuApp):
             }
 
         # Send the initial packet out via first hop
-        first_out_port = path[0][1]
+        first_out_port = path[0][2]
         actions = [parser.OFPActionOutput(first_out_port)]
         data    = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         self._send_packet_out(dp, msg.buffer_id, in_port, actions, data)
