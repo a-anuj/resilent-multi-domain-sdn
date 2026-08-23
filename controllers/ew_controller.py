@@ -165,6 +165,8 @@ def _local_topology_snapshot() -> dict:
         'links':       _DOMAIN_INTRA_LINKS.get(DOMAIN_ID, []),
         'inter_links': [il for il in _inter_links
                         if il.get('src_port') is not None],
+        'hosts':       {mac: info for mac, info in gt.get_hosts().items()
+                        if info['dpid'] in DOMAIN_DPIDS},
     }
 
 

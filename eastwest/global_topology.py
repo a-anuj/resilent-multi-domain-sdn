@@ -117,12 +117,13 @@ def get_peer_meta() -> dict:
 # ── Merging helpers ───────────────────────────────────────────────────────────
 
 def merge_local_topology(domain_id: str, switches: dict, links: list,
-                         inter_links: list):
+                         inter_links: list, hosts: dict = None):
     """
     Called once at controller start-up to populate the local domain's view.
     switches  : {dpid_str: {ports: [...], ...}}
     links     : [{src_dpid, src_port, dst_dpid, dst_port}]
     inter_links: [{src_dpid, src_port, dst_dpid, dst_port}]
+    hosts      : {mac: {dpid, port, ip}}
     """
     with _LOCK:
         for dpid, info in switches.items():
@@ -145,6 +146,10 @@ def merge_local_topology(domain_id: str, switches: dict, links: list,
                 _state['inter_links'].append(il)
                 existing.add(key)
 
+        if hosts:
+            for mac, info in hosts.items():
+                _state['hosts'][mac] = info
+
         _route_cache.clear()
 
 
@@ -157,6 +162,7 @@ def merge_peer_topology(domain_id: str, data: dict):
         switches   = data.get('switches', {})
         links      = data.get('links', [])
         inter_links = data.get('inter_links', [])
+        hosts      = data.get('hosts', {})
 
         for dpid, info in switches.items():
             info['domain'] = domain_id
@@ -180,6 +186,9 @@ def merge_peer_topology(domain_id: str, data: dict):
             'last_seen_ts': time.time(),
             'seq': data.get('seq', -1),
         }
+        for mac, info in hosts.items():
+            _state['hosts'][mac] = info
+
         _route_cache.clear()
 
 
