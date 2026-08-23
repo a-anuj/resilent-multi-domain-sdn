@@ -97,11 +97,13 @@ EW_HOST    = '127.0.0.1'
 TE_DEC_LOG = os.path.join(RESULTS_DIR, 'te_decisions.log')
 EW_LOG     = os.path.join(RESULTS_DIR, 'eastwest_traffic.log')
 
-CONNECT_WAIT     = 20    # s: switch→controller connection wait
-SYNC_WAIT        = 15    # s: EW sync convergence wait
-SATURATE_DURATION = 30   # s: background iperf3 duration (saturates congested path)
-NEW_FLOW_DURATION = 20   # s: new flow iperf3 duration
-IPERF_PORT        = 5201
+CONNECT_WAIT      = 20    # s: switch→controller connection wait
+SYNC_WAIT         = 15    # s: EW sync convergence wait
+STATS_WARMUP      = 12    # s: wait for 2x PortStats cycles (interval=5s) before reading utils
+SATURATE_DURATION = 30    # s: background iperf3 duration (saturates congested path)
+NEW_FLOW_DURATION = 20    # s: new flow iperf3 duration
+IPERF_PORT_SAT    = 5201  # saturation flow server port
+IPERF_PORT_NEW    = 5202  # new flow server port (separate, avoids "server busy" error)
 HTTP_TIMEOUT      = 4
 
 # Topology: h1, h2 in Domain A; h12 in Domain C
@@ -170,25 +172,27 @@ def read_last_te_decisions(n: int = 5) -> list[dict]:
     return records[-n:]
 
 
-def run_iperf_server(host) -> subprocess.Popen:
-    """Start iperf3 server on a Mininet host. Returns process handle."""
-    host.cmd(f'pkill -f "iperf3 -s" 2>/dev/null; sleep 0.5')
-    host.cmd(f'iperf3 -s -p {IPERF_PORT} -D --logfile /tmp/iperf_server.log')
-    time.sleep(0.5)
-    log.info('  iperf3 server started on %s (%s)', host.name, host.IP())
+def run_iperf_server(host, port: int) -> None:
+    """Start iperf3 server on a Mininet host on the given port."""
+    host.cmd(f'pkill -f "iperf3 -s -p {port}" 2>/dev/null; sleep 0.3')
+    host.cmd(f'iperf3 -s -p {port} -D --logfile /tmp/iperf_server_{port}.log')
+    time.sleep(0.3)
+    log.info('  iperf3 server started on %s (%s) port=%d', host.name, host.IP(), port)
 
 
 def run_iperf_client(src_host, dst_host, duration: int,
-                     output_file: str, bitrate: str = '0') -> None:
+                     output_file: str, port: int = IPERF_PORT_SAT,
+                     bitrate: str = '0') -> None:
     """
     Run iperf3 client from src to dst for `duration` seconds.
     Results written to output_file as JSON.
     """
     dst_ip = dst_host.IP()
-    cmd = (f'iperf3 -c {dst_ip} -p {IPERF_PORT} -t {duration} '
+    cmd = (f'iperf3 -c {dst_ip} -p {port} -t {duration} '
            f'-b {bitrate} -J > {output_file} 2>&1')
-    log.info('  iperf3: %s → %s  dur=%ds  bitrate=%s', src_host.name,
-             dst_host.name, duration, bitrate if bitrate != '0' else 'unlimited')
+    log.info('  iperf3: %s → %s  port=%d  dur=%ds  bitrate=%s',
+             src_host.name, dst_host.name, port, duration,
+             bitrate if bitrate != '0' else 'unlimited')
     src_host.cmd(cmd)
 
 
@@ -231,11 +235,18 @@ def snapshot_link_utils(label: str = '') -> dict:
     for domain in ['A', 'B', 'C']:
         data = ew_get(domain, '/linkstate')
         if data and 'util_rates' in data:
-            all_utils[domain] = data['util_rates']
-    log.info('  [Utils%s] %s', f' {label}' if label else '',
-             {d: {p: f"{v.get('ratio', 0):.1%}"
-                  for p, v in ports.items()}
-              for d, ports in all_utils.items()})
+            all_utils[domain] = data['util_rates']  # {dpid_str: {port_str: {ratio,...}}}
+
+    # Build flat display: domain -> 'sX:pY: Z%'
+    display = {}
+    for d, dpid_map in all_utils.items():
+        display[d] = {}
+        for dpid_str, port_map in dpid_map.items():
+            for port_str, pdata in port_map.items():
+                key = f's{dpid_str}:p{port_str}'
+                display[d][key] = f"{pdata.get('ratio', 0):.1%}"
+
+    log.info('  [Utils%s] %s', f' {label}' if label else '', display)
     return all_utils
 
 
@@ -254,10 +265,15 @@ def run_trial(net, mode: str) -> dict:
     h2  = net.get('h2')    # Domain A — new flow source
     h12 = net.get('h12')   # Domain C — destination
 
-    # Start iperf3 server on h12
-    run_iperf_server(h12)
+    # Start TWO iperf3 server instances on h12 (different ports to avoid
+    # "server busy" rejection when both h1 and h2 connect simultaneously)
+    run_iperf_server(h12, IPERF_PORT_SAT)
+    run_iperf_server(h12, IPERF_PORT_NEW)
 
-    # ── Step 1: Snapshot baseline utilization ─────────────────────────────
+    # ── Step 1: Wait for PortStats warmup then snapshot baseline ──────────
+    log.info('Waiting %ds for PortStats warmup (2 x %ds interval)...',
+             STATS_WARMUP, 5)
+    time.sleep(STATS_WARMUP)
     log.info('Snapshotting baseline link utilizations...')
     utils_before = snapshot_link_utils('before')
 
@@ -266,24 +282,27 @@ def run_trial(net, mode: str) -> dict:
     sat_file = f'/tmp/iperf_sat_{mode}.json'
 
     def _saturate():
-        run_iperf_client(h1, h12, SATURATE_DURATION, sat_file, bitrate='8M')
+        run_iperf_client(h1, h12, SATURATE_DURATION, sat_file,
+                         port=IPERF_PORT_SAT, bitrate='8M')
 
     sat_thread = threading.Thread(target=_saturate, daemon=True)
     sat_thread.start()
 
-    # Wait for saturation to take effect (half the duration)
-    log.info('  Waiting %ds for saturation to take effect...', SATURATE_DURATION // 2)
-    time.sleep(SATURATE_DURATION // 2)
+    # Wait for saturation to take effect + at least one PortStats cycle (5s)
+    wait_sat = max(SATURATE_DURATION // 2, 10)
+    log.info('  Waiting %ds for saturation to take effect...', wait_sat)
+    time.sleep(wait_sat)
 
     # ── Step 3: Snapshot utilization under load ───────────────────────────
     utils_during = snapshot_link_utils('during saturation')
 
-    # ── Step 4: Start new flow h2 → h12 ──────────────────────────────────
+    # ── Step 4: Start new flow h2 → h12 on SEPARATE port ─────────────────
     section(f'Starting NEW flow h2→h12 ({NEW_FLOW_DURATION}s)')
     te_decisions_before = len(read_last_te_decisions(100))
 
     new_flow_file = f'/tmp/iperf_new_{mode}.json'
-    run_iperf_client(h2, h12, NEW_FLOW_DURATION, new_flow_file)
+    run_iperf_client(h2, h12, NEW_FLOW_DURATION, new_flow_file,
+                     port=IPERF_PORT_NEW)
 
     # ── Step 5: Wait for saturation to finish ────────────────────────────
     sat_thread.join(timeout=SATURATE_DURATION + 5)
@@ -312,13 +331,13 @@ def run_trial(net, mode: str) -> dict:
     # ── Step 8: Check if new flow avoided congested path (TE case) ────────
     path_used = None
     for d in reversed(new_decisions):
-        if d.get('src_dpid') == 1:  # src = s1 (h2's switch)
+        if d.get('src_dpid') in (1, 2):  # h2 connects to s1 or s2
             path_used = d.get('path', [])
             break
 
     used_direct = False
     if path_used:
-        # Direct path uses s7 immediately after s3 (dpid 3 → port 4 → dpid 7)
+        # Direct path: goes s3→s7 directly (no s4 hop)
         hops = [h.split(':')[0] for h in path_used]
         used_direct = 's3' in hops and 's4' not in hops and 's7' in hops
 
@@ -326,17 +345,18 @@ def run_trial(net, mode: str) -> dict:
     log.info('  Used direct (congested) A↔C path: %s', used_direct)
 
     metrics = {
-        'mode':          mode,
+        'mode':            mode,
         'throughput_mbps': throughput,
-        'te_decisions':  len(new_decisions),
-        'path_used':     path_used,
-        'used_direct':   used_direct,
-        'utils_before':  utils_before,
-        'utils_during':  utils_during,
+        'te_decisions':    len(new_decisions),
+        'path_used':       path_used,
+        'used_direct':     used_direct,
+        'utils_before':    utils_before,
+        'utils_during':    utils_during,
     }
 
     # Cleanup
-    h12.cmd('pkill -f "iperf3 -s" 2>/dev/null')
+    h12.cmd(f'pkill -f "iperf3 -s -p {IPERF_PORT_SAT}" 2>/dev/null')
+    h12.cmd(f'pkill -f "iperf3 -s -p {IPERF_PORT_NEW}" 2>/dev/null')
     return metrics
 
 

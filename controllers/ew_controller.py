@@ -75,7 +75,7 @@ PRI_DROP         = 100
 IDLE_TO  = 30
 HARD_TO  = 300
 
-STATS_INTERVAL  = 10    # seconds between PortStats polls
+STATS_INTERVAL  = 5     # seconds between PortStats polls (5s for responsive util tracking)
 REEVAL_INTERVAL = 15    # seconds between congestion re-evaluation
 
 # ── Logging ───────────────────────────────────────────────────────────────────
@@ -481,13 +481,39 @@ class EWController(app_manager.RyuApp):
             ip_src = ip_pkt.src
 
         # MAC learning + host registration
+        # IMPORTANT: Do NOT learn MACs arriving on inter-domain (boundary) ports.
+        # If we did, L2 forwarding would short-circuit TE on subsequent packets
+        # (after ARP floods, s3 would "know" h12 is on port 4 and bypass TE).
+        _inter_in_ports = {
+            il['src_port'] for il in _inter_links
+            if il.get('src_port') and il['src_dpid'] == dpid
+        } | {
+            il['dst_port'] for il in _inter_links
+            if il.get('dst_port') and il['dst_dpid'] == dpid
+        }
         if src != 'ff:ff:ff:ff:ff:ff':
-            self.mac_to_port[dpid][src] = in_port
+            if in_port not in _inter_in_ports:
+                self.mac_to_port[dpid][src] = in_port
             gt.update_host(src, dpid, in_port, ip=ip_src)
 
         table = self.mac_to_port[dpid]
 
-        # ── Known local destination ────────────────────────────────────────
+        # ── Inter-domain check FIRST — before L2 table lookup ─────────────
+        # If the destination MAC is known in the global topology as belonging
+        # to a different domain, ALWAYS route via TE — never via the local
+        # L2 table.  This guarantees TE intercepts even if a stale L2 entry
+        # from earlier flooding exists on an inter-domain port.
+        host_info = gt.get_host(dst)
+        if host_info is not None:
+            dst_dpid   = host_info['dpid']
+            dst_domain = gt.get_switches().get(str(dst_dpid), {}).get('domain')
+            src_domain = DPID_DOMAIN.get(dpid)
+            if dst_domain is not None and dst_domain != src_domain:
+                self._handle_inter_domain(dp, msg, dpid, in_port, src, dst,
+                                          dst_dpid, dst_domain)
+                return
+
+        # ── Known LOCAL destination → L2 forwarding ───────────────────────
         if dst in table:
             out_port = table[dst]
             actions  = [parser.OFPActionOutput(out_port)]
@@ -496,19 +522,6 @@ class EWController(app_manager.RyuApp):
             data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
             self._send_packet_out(dp, msg.buffer_id, in_port, actions, data)
             return
-
-        # ── Unknown destination: check global topology ─────────────────────
-        host_info = gt.get_host(dst)
-        if host_info is not None:
-            dst_dpid   = host_info['dpid']
-            dst_domain = gt.get_switches().get(str(dst_dpid), {}).get('domain')
-            src_domain = DPID_DOMAIN.get(dpid)
-
-            if dst_domain is not None and dst_domain != src_domain:
-                # Inter-domain: TE path selection
-                self._handle_inter_domain(dp, msg, dpid, in_port, src, dst,
-                                          dst_dpid, dst_domain)
-                return
 
         # ── Fallback: flood ────────────────────────────────────────────────
         actions = [parser.OFPActionOutput(ofp.OFPP_FLOOD)]
