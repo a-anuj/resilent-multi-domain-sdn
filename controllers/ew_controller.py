@@ -553,7 +553,10 @@ class EWController(app_manager.RyuApp):
         parser = dp.ofproto_parser
         ls     = gt.get_link_state()
 
-        dst_out_port = host_info['port'] if host_info else 1
+        # Look up the host's actual switch port so the final-hop flow rule
+        # forwards directly to the host (not just the switch boundary).
+        _dst_host_info = gt.get_host(dst_mac)
+        dst_out_port = _dst_host_info['port'] if _dst_host_info else 1
 
         # Compute path
         path = compute_path(src_dpid, dst_dpid, ls, src_in_port=in_port, dst_out_port=dst_out_port, te_enabled=TE_ENABLED)
