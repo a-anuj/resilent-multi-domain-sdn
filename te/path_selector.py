@@ -149,16 +149,11 @@ def compute_utilization_rates(link_state: dict) -> dict[str, dict[str, float]]:
 
 def build_graph(utilization: dict[str, dict[str, float]]) -> nx.DiGraph:
     """
-    Build a directed weighted NetworkX graph from the static topology,
-    with edge weights derived from current utilization ratios.
-
-    Edge attributes:
-      weight     : utilization-based weight (penalized if > CONGESTION_THRESHOLD)
-      util       : raw utilization ratio
-      src_port   : outgoing port number on src node
-      dst_port   : incoming port number on dst node
+    Build a directed weighted NetworkX graph from the static topology.
+    utilization: {dpid_str: {port_str: ratio}}  (0.0-1.0, pre-computed)
     """
     G = nx.DiGraph()
+
 
     for dpid in DPID_DOMAIN:
         G.add_node(dpid, domain=DPID_DOMAIN[dpid])
@@ -261,27 +256,29 @@ def compute_path(src_dpid: int, dst_dpid: int,
 
 
 def path_utilizations(path: list[tuple[int, int, int]],
-                      link_state: dict) -> list[float]:
+                      utilization: dict[str, dict[str, float]]) -> list[float]:
     """
     Return the utilization ratio for each hop in the path.
-    Useful for logging and congestion detection.
+    utilization: pre-computed {dpid_str: {port_str: ratio}}
     """
-    rates = compute_utilization_rates(link_state)
-    return [rates.get(str(dpid), {}).get(str(out_port), 0.0) for dpid, in_port, out_port in path]
+    return [utilization.get(str(dpid), {}).get(str(out_port), 0.0)
+            for dpid, in_port, out_port in path]
 
 
-def is_congested(path: list[tuple[int, int, int]], link_state: dict) -> bool:
+def is_congested(path: list[tuple[int, int, int]],
+                 utilization: dict[str, dict[str, float]]) -> bool:
     """Return True if any link on the path exceeds CONGESTION_THRESHOLD."""
     return any(u >= CONGESTION_THRESHOLD
-               for u in path_utilizations(path, link_state))
+               for u in path_utilizations(path, utilization))
 
 
 def summarize_path(path: list[tuple[int, int, int]],
-                   link_state: dict) -> dict[str, Any]:
+                   utilization: dict[str, dict[str, float]]) -> dict[str, Any]:
     """
     Return a dict suitable for logging to te_decisions.log.
+    utilization: pre-computed {dpid_str: {port_str: ratio}}
     """
-    utils = path_utilizations(path, link_state)
+    utils = path_utilizations(path, utilization)
     hop_strs = [f's{dpid}:p{out_port}' for dpid, in_port, out_port in path]
     return {
         'hops':          hop_strs,

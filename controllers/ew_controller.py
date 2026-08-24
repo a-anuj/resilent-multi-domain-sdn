@@ -361,7 +361,7 @@ class EWController(app_manager.RyuApp):
         If so, log it as a trigger for new-flow rerouting.
         (Live flow migration is out of scope — only new flows get rerouted.)
         """
-        ls = gt.get_link_state()
+        util = gt.get_all_util_ratios()
         with _flow_lock:
             flows = dict(_active_flows)
 
@@ -369,8 +369,8 @@ class EWController(app_manager.RyuApp):
             path = info.get('path', [])
             if not path:
                 continue
-            if is_congested(path, ls):
-                summary = summarize_path(path, ls)
+            if is_congested(path, util):
+                summary = summarize_path(path, util)
                 self.logger.info(
                     '[Domain %s][TE] Congestion detected on flow %s: max_util=%.1f%%',
                     DOMAIN_ID, flow_id, summary['max_util'] * 100)
@@ -551,7 +551,9 @@ class EWController(app_manager.RyuApp):
         """
         ofp    = dp.ofproto
         parser = dp.ofproto_parser
-        ls     = gt.get_link_state()
+        # Use pre-computed utilization ratios (merged from all 3 domains via EW sync).
+        # This avoids the stale-cache problem of re-deriving rates from raw byte counts.
+        util = gt.get_all_util_ratios()
 
         # Look up the host's actual switch port so the final-hop flow rule
         # forwards directly to the host (not just the switch boundary).
@@ -559,7 +561,7 @@ class EWController(app_manager.RyuApp):
         dst_out_port = _dst_host_info['port'] if _dst_host_info else 1
 
         # Compute path
-        path = compute_path(src_dpid, dst_dpid, ls, src_in_port=in_port, dst_out_port=dst_out_port, te_enabled=TE_ENABLED)
+        path = compute_path(src_dpid, dst_dpid, util, src_in_port=in_port, dst_out_port=dst_out_port, te_enabled=TE_ENABLED)
         if not path:
             self.logger.warning('[Domain %s][TE] No path from dpid=%d to %d — flooding',
                                 DOMAIN_ID, src_dpid, dst_dpid)
@@ -569,7 +571,7 @@ class EWController(app_manager.RyuApp):
             return
 
         flow_id = str(uuid.uuid4())[:8]
-        summary = summarize_path(path, ls)
+        summary = summarize_path(path, util)
         _log_te_decision(flow_id, src_dpid, dst_dpid, path, summary)
 
         self.logger.info(

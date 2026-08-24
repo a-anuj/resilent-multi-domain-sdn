@@ -201,7 +201,9 @@ def merge_peer_topology(domain_id: str, data: dict):
 def merge_peer_link_state(domain_id: str, data: dict):
     """
     Merge a /linkstate response from a peer.
-    data keys: link_state -> {dpid_str: {port_no: stats_dict}}
+    data keys:
+      link_state  : {dpid_str: {port_no: stats_dict}}  (raw cumulative bytes)
+      util_rates  : {dpid_str: {port_no: {ratio, bps_tx, bps_rx}}}  (pre-computed)
     """
     with _LOCK:
         for dpid, ports in data.get('link_state', {}).items():
@@ -209,9 +211,35 @@ def merge_peer_link_state(domain_id: str, data: dict):
                 _state['link_state'][dpid] = {}
             _state['link_state'][dpid].update(ports)
 
+        # Merge peer's pre-computed util_rates so path_selector has accurate
+        # cross-domain utilization without needing to re-derive from raw bytes.
+        for dpid, ports in data.get('util_rates', {}).items():
+            if dpid not in _state['util_rates']:
+                _state['util_rates'][dpid] = {}
+            _state['util_rates'][dpid].update(ports)
+
         if domain_id not in _state['peer_meta']:
             _state['peer_meta'][domain_id] = {}
         _state['peer_meta'][domain_id]['last_seen_ts'] = time.time()
+
+
+def get_all_util_ratios() -> dict:
+    """
+    Return a flat {dpid_str: {port_str: ratio}} dict from the merged util_rates,
+    covering both local domain and peers (populated via merge_peer_link_state).
+    Suitable for direct use in build_graph() without re-deriving from raw bytes.
+    """
+    with _LOCK:
+        import copy
+        result = {}
+        for dpid_str, ports in _state['util_rates'].items():
+            result[dpid_str] = {}
+            for port_str, pdata in ports.items():
+                if isinstance(pdata, dict):
+                    result[dpid_str][port_str] = pdata.get('ratio', 0.0)
+                else:
+                    result[dpid_str][port_str] = float(pdata)
+        return result
 
 
 def update_host(mac: str, dpid: int, port: int, ip: str = ''):
