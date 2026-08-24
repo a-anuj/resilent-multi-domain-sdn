@@ -182,7 +182,7 @@ def build_graph(utilization: dict[str, dict[str, float]]) -> nx.DiGraph:
 
 
 def compute_path(src_dpid: int, dst_dpid: int,
-                 link_state: dict,
+                 utilization: dict,
                  src_in_port: int,
                  dst_out_port: int,
                  te_enabled: bool = True) -> list[tuple[int, int, int]]:
@@ -191,10 +191,12 @@ def compute_path(src_dpid: int, dst_dpid: int,
 
     Parameters
     ──────────
-    src_dpid   : source switch DPID
-    dst_dpid   : destination switch DPID
-    link_state : raw link_state from global_topology.get_link_state()
-    te_enabled : if False, uses hop-count shortest path (TE-off baseline)
+    src_dpid    : source switch DPID
+    dst_dpid    : destination switch DPID
+    utilization : pre-computed {dpid_str: {port_str: ratio}} from gt.get_all_util_ratios()
+    src_in_port : incoming port on the first switch
+    dst_out_port: outgoing port on the last switch (to the destination host)
+    te_enabled  : if False, uses hop-count shortest path (TE-off baseline)
 
     Returns
     ───────
@@ -205,7 +207,8 @@ def compute_path(src_dpid: int, dst_dpid: int,
         return []
 
     if te_enabled:
-        utilization = compute_utilization_rates(link_state)
+        # utilization is already a {dpid_str: {port_str: ratio}} dict —
+        # pass directly to build_graph; no need to re-derive from raw bytes.
         G = build_graph(utilization)
         try:
             node_path = nx.dijkstra_path(G, src_dpid, dst_dpid, weight='weight')
@@ -227,7 +230,6 @@ def compute_path(src_dpid: int, dst_dpid: int,
             node_path = nx.shortest_path(G, src_dpid, dst_dpid, weight='weight')
         except (nx.NetworkXNoPath, nx.NodeNotFound):
             return []
-        utilization = {}  # empty for no-TE path
 
     # Convert node sequence → (dpid, in_port, out_port) sequence
     result: list[tuple[int, int, int]] = []
@@ -253,6 +255,7 @@ def compute_path(src_dpid: int, dst_dpid: int,
              ' → '.join(f's{d}:in{i}->out{o}' for d, i, o in result),
              'ON' if te_enabled else 'OFF')
     return result
+
 
 
 def path_utilizations(path: list[tuple[int, int, int]],
