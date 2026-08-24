@@ -281,13 +281,20 @@ def run_trial(net, mode: str) -> dict:
     h2  = net.get('h2')
     h12 = net.get('h12')
     for src, name in [(h1, 'h1'), (h2, 'h2')]:
-        result = src.cmd(f'ping -c 3 -W 2 {h12.IP()} 2>&1')
-        if '0 received' in result or 'unreachable' in result:
-            log.warning('  Pre-warm ping %s→h12 failed! Result: %s', name, result[:200])
-        else:
-            log.info('  Pre-warm ping %s→h12 OK', name)
+        ok = False
+        for attempt in range(1, 4):   # up to 3 attempts
+            result = src.cmd(f'ping -c 3 -W 3 {h12.IP()} 2>&1')
+            if '0 received' not in result and 'unreachable' not in result:
+                log.info('  Pre-warm ping %s→h12 OK (attempt %d)', name, attempt)
+                ok = True
+                break
+            log.warning('  Pre-warm ping %s→h12 attempt %d failed, retrying...', name, attempt)
+            time.sleep(3)
+        if not ok:
+            log.warning('  Pre-warm ping %s→h12 FAILED after 3 attempts — host registration may be incomplete', name)
     log.info('Waiting %ds for EW sync to propagate host locations...', PRE_WARM_WAIT)
     time.sleep(PRE_WARM_WAIT)
+
 
     # ── Step 1: Wait for PortStats warmup then snapshot baseline ──────────
     log.info('Waiting %ds for PortStats warmup (3 x %ds interval)...',

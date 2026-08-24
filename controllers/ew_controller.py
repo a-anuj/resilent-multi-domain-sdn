@@ -35,6 +35,7 @@ import sys
 import threading
 import time
 import uuid
+from concurrent.futures import ThreadPoolExecutor
 from collections import defaultdict
 from datetime import datetime
 
@@ -125,6 +126,11 @@ _dp_map_lock = threading.Lock()
 # flow_id → {src_dpid, dst_dpid, dst_mac, path, installed_at}
 _active_flows: dict[str, dict] = {}
 _flow_lock = threading.Lock()
+
+# Thread pool for parallel cross-domain /install_path calls.
+# Max 8 workers: up to 4 remote hops × 2 concurrent TE flows.
+# Using a pool (not bare threads) gives us Future.result() to wait on.
+_peer_executor = ThreadPoolExecutor(max_workers=8, thread_name_prefix='ew-peer')
 
 # Static inter-domain links (subset owned by this domain)
 _inter_links: list[dict] = []
@@ -596,29 +602,56 @@ class EWController(app_manager.RyuApp):
             '→'.join(f's{d}:p{p}' for d, _, p in path),
             summary['max_util'] * 100, TE_ENABLED)
 
-        # Install flow rules hop by hop
-        for i, (hop_dpid, in_p, out_port) in enumerate(path):
+        # ── Install flow rules hop by hop ─────────────────────────────────────
+        # CRITICAL: remote /install_path calls MUST complete before we send
+        # packet_out, otherwise the forwarded packet arrives at a downstream
+        # switch before its flow rule is in place → table-miss → TCP SYN loop.
+        #
+        # Strategy:
+        #   1. Install ALL local-domain rules immediately (fast, in-process).
+        #   2. Fire ALL remote /install_path calls in parallel threads.
+        #   3. Wait (with timeout) for ALL remote installs to complete.
+        #   4. THEN send packet_out.
+        #
+        # This adds ~10-50ms latency to the first packet of each new TE flow,
+        # which is acceptable for cross-domain path setup.
+
+        peer_futures = []  # (future, peer_domain, dpid) for logging
+
+        for hop_dpid, in_p, out_port in path:
             hop_domain = DPID_DOMAIN.get(hop_dpid)
 
             if hop_domain == DOMAIN_ID:
-                # Install locally
+                # Install locally — synchronous, fast
                 with _dp_map_lock:
                     hop_dp = _dp_map.get(hop_dpid)
                 if hop_dp is not None:
                     match   = parser.OFPMatch(in_port=in_p, eth_dst=dst_mac)
-                    actions = [parser.OFPActionOutput(out_port)]
-                    self._add_flow(hop_dp, PRI_INTER_DOMAIN, match, actions,
+                    actions_local = [parser.OFPActionOutput(out_port)]
+                    self._add_flow(hop_dp, PRI_INTER_DOMAIN, match, actions_local,
                                    idle=IDLE_TO, hard=HARD_TO)
                     self.logger.debug(
                         '[Domain %s][TE] Local rule: dpid=%d in=%d→out=%d dst=%s',
                         DOMAIN_ID, hop_dpid, in_p, out_port, dst_mac)
             else:
-                # Delegate to peer controller
-                threading.Thread(
-                    target=_install_flow_on_peer,
-                    args=(hop_domain, hop_dpid, in_p, out_port,
-                          dst_mac, PRI_INTER_DOMAIN, IDLE_TO, HARD_TO, flow_id),
-                    daemon=True).start()
+                # Queue remote install — fire in parallel, wait before packet_out
+                fut = _peer_executor.submit(
+                    _install_flow_on_peer,
+                    hop_domain, hop_dpid, in_p, out_port,
+                    dst_mac, PRI_INTER_DOMAIN, IDLE_TO, HARD_TO, flow_id)
+                peer_futures.append((fut, hop_domain, hop_dpid))
+
+        # Wait for all remote installs (max 2s total — 3s per call timeout already set)
+        for fut, peer_domain, hop_dpid in peer_futures:
+            try:
+                ok = fut.result(timeout=2.0)
+                self.logger.debug(
+                    '[Domain %s][TE] Remote rule installed: domain=%s dpid=%d ok=%s',
+                    DOMAIN_ID, peer_domain, hop_dpid, ok)
+            except Exception as exc:
+                self.logger.error(
+                    '[Domain %s][TE] Remote /install_path FAILED: domain=%s dpid=%d err=%s',
+                    DOMAIN_ID, peer_domain, hop_dpid, exc)
 
         # Record active flow
         with _flow_lock:
@@ -635,13 +668,9 @@ class EWController(app_manager.RyuApp):
         # at src_dpid (e.g. s3). Find the current switch's position in the path.
         current_hop = next(
             ((d, ip, op) for d, ip, op in path if d == src_dpid), None)
-        if current_hop is not None:
-            cur_out_port = current_hop[2]
-        else:
-            # PacketIn switch is not in the computed path (e.g. path starts upstream).
-            # Forward toward the first hop in the path on the current switch's out_port.
-            cur_out_port = path[0][2]
+        cur_out_port = current_hop[2] if current_hop is not None else path[0][2]
         actions = [parser.OFPActionOutput(cur_out_port)]
         data    = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         self._send_packet_out(dp, msg.buffer_id, in_port, actions, data)
+
 
