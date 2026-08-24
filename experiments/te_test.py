@@ -99,7 +99,8 @@ EW_LOG     = os.path.join(RESULTS_DIR, 'eastwest_traffic.log')
 
 CONNECT_WAIT      = 20    # s: switch→controller connection wait
 SYNC_WAIT         = 15    # s: EW sync convergence wait
-STATS_WARMUP      = 12    # s: wait for 2x PortStats cycles (interval=5s) before reading utils
+PRE_WARM_WAIT     = 12    # s: after ping pre-warm, wait for EW sync to propagate host info
+STATS_WARMUP      = 15    # s: wait for 3x PortStats cycles (interval=5s) before reading utils
 SATURATE_DURATION = 30    # s: background iperf3 duration (saturates congested path)
 NEW_FLOW_DURATION = 20    # s: new flow iperf3 duration
 IPERF_PORT_SAT    = 5201  # saturation flow server port
@@ -270,8 +271,22 @@ def run_trial(net, mode: str) -> dict:
     run_iperf_server(h12, IPERF_PORT_SAT)
     run_iperf_server(h12, IPERF_PORT_NEW)
 
+    # ── PRE-WARM: ping to trigger ARP + host registration + EW sync ──────
+    log.info('Pre-warming connectivity: pinging h12 from h1 and h2...')
+    h1  = net.get('h1')
+    h2  = net.get('h2')
+    h12 = net.get('h12')
+    for src, name in [(h1, 'h1'), (h2, 'h2')]:
+        result = src.cmd(f'ping -c 3 -W 2 {h12.IP()} 2>&1')
+        if '0 received' in result or 'unreachable' in result:
+            log.warning('  Pre-warm ping %s→h12 failed! Result: %s', name, result[:200])
+        else:
+            log.info('  Pre-warm ping %s→h12 OK', name)
+    log.info('Waiting %ds for EW sync to propagate host locations...', PRE_WARM_WAIT)
+    time.sleep(PRE_WARM_WAIT)
+
     # ── Step 1: Wait for PortStats warmup then snapshot baseline ──────────
-    log.info('Waiting %ds for PortStats warmup (2 x %ds interval)...',
+    log.info('Waiting %ds for PortStats warmup (3 x %ds interval)...',
              STATS_WARMUP, 5)
     time.sleep(STATS_WARMUP)
     log.info('Snapshotting baseline link utilizations...')
