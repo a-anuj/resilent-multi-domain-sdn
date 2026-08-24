@@ -99,13 +99,17 @@ EW_LOG     = os.path.join(RESULTS_DIR, 'eastwest_traffic.log')
 
 CONNECT_WAIT      = 20    # s: switch→controller connection wait
 SYNC_WAIT         = 15    # s: EW sync convergence wait
-PRE_WARM_WAIT     = 12    # s: after ping pre-warm, wait for EW sync to propagate host info
+PRE_WARM_WAIT     = 15    # s: after ping pre-warm, wait for EW sync to propagate host info (3 cycles)
 STATS_WARMUP      = 15    # s: wait for 3x PortStats cycles (interval=5s) before reading utils
-SATURATE_DURATION = 30    # s: background iperf3 duration (saturates congested path)
+SATURATE_DURATION = 35    # s: background iperf3 duration — long enough for util to be measured
 NEW_FLOW_DURATION = 20    # s: new flow iperf3 duration
 IPERF_PORT_SAT    = 5201  # saturation flow server port
 IPERF_PORT_NEW    = 5202  # new flow server port (separate, avoids "server busy" error)
 HTTP_TIMEOUT      = 4
+
+# Minimum saturation wait before starting new flow:
+# Must be > 2 x STATS_INTERVAL (5s) + 1 x EW_SYNC_INTERVAL (5s) = 15s
+MIN_SAT_WAIT      = 20    # s: wait for at least 4 PortStats + 2 EW sync cycles
 
 # Topology: h1, h2 in Domain A; h12 in Domain C
 # Direct A↔C path:  s1→s3→s7→s9→h12     (via s3-s7 diagonal)
@@ -303,9 +307,9 @@ def run_trial(net, mode: str) -> dict:
     sat_thread = threading.Thread(target=_saturate, daemon=True)
     sat_thread.start()
 
-    # Wait for saturation to take effect + at least one PortStats cycle (5s)
-    wait_sat = max(SATURATE_DURATION // 2, 10)
-    log.info('  Waiting %ds for saturation to take effect...', wait_sat)
+    # Wait for saturation to take effect + at least two full stats+EW cycles
+    wait_sat = MIN_SAT_WAIT
+    log.info('  Waiting %ds for saturation to take effect (4 PortStats + 2 EW cycles)...', wait_sat)
     time.sleep(wait_sat)
 
     # ── Step 3: Snapshot utilization under load ───────────────────────────
