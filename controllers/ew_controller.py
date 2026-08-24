@@ -555,28 +555,44 @@ class EWController(app_manager.RyuApp):
         # This avoids the stale-cache problem of re-deriving rates from raw byte counts.
         util = gt.get_all_util_ratios()
 
-        # Look up the host's actual switch port so the final-hop flow rule
-        # forwards directly to the host (not just the switch boundary).
+        # Look up the destination host's actual switch port for the final-hop rule.
         _dst_host_info = gt.get_host(dst_mac)
         dst_out_port = _dst_host_info['port'] if _dst_host_info else 1
 
-        # Compute path
-        path = compute_path(src_dpid, dst_dpid, util, src_in_port=in_port, dst_out_port=dst_out_port, te_enabled=TE_ENABLED)
+        # Look up the source host's true attachment switch.
+        # This is critical: the PacketIn may arrive at an INTERMEDIATE switch (e.g. s3)
+        # after being flooded from the edge switch (s1). If we compute the path starting
+        # from s3 instead of s1, the rule at s1 is never installed and traffic loops.
+        _src_host_info = gt.get_host(src_mac)
+        if _src_host_info is not None:
+            true_src_dpid    = _src_host_info['dpid']
+            true_src_in_port = _src_host_info['port']
+        else:
+            # GT doesn't know the source yet (race during pre-warm); use the current switch.
+            true_src_dpid    = src_dpid
+            true_src_in_port = in_port
+
+        # Compute path from the true source host attachment switch.
+        path = compute_path(true_src_dpid, dst_dpid, util,
+                            src_in_port=true_src_in_port,
+                            dst_out_port=dst_out_port,
+                            te_enabled=TE_ENABLED)
         if not path:
             self.logger.warning('[Domain %s][TE] No path from dpid=%d to %d — flooding',
-                                DOMAIN_ID, src_dpid, dst_dpid)
+                                DOMAIN_ID, true_src_dpid, dst_dpid)
             actions = [parser.OFPActionOutput(ofp.OFPP_FLOOD)]
             data    = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
             self._send_packet_out(dp, msg.buffer_id, in_port, actions, data)
             return
 
+
         flow_id = str(uuid.uuid4())[:8]
         summary = summarize_path(path, util)
-        _log_te_decision(flow_id, src_dpid, dst_dpid, path, summary)
+        _log_te_decision(flow_id, true_src_dpid, dst_dpid, path, summary)
 
         self.logger.info(
             '[Domain %s][TE] flow=%s  %d→%d  path=%s  max_util=%.1f%%  TE=%s',
-            DOMAIN_ID, flow_id, src_dpid, dst_dpid,
+            DOMAIN_ID, flow_id, true_src_dpid, dst_dpid,
             '→'.join(f's{d}:p{p}' for d, _, p in path),
             summary['max_util'] * 100, TE_ENABLED)
 
@@ -592,7 +608,7 @@ class EWController(app_manager.RyuApp):
                     match   = parser.OFPMatch(in_port=in_p, eth_dst=dst_mac)
                     actions = [parser.OFPActionOutput(out_port)]
                     self._add_flow(hop_dp, PRI_INTER_DOMAIN, match, actions,
-                                   idle=10, hard=60)
+                                   idle=IDLE_TO, hard=HARD_TO)
                     self.logger.debug(
                         '[Domain %s][TE] Local rule: dpid=%d in=%d→out=%d dst=%s',
                         DOMAIN_ID, hop_dpid, in_p, out_port, dst_mac)
@@ -601,21 +617,31 @@ class EWController(app_manager.RyuApp):
                 threading.Thread(
                     target=_install_flow_on_peer,
                     args=(hop_domain, hop_dpid, in_p, out_port,
-                          dst_mac, PRI_INTER_DOMAIN, 10, 60, flow_id),
+                          dst_mac, PRI_INTER_DOMAIN, IDLE_TO, HARD_TO, flow_id),
                     daemon=True).start()
 
         # Record active flow
         with _flow_lock:
             _active_flows[flow_id] = {
-                'src_dpid': src_dpid,
+                'src_dpid': true_src_dpid,
                 'dst_dpid': dst_dpid,
                 'dst_mac':  dst_mac,
                 'path':     path,
                 'installed_at': time.time(),
             }
 
-        # Send the initial packet out via first hop
-        first_out_port = path[0][2]
-        actions = [parser.OFPActionOutput(first_out_port)]
+        # Send the initial packet out via the CURRENT switch's hop in the path.
+        # path may start from true_src_dpid (e.g. s1) while the PacketIn arrived
+        # at src_dpid (e.g. s3). Find the current switch's position in the path.
+        current_hop = next(
+            ((d, ip, op) for d, ip, op in path if d == src_dpid), None)
+        if current_hop is not None:
+            cur_out_port = current_hop[2]
+        else:
+            # PacketIn switch is not in the computed path (e.g. path starts upstream).
+            # Forward toward the first hop in the path on the current switch's out_port.
+            cur_out_port = path[0][2]
+        actions = [parser.OFPActionOutput(cur_out_port)]
         data    = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         self._send_packet_out(dp, msg.buffer_id, in_port, actions, data)
+
