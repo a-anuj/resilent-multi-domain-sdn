@@ -98,6 +98,31 @@ sudo mn --test pingall
 
 ---
 
+## Emergency reset and attack safety
+
+Before any Phase 5 attack experiment, run the preflight check. It fails closed
+unless Mininet's nine switches are present, all three East-West controller APIs
+respond, and no previous project attack process is running.
+
+```bash
+sudo python3 experiments/preflight_check.py
+```
+
+If a Mininet run or later attack experiment behaves unexpectedly, reset the
+testbed immediately. This command stops only this project's named attack and
+EW-controller processes, runs `mn -c`, and starts clean TE-enabled controllers:
+
+```bash
+sudo ./experiments/emergency_reset.sh
+```
+
+The shared [attack safety module](attacks/safety.py) permits traffic only to
+the Mininet subnet `10.0.0.0/24` or interfaces named like `s1-eth1`. Future
+attack scripts must validate their target, require a typed `yes` confirmation,
+use a gradual rate ramp, and start a watchdog before transmitting traffic.
+
+---
+
 ## Installed Python Packages (via pip)
 
 | Package | Purpose |
