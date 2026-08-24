@@ -110,7 +110,8 @@ sudo python3 experiments/preflight_check.py
 
 If a Mininet run or later attack experiment behaves unexpectedly, reset the
 testbed immediately. This command stops only this project's named attack and
-EW-controller processes, runs `mn -c`, and starts clean TE-enabled controllers:
+EW-controller processes and runs `mn -c`. It deliberately does **not** restart
+controllers, so you can start and observe each controller in its own terminal:
 
 ```bash
 sudo ./experiments/emergency_reset.sh
