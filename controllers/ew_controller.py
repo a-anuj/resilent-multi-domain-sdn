@@ -201,10 +201,11 @@ def _install_flow_on_peer(peer_domain: str, dpid: int, in_port: int,
                              headers={'Content-Type': 'application/json',
                                       'X-Domain-Id': DOMAIN_ID},
                              timeout=3)
+        _std_log.getLogger('ew_ctrl').info('[DEBUG-TE-HYPOTHESIS] /install_path to %s URL=%s STATUS=%s RESP=%s', peer_domain, url, resp.status_code, resp.text)
         return resp.status_code == 200
     except Exception as exc:
         _std_log.getLogger('ew_ctrl').warning(
-            '[Domain %s] /install_path to %s failed: %s', DOMAIN_ID, peer_domain, exc)
+            '[DEBUG-TE-HYPOTHESIS-FAIL] /install_path to %s URL=%s failed: %s', peer_domain, url, exc)
         return False
 
 
@@ -297,6 +298,10 @@ class EWController(app_manager.RyuApp):
         parser = dp.ofproto_parser
         match  = parser.OFPMatch(in_port=in_port, eth_dst=eth_dst)
         actions = [parser.OFPActionOutput(out_port)]
+
+        self.logger.info('[DEBUG] _flow_install_callback: dpid=%d in_port=%d out_port=%d eth_dst=%s',
+                         dpid, in_port, out_port, eth_dst)
+
         self._add_flow(dp, priority, match, actions, idle=idle_to, hard=hard_to)
         self.logger.info(
             '[Domain %s] /install_path: dpid=%d  in=%d→out=%d  dst=%s  flow=%s',
@@ -332,11 +337,17 @@ class EWController(app_manager.RyuApp):
         def _stats_poll():
             while True:
                 hub.sleep(STATS_INTERVAL)
-                with _dp_map_lock:
-                    dps = list(_dp_map.values())
-                for dp in dps:
-                    if dp.id in DOMAIN_DPIDS:
-                        self._request_port_stats(dp)
+                try:
+                    with _dp_map_lock:
+                        dps = list(_dp_map.values())
+                    for dp in dps:
+                        if dp.id in DOMAIN_DPIDS:
+                            try:
+                                self._request_port_stats(dp)
+                            except Exception as exc:
+                                self.logger.warning('[Domain %s] Failed to request PortStats for dpid=%d: %s', DOMAIN_ID, dp.id, exc)
+                except Exception as exc:
+                    self.logger.error('[Domain %s] Critical error in _stats_poll: %s', DOMAIN_ID, exc)
 
         def _congestion_monitor():
             while True:
@@ -375,6 +386,13 @@ class EWController(app_manager.RyuApp):
             path = info.get('path', [])
             if not path:
                 continue
+                
+            # Exclude saturation flow (h4 <-> h9) from reactive TE
+            src_mac = info.get('src_mac', '')
+            dst_mac = info.get('dst_mac', '')
+            if {src_mac, dst_mac} == {'00:00:00:00:00:04', '00:00:00:00:00:09'}:
+                continue
+
             if is_congested(path, util):
                 summary = summarize_path(path, util)
                 self.logger.info(
@@ -405,6 +423,76 @@ class EWController(app_manager.RyuApp):
         dp.send_msg(parser.OFPPacketOut(
             datapath=dp, buffer_id=buffer_id,
             in_port=in_port, actions=actions, data=data))
+
+    def _tree_flood_ports(self, dpid: int, in_port: int) -> list[int]:
+        """
+        Compute the set of output ports for a broadcast/unknown-unicast flood
+        on switch `dpid` arriving from `in_port`.
+
+        Like final_year/qos_controller.py _get_tree_ports(), this:
+          • Includes ALL host-side ports (anything not a switch-to-switch link)
+          • Includes ONLY intra-domain spanning-tree switch ports (never the
+            inter-domain boundary ports — those stay blocked for broadcasts)
+          • Excludes in_port itself
+
+        The intra-domain spanning tree is the simple chain (not the triangle):
+          Domain A: s1—s2—s3   (s1↔s3 back-link is excluded = already DROP-ruled)
+          Domain B: s4—s5—s6
+          Domain C: s7—s8—s9
+        """
+        # Intra-domain tree neighbors (DPID -> [neighbor DPIDs in spanning tree])
+        # This is the chain, not the full triangle.
+        TREE_NEIGHBORS: dict[int, list[int]] = {
+            1: [2],        # s1: only to s2 (not s3, that's the hypotenuse)
+            2: [1, 3],     # s2: to s1 and s3
+            3: [2],        # s3: only to s2 (not s1 hypotenuse; inter-domain s4,s7 via TE only)
+            4: [5],        # s4: only to s5
+            5: [4, 6],     # s5: to s4 and s6
+            6: [5],        # s6: only to s5
+            7: [8],        # s7: only to s8
+            8: [7, 9],     # s8: to s7 and s9
+            9: [8],        # s9: only to s8
+        }
+
+        # All switch-to-switch ports for this dpid (intra + inter domain)
+        all_sw_ports: set[int] = set()
+        for link in _DOMAIN_INTRA_LINKS.get(DOMAIN_ID, []):
+            if link['src_dpid'] == dpid:
+                all_sw_ports.add(link['src_port'])
+            elif link['dst_dpid'] == dpid:
+                all_sw_ports.add(link['dst_port'])
+        for il in _inter_links:
+            if il.get('src_port') and il['src_dpid'] == dpid:
+                all_sw_ports.add(il['src_port'])
+            if il.get('dst_port') and il['dst_dpid'] == dpid:
+                all_sw_ports.add(il['dst_port'])
+
+        known_ports = set(_switch_registry.get(dpid, {}).get('ports', {}).keys())
+        if not known_ports:
+            # Fall back to all registered ports minus in_port
+            return [p for p in range(1, 10) if p != in_port]
+
+        output_ports: list[int] = []
+
+        # 1. Add host-side ports (all ports that are NOT switch-to-switch)
+        for port in known_ports:
+            if port != in_port and port not in all_sw_ports:
+                output_ports.append(port)
+
+        # 2. Add spanning-tree switch ports (intra-domain chain only, never inter-domain)
+        for neighbor_dpid in TREE_NEIGHBORS.get(dpid, []):
+            # Find the port on this switch that connects to neighbor_dpid
+            for link in _DOMAIN_INTRA_LINKS.get(DOMAIN_ID, []):
+                if link['src_dpid'] == dpid and link['dst_dpid'] == neighbor_dpid:
+                    p = link['src_port']
+                    if p and p != in_port:
+                        output_ports.append(p)
+                elif link['dst_dpid'] == dpid and link['src_dpid'] == neighbor_dpid:
+                    p = link['dst_port']
+                    if p and p != in_port:
+                        output_ports.append(p)
+
+        return output_ports
 
     # ── Switch handshake ──────────────────────────────────────────────────────
 
@@ -541,10 +629,25 @@ class EWController(app_manager.RyuApp):
             self._send_packet_out(dp, msg.buffer_id, in_port, actions, data)
             return
 
-        # ── Fallback: flood ────────────────────────────────────────────────
-        actions = [parser.OFPActionOutput(ofp.OFPP_FLOOD)]
-        data    = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
+        # ── Fallback: domain-scoped spanning tree flood ────────────────────
+        # Use explicit port list instead of OFPP_FLOOD to avoid sending
+        # broadcasts out inter-domain ports (which would either cause
+        # loops or be dropped by the TE drop rules installed there).
+        flood_ports = self._tree_flood_ports(dpid, in_port)
+        if flood_ports:
+            actions = [parser.OFPActionOutput(p) for p in flood_ports]
+        else:
+            actions = [parser.OFPActionOutput(ofp.OFPP_FLOOD)]
+        data = msg.data if msg.buffer_id == ofp.OFP_NO_BUFFER else None
         self._send_packet_out(dp, msg.buffer_id, in_port, actions, data)
+
+
+    @set_ev_cls(ofp_event.EventOFPErrorMsg, [CONFIG_DISPATCHER, MAIN_DISPATCHER])
+    def error_msg_handler(self, ev):
+        msg = ev.msg
+        self.logger.error(
+            '[Domain %s] OFPErrorMsg received: type=0x%02x code=0x%02x message=%s',
+            DOMAIN_ID, msg.type, msg.code, repr(msg.data))
 
     # ── Inter-domain TE forwarding ─────────────────────────────────────────────
 
@@ -658,6 +761,7 @@ class EWController(app_manager.RyuApp):
             _active_flows[flow_id] = {
                 'src_dpid': true_src_dpid,
                 'dst_dpid': dst_dpid,
+                'src_mac':  src_mac,
                 'dst_mac':  dst_mac,
                 'path':     path,
                 'installed_at': time.time(),

@@ -224,6 +224,12 @@ def get_globalview():
     return jsonify(gt.snapshot()), 200
 
 
+@_app.route('/hosts', methods=['GET'])
+def get_hosts():
+    """Return all host MACs known to this controller (from global_topology)."""
+    return jsonify(gt.get_hosts()), 200
+
+
 # ── Server startup ─────────────────────────────────────────────────────────────
 
 def start_api(domain_id: str, api_port: int, local_topo_fn,
@@ -255,9 +261,17 @@ def start_api(domain_id: str, api_port: int, local_topo_fn,
     def _run():
         log.info('[EW-API] Starting Flask on 0.0.0.0:%d (domain=%s)',
                  api_port, domain_id)
-        _app.run(host='0.0.0.0', port=api_port, threaded=True, use_reloader=False)
+        from ryu.lib import hub
+        import eventlet
+        import eventlet.wsgi
+        # Run Flask using eventlet's WSGI server so it runs in the same thread
+        # and event loop as Ryu datapath. This is CRITICAL because incoming
+        # /install_path requests call dp.send_msg(), which pushes to an
+        # eventlet queue. If called from a separate OS thread, the eventlet
+        # hub never wakes up, and the flows never get installed!
+        eventlet.wsgi.server(eventlet.listen(('0.0.0.0', api_port)), _app, log_output=False)
 
-    t = threading.Thread(target=_run, name='ew-api', daemon=True)
-    t.start()
-    log.info('[EW-API] Thread launched.')
+    from ryu.lib import hub
+    t = hub.spawn(_run)
+    log.info('[EW-API] GreenThread launched.')
     return t

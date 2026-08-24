@@ -93,33 +93,39 @@ class SyncAgent:
         self.peer_domains = peer_domains
         self.local_topo_fn = local_topo_fn
         self.ew_log_path  = ew_log_path
-        self._stop        = threading.Event()
-        self._thread      = threading.Thread(
-            target=self._loop, name=f'sync-agent-{domain_id}', daemon=True)
+        
+        self._running     = False
+        self._thread      = None
 
     def start(self):
         log.info('[SyncAgent-%s] Starting (interval=%ds, peers=%s)',
                  self.domain_id, SYNC_INTERVAL, self.peer_domains)
-        self._thread.start()
+        from ryu.lib import hub
+        self._running = True
+        self._thread = hub.spawn(self._loop)
 
     def stop(self):
-        self._stop.set()
+        self._running = False
 
     # ── Internal ──────────────────────────────────────────────────────────────
 
     def _loop(self):
+        import eventlet
         # Wait a bit for controllers to finish startup before first sync
-        time.sleep(3)
-        while not self._stop.is_set():
+        eventlet.sleep(3)
+        while self._running:
             start = time.time()
             for peer in self.peer_domains:
+                if not self._running:
+                    break
                 self._pull_from_peer(peer)
                 self._push_to_peer(peer)
             elapsed = time.time() - start
             sleep_for = max(0.0, SYNC_INTERVAL - elapsed)
             log.debug('[SyncAgent-%s] round done in %.1fs, sleeping %.1fs',
                       self.domain_id, elapsed, sleep_for)
-            self._stop.wait(timeout=sleep_for)
+            if self._running:
+                eventlet.sleep(sleep_for)
 
     def _pull_from_peer(self, peer: str):
         """Pull /topology and /linkstate from a peer, merge into global view."""

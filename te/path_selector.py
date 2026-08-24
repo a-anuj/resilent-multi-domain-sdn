@@ -159,21 +159,36 @@ def build_graph(utilization: dict[str, dict[str, float]]) -> nx.DiGraph:
         G.add_node(dpid, domain=DPID_DOMAIN[dpid])
 
     for src_dpid, src_port, dst_dpid, dst_port in STATIC_LINKS:
-        # Get utilization for the TX direction on src_port
-        util = utilization.get(str(src_dpid), {}).get(str(src_port), 0.0)
+        # A physical link is congested if EITHER endpoint reports high load.
+        # With OVS/TCLink, a unidirectional UDP stream can be visible only as
+        # RX at one endpoint during a polling window. Using one endpoint's TX
+        # counter alone therefore lets a heavily loaded s3:p4↔s7:p4 link look
+        # idle to the controller that owns s3. Apply the same physical-link
+        # load in both graph directions.
+        util_src = utilization.get(str(src_dpid), {}).get(str(src_port), 0.0)
+        util_dst = utilization.get(str(dst_dpid), {}).get(str(dst_port), 0.0)
+        util = max(util_src, util_dst)
 
-        if util >= CONGESTION_THRESHOLD:
+        # Only apply TE congestion penalties to INTER-DOMAIN links.
+        # Intra-domain links must remain at weight=1.0 to ensure Dijkstra
+        # always chooses the shortest path, avoiding RSTP-blocked back-edges.
+        is_inter_domain = DPID_DOMAIN[src_dpid] != DPID_DOMAIN[dst_dpid]
+        
+        if is_inter_domain and util >= CONGESTION_THRESHOLD:
             weight = PENALTY
         else:
-            # Weight = utilization ratio; idle links have weight near 0
-            weight = max(util, 0.001)   # avoid zero-weight (Dijkstra ties)
+            weight = 1.0   # avoid zero-weight (Dijkstra ties)
 
         G.add_edge(src_dpid, dst_dpid,
                    weight=weight, util=util,
                    src_port=src_port, dst_port=dst_port)
-        # Reverse direction: use the dst→src port utilization
-        util_rev = utilization.get(str(dst_dpid), {}).get(str(dst_port), 0.0)
-        weight_rev = PENALTY if util_rev >= CONGESTION_THRESHOLD else max(util_rev, 0.001)
+        # Both directed graph edges represent the same constrained medium.
+        util_rev = util
+        if is_inter_domain and util_rev >= CONGESTION_THRESHOLD:
+            weight_rev = PENALTY
+        else:
+            weight_rev = 1.0
+
         G.add_edge(dst_dpid, src_dpid,
                    weight=weight_rev, util=util_rev,
                    src_port=dst_port, dst_port=src_port)
