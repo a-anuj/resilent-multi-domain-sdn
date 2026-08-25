@@ -1,0 +1,4 @@
+Attack Type,Time-to-Detect (s),Mitigation Strategy,Time-to-Mitigate (s),Post-Mitigation Latency
+PacketIn Flood,3.0,Controller Restart + Edge Metering,16.7,Returned to Baseline
+Link Saturation (EW),4.2*,Dynamic TE Reroute,2.1*,Returned to Baseline
+Topology Poisoning,2.5*,Port Shutdown + Flow Flush,5.5*,Returned to Baseline

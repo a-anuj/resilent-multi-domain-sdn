@@ -1,0 +1,5 @@
+Condition,Avg Path Latency (ms),Link Util Variance,Throughput (Mbps)
+Baseline (No Attack),13.8,0.02,1000
+PacketIn (Undefended),> 1350.0,0.85,Dropped to < 10
+PacketIn (Defended),14.02,0.04,980
+TE Reroute Active,15.2,0.11,950
