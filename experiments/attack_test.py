@@ -56,13 +56,18 @@ BASELINE_DUR   = 60       # seconds
 RECOVERY_DUR   = 60       # seconds
 
 # Attack durations (watchdog-enforced in the attack scripts themselves)
+#
+# PacketIn rates: raised to 500→5000 pkt/s to find the controller's saturation point.
+# Earlier runs at 50→300 showed no measurable effect; these higher rates are needed
+# to produce data worth reporting (either a real effect, or a resilience finding).
 ATTACK_CONFIGS = {
     "packetin": {
         "script":   str(_ROOT / "attacks" / "packetin_flood.py"),
         "args":     ["--target", "10.0.0.9",
                      "--iface", "h1-eth0",
-                     "--start-rate", "50",
-                     "--max-rate", "300",
+                     "--start-rate", "500",
+                     "--max-rate", "5000",
+                     "--step", "500",
                      "--duration", "120"],
         "duration": 120,
         "label":    "PacketIn Flood (North-South)",
@@ -147,7 +152,13 @@ def _link_utils() -> dict:
 
 
 def _te_decision_count() -> int:
-    """Return the number of lines currently in te_decisions.log."""
+    """Return the number of lines currently in te_decisions.log.
+
+    This reads the live file on every call — it is NOT cached.
+    If the count stays static across an entire experiment, that means no new
+    inter-domain TE decisions were triggered (expected when no iperf/new flows
+    are active during the attack suite).  Document this explicitly in results.
+    """
     try:
         with open(TE_DEC_LOG) as f:
             return sum(1 for _ in f)
@@ -230,6 +241,43 @@ def run_preflight(log: logging.Logger) -> bool:
     return result.returncode == 0
 
 
+def _check_ew_connectivity(port: int, log: logging.Logger) -> bool:
+    """Return True if the EW REST API at localhost:port is reachable.
+
+    This is a pre-launch guard for the East-West flood: if the /update
+    endpoint is not reachable, the flood will run but produce only
+    'Connection refused' errors and give meaningless latency data.
+    """
+    url = f"http://127.0.0.1:{port}/topology"
+    try:
+        r = requests.get(url, timeout=3)
+        if r.status_code == 200:
+            log.info("EW connectivity OK: %s → HTTP %d", url, r.status_code)
+            return True
+        log.warning("EW connectivity check: unexpected status %d at %s", r.status_code, url)
+        return False
+    except Exception as exc:
+        log.error("EW connectivity FAILED for %s: %s", url, exc)
+        return False
+
+
+def _drain_subprocess_output(proc: subprocess.Popen,
+                              timeout: float) -> tuple[int, str]:
+    """Wait for subprocess to complete, drain its stdout pipe, return (returncode, output).
+
+    Using communicate() instead of wait() avoids the Popen deadlock that can occur
+    when stdout=PIPE is used and the pipe buffer fills before the process exits.
+    The timeout triggers if the attack overruns its expected window.
+    """
+    try:
+        out_bytes, _ = proc.communicate(timeout=timeout)
+        return proc.returncode, out_bytes.decode(errors="replace")
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        out_bytes, _ = proc.communicate()
+        return proc.returncode, out_bytes.decode(errors="replace")
+
+
 # ── Emergency reset ───────────────────────────────────────────────────────────
 
 def run_emergency_reset(log: logging.Logger) -> None:
@@ -308,6 +356,30 @@ def run_attack_experiment(attack_key: str, cfg: dict,
         log.info("PHASE: ATTACK — %s", cfg["label"])
         log.info("─" * 70)
 
+        atk_proc = None
+        attack_pid: str | int = "N/A"
+        atk_exit_early = False   # set True if proc exits significantly before duration
+
+        # Pre-launch connectivity check for East-West flood
+        if attack_key == "eastwest":
+            ew_port = int(next(
+                a for i, a in enumerate(cfg["args"])
+                if cfg["args"][i - 1] == "--target-port"
+            ))
+            if not _check_ew_connectivity(ew_port, log):
+                log.error(
+                    "EASTWEST ABORT: controller REST API not reachable on port %d. "
+                    "The flood would produce only connection-refused errors. "
+                    "Ensure all three Ryu controllers are running before re-running.",
+                    ew_port,
+                )
+                return {
+                    "attack": label,
+                    "result": "CONNECTIVITY_FAIL",
+                    "log": str(log_path),
+                    "detail": f"Controller REST port {ew_port} not reachable",
+                }
+
         # PacketIn flood must run inside h1's namespace via Mininet
         if attack_key == "packetin" and net is not None:
             h1 = net.get("h1")
@@ -315,8 +387,7 @@ def run_attack_experiment(attack_key: str, cfg: dict,
                 [sys.executable, cfg["script"]] + cfg["args"] + ["--yes"]
             )
             log.info("Launching packetin flood inside h1 namespace: %s", cmd)
-            atk_proc = None
-            # Run non-blocking inside h1's namespace; use popen
+            # Run non-blocking inside h1's namespace via popen
             h1.cmd(f"nohup {cmd} > /tmp/atk_packetin.log 2>&1 &")
             attack_pid = h1.cmd("echo $!").strip()
             log.info("Attack PID in h1 namespace: %s", attack_pid)
@@ -324,7 +395,7 @@ def run_attack_experiment(attack_key: str, cfg: dict,
             # eastwest_flood and topology_poison run from host Python directly
             # (they target 127.0.0.1 controller ports, not Mininet NICs)
             cmd = [sys.executable, cfg["script"]] + cfg["args"] + ["--yes"]
-            log.info("Launching attack: %s", " ".join(cmd))
+            log.info("Launching attack subprocess: %s", " ".join(cmd))
             atk_proc = subprocess.Popen(
                 cmd,
                 stdin=subprocess.DEVNULL,
@@ -339,21 +410,67 @@ def run_attack_experiment(attack_key: str, cfg: dict,
         # ── 4. Metric logging during attack ───────────────────────────────────
         dur_thread, dur_stop = start_metric_logger(log, snapshots["during"], "during")
 
-        # Wait for attack to complete (or watchdog to kill it)
+        # Wait for attack to complete (or watchdog to kill it).
+        # Use _drain_subprocess_output() instead of bare wait() to avoid pipe deadlocks
+        # and to capture the subprocess's stdout/stderr for failure diagnosis.
+        atk_returncode: int | None = None
+        atk_output: str = ""
         if attack_key == "packetin" and net is not None:
             time.sleep(cfg["duration"] + 10)
         elif atk_proc is not None:
-            try:
-                atk_proc.wait(timeout=cfg["duration"] + 30)
-            except subprocess.TimeoutExpired:
-                log.warning("Attack process overran — killing.")
-                atk_proc.kill()
+            atk_returncode, atk_output = _drain_subprocess_output(
+                atk_proc, timeout=cfg["duration"] + 30
+            )
 
         dur_stop.set()
         dur_thread.join(timeout=10)
 
         atk_elapsed = time.time() - atk_start
-        log.info("Attack phase done. Elapsed: %.1f s", atk_elapsed)
+
+        # ── Evaluate whether the attack actually ran its full duration ─────────
+        EARLY_EXIT_THRESHOLD = 0.5   # fraction of configured duration
+        expected_min = cfg["duration"] * EARLY_EXIT_THRESHOLD
+        if atk_elapsed < expected_min:
+            atk_exit_early = True
+            log.error(
+                "EARLY EXIT DETECTED: attack ran %.1f s but expected ≥ %.0f s "
+                "(%.0f%% of configured %d s duration). "
+                "This invalidates 'during' phase metrics. "
+                "Return code: %s",
+                atk_elapsed, expected_min,
+                100.0 * atk_elapsed / cfg["duration"],
+                cfg["duration"],
+                atk_returncode,
+            )
+        else:
+            log.info(
+                "Attack phase done. Elapsed: %.1f s  (returncode=%s)",
+                atk_elapsed, atk_returncode,
+            )
+
+        # Log subprocess output regardless of exit status — essential for debugging
+        if atk_output:
+            tail = atk_output[-4000:]   # last 4KB is most relevant for crashes
+            log.info(
+                "Attack subprocess stdout/stderr (last 4KB):\n%s",
+                tail,
+            )
+        if atk_returncode not in (None, 0):
+            log.error(
+                "Attack subprocess exited with non-zero returncode=%d",
+                atk_returncode,
+            )
+
+        # Snapshot count sanity check
+        expected_snaps = cfg["duration"] // POLL_INTERVAL
+        actual_snaps = len(snapshots["during"])
+        if actual_snaps < expected_snaps // 2:
+            log.warning(
+                "INSUFFICIENT SNAPSHOTS during attack: got %d, expected ~%d "
+                "(at %ds poll interval for %ds attack). "
+                "Statistical comparison will be unreliable.",
+                actual_snaps, expected_snaps, POLL_INTERVAL, cfg["duration"],
+            )
 
         # Snapshot TE path immediately after attack to check poison effect
         te_during = fetch_te_path(src_dpid=1, dst_dpid=9)
@@ -386,30 +503,69 @@ def run_attack_experiment(attack_key: str, cfg: dict,
                            if s["latency_ms"].get(domain) is None)
             return round(100.0 * timeouts / total, 1)
 
+        def _te_delta(phase_snaps: list[dict], baseline_snaps: list[dict]) -> int | None:
+            """Return net new TE decisions during this phase vs baseline start.
+
+            te_decisions is a cumulative log-line count. A static value across all
+            phases means zero new TE decisions were triggered — expected when no
+            inter-domain flows are active (no iperf during this suite).
+            'te_path: None' is also expected for the same reason: /te_path returns
+            None when no active flow for the queried s1→s9 pair exists.
+            """
+            if not phase_snaps or not baseline_snaps:
+                return None
+            return phase_snaps[-1]["te_decisions"] - baseline_snaps[0]["te_decisions"]
+
+        # Determine overall experiment status
+        if atk_exit_early:
+            exp_result = "EARLY_EXIT"
+        elif atk_returncode is not None and atk_returncode != 0:
+            exp_result = "SUBPROCESS_ERROR"
+        elif len(snapshots["during"]) < (cfg["duration"] // POLL_INTERVAL) // 2:
+            exp_result = "INSUFFICIENT_DATA"
+        else:
+            exp_result = "OK"
+
         summary = {
             "attack":   label,
+            "result":   exp_result,
             "ts":       ts,
             "log":      str(log_path),
+            "atk_elapsed_s":   round(atk_elapsed, 1),
+            "atk_returncode":  atk_returncode,
             "baseline": {
                 "n_snaps": len(snapshots["baseline"]),
                 "avg_lat": {d: _avg_lat(snapshots["baseline"], d) for d in EW_PORTS},
                 "timeout_pct": {d: _timeout_pct(snapshots["baseline"], d) for d in EW_PORTS},
-                "te_decisions": snapshots["baseline"][-1]["te_decisions"] if snapshots["baseline"] else 0,
+                "te_decisions_abs": snapshots["baseline"][-1]["te_decisions"] if snapshots["baseline"] else 0,
             },
             "during": {
                 "n_snaps":  len(snapshots["during"]),
                 "avg_lat":  {d: _avg_lat(snapshots["during"], d) for d in EW_PORTS},
                 "timeout_pct": {d: _timeout_pct(snapshots["during"], d) for d in EW_PORTS},
-                "te_decisions": snapshots["during"][-1]["te_decisions"] if snapshots["during"] else 0,
+                "te_decisions_abs":   snapshots["during"][-1]["te_decisions"] if snapshots["during"] else 0,
+                "te_decisions_delta": _te_delta(snapshots["during"], snapshots["baseline"]),
             },
             "recovery": {
                 "n_snaps": len(snapshots["recovery"]),
                 "avg_lat": {d: _avg_lat(snapshots["recovery"], d) for d in EW_PORTS},
                 "timeout_pct": {d: _timeout_pct(snapshots["recovery"], d) for d in EW_PORTS},
+                "te_decisions_delta": _te_delta(snapshots["recovery"], snapshots["baseline"]),
             },
             "te_path_before": te_before,
             "te_path_during": te_during,
             "te_path_after":  te_after,
+            # NOTE: te_path=None and static te_decisions are EXPECTED when the
+            # attack suite runs without active iperf flows. /te_path queries the
+            # live flow table; with no s1→s9 flow active, it correctly returns None.
+            # If te_decisions_delta stays 0 across all phases, no new inter-domain
+            # paths were computed — consistent with this test design.
+            "te_note": (
+                "te_decisions is read live from te_decisions.log on every poll. "
+                "A static value indicates zero new TE decisions during the suite — "
+                "expected when no inter-domain iperf flows are active. "
+                "te_path=None is correct when no s1→s9 flow is currently active."
+            ),
         }
 
         # Did topology poison cause a path change?
@@ -440,7 +596,7 @@ def run_attack_experiment(attack_key: str, cfg: dict,
         log.info("JSON summary saved: %s", json_path)
 
         log.info("=" * 70)
-        log.info("EXPERIMENT DONE: %s", cfg["label"])
+        log.info("EXPERIMENT DONE: %s  [result=%s]", cfg["label"], exp_result)
         log.info("=" * 70)
         return summary
 

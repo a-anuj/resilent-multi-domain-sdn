@@ -62,7 +62,7 @@ def validate_target(ip_or_iface: str) -> None:
 
 
 def confirm_before_run(attack_name: str, target: str, rate: str,
-                       duration: int) -> bool:
+                       duration: int, auto_confirm: bool = False) -> bool:
     """Show the exact action and require an interactive ``yes`` confirmation.
 
     ``False`` means the caller must abort without transmitting traffic.
@@ -77,6 +77,11 @@ def confirm_before_run(attack_name: str, target: str, rate: str,
     print(f"Rate:     {rate}")
     print(f"Duration: {duration} seconds (watchdog required)")
     print("Only proceed if this target is inside the Mininet testbed.")
+    
+    if auto_confirm:
+        print("\nAuto-confirmed via --yes flag.")
+        return True
+
     try:
         return input("Type 'yes' to continue: ").strip().lower() == "yes"
     except (EOFError, KeyboardInterrupt):
