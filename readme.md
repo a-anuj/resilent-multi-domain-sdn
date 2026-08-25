@@ -86,6 +86,19 @@ We built an automated evaluation pipeline (`experiments/circuit_breaker_eval.py`
     *   **Post-Mitigation Latency:** Capped at **14.02 ms** (virtually identical to the baseline of 13.8 ms).
 *   **False Positives:** The Circuit Breaker was tested against data-plane East-West link saturation and Topology Poisoning. Because it relies on a strict dual-signal threshold (Control Plane CPU + Datapath PacketIns), it successfully ignored these attacks, leaving them to be handled by the TE engine.
 
+### Visual Metrics
+
+*(Click on any chart to view the high-resolution PDF version)*
+
+[![TE Link Utilization](results/figures/fig1_te_utilization.png)](results/figures/fig1_te_utilization.pdf)
+**Figure 1:** Traffic Engineering (TE) load-balancing activation triggering at the 70% threshold (15s mark).
+
+[![Attack Latency Comparison](results/figures/fig2_attack_latency.png)](results/figures/fig2_attack_latency.pdf)
+**Figure 2:** Logarithmic comparison of Domain A peak latency. Only the PacketIn flood causes unbounded saturation; data-plane/TE attacks (East-West and Poisoning) do not saturate the controller CPU.
+
+[![Detection Accuracy](results/figures/fig3_detection_accuracy.png)](results/figures/fig3_detection_accuracy.pdf)
+**Figure 3:** Anticipated precision/recall improvement when replacing the threshold-based detector with an ML model (future work).
+
 ---
 
 ## 📁 Project Structure
