@@ -71,10 +71,10 @@ def main():
     )
     time.sleep(2) # let it initialize
     
-    print("[3] Launching PacketIn Flood Attack (5000 pkt/s) via Orchestrator...")
-    print("    (This will take ~8 minutes to run the full baseline -> attack -> recovery cycle)")
+    print("[3] Launching All 3 Attacks via Orchestrator...")
+    print("    (This will take ~15-20 minutes to run the full baseline -> attack -> recovery cycles)")
     
-    attack_cmd = ["sudo", sys.executable, "experiments/attack_test.py", "--attacks", "packetin", "--with-mininet"]
+    attack_cmd = ["sudo", sys.executable, "experiments/attack_test.py", "--attacks", "eastwest", "poison", "packetin", "--with-mininet"]
     subprocess.run(attack_cmd)
     
     print("[4] Attack phase completed. Stopping Circuit Breaker...")

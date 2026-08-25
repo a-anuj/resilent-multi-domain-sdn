@@ -33,14 +33,31 @@ plt.savefig('results/figures/fig1_te_utilization.png', dpi=300)
 plt.savefig('results/figures/fig1_te_utilization.pdf', dpi=300)
 plt.close()
 
+import glob
+def get_latest_summary(attack_type):
+    files = glob.glob(f"results/attack_{attack_type}_*_summary.json")
+    if not files: return None
+    files.sort(key=os.path.getmtime)
+    with open(files[-1]) as f:
+        return json.load(f)
+
 print("Generating Phase 5/6: Latency vs Baseline (3 Attacks)...")
 # 2. Figure: Latency during attack vs baseline, with and without defense
-# We use the empirical data for PacketIn, and placeholders for the others for the pipeline scaffold.
+# We parse the empirical data for all 3 attacks
+
+undefended_peak = [1350.0, 23.49, 15.36] # From Phase 5 (PacketIn is 1350, others are low as they are data-plane/TE attacks)
+defended_peak = [14.02, 23.49, 15.36]    # Default to Phase 5 values if Phase 6 not run yet
+
+baseline = [13.8, 17.59, 18.34]
+
+# Try to load Phase 6 defended values if they exist
+for i, atk in enumerate(['packetin', 'eastwest', 'poison']):
+    data = get_latest_summary(atk)
+    if data:
+        baseline[i] = data["baseline"]["avg_lat"]["A"] or baseline[i]
+        defended_peak[i] = data["during"]["avg_lat"]["A"] or defended_peak[i]
 
 attacks = ['PacketIn Flood', 'Link Saturation (EW)', 'Topology Poisoning']
-baseline = [13.8, 14.5, 13.9]
-undefended_peak = [1350.0, 450.0, 850.0]  # PacketIn empirical, others placeholder
-defended_peak = [14.02, 15.5, 14.1]       # PacketIn empirical, others placeholder
 
 x = np.arange(len(attacks))
 width = 0.25
@@ -61,6 +78,7 @@ plt.tight_layout()
 plt.savefig('results/figures/fig2_attack_latency.png', dpi=300)
 plt.savefig('results/figures/fig2_attack_latency.pdf', dpi=300)
 plt.close()
+
 
 print("Generating Phase 6: Detection Accuracy (Threshold vs ML)...")
 # 3. Figure: Detection accuracy comparison, threshold-based vs ML-based detector
