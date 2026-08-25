@@ -1,0 +1,170 @@
+[
+  {
+    "attack": "packetin",
+    "result": "OK",
+    "ts": "20260825T031501Z",
+    "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_packetin_20260825T031501Z.log",
+    "atk_elapsed_s": 130.0,
+    "atk_returncode": null,
+    "baseline": {
+      "n_snaps": 12,
+      "avg_lat": {
+        "A": 18.19,
+        "B": 20.25,
+        "C": 17.79
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_abs": 4969,
+      "te_decisions_suite": 0
+    },
+    "during": {
+      "n_snaps": 26,
+      "avg_lat": {
+        "A": 17.92,
+        "B": 19.67,
+        "C": 17.45
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_abs": 4969,
+      "te_decisions_phase": 0
+    },
+    "recovery": {
+      "n_snaps": 12,
+      "avg_lat": {
+        "A": 17.5,
+        "B": 19.61,
+        "C": 20.31
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_phase": 0
+    },
+    "te_path_before": null,
+    "te_path_during": null,
+    "te_path_after": null,
+    "te_note": "te_decisions_suite=0 expected: log is append-only, no new TE decisions without active inter-domain flows. te_path=None correct: no s1\u2192s9 flow active."
+  },
+  {
+    "attack": "eastwest",
+    "result": "OK",
+    "ts": "20260825T031941Z",
+    "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_eastwest_20260825T031941Z.log",
+    "atk_elapsed_s": 82.7,
+    "atk_returncode": 0,
+    "baseline": {
+      "n_snaps": 12,
+      "avg_lat": {
+        "A": 16.85,
+        "B": 20.22,
+        "C": 18.1
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_abs": 4969,
+      "te_decisions_suite": 0
+    },
+    "during": {
+      "n_snaps": 16,
+      "avg_lat": {
+        "A": 21.58,
+        "B": 19.16,
+        "C": 18.72
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_abs": 4969,
+      "te_decisions_phase": 0
+    },
+    "recovery": {
+      "n_snaps": 12,
+      "avg_lat": {
+        "A": 19.17,
+        "B": 17.69,
+        "C": 18.41
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_phase": 0
+    },
+    "te_path_before": null,
+    "te_path_during": null,
+    "te_path_after": null,
+    "te_note": "te_decisions_suite=0 expected: log is append-only, no new TE decisions without active inter-domain flows. te_path=None correct: no s1\u2192s9 flow active."
+  },
+  {
+    "attack": "poison",
+    "result": "OK",
+    "ts": "20260825T032335Z",
+    "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_poison_20260825T032335Z.log",
+    "atk_elapsed_s": 10.6,
+    "atk_returncode": 0,
+    "baseline": {
+      "n_snaps": 12,
+      "avg_lat": {
+        "A": 18.91,
+        "B": 17.46,
+        "C": 19.16
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_abs": 4969,
+      "te_decisions_suite": 0
+    },
+    "during": {
+      "n_snaps": 3,
+      "avg_lat": {
+        "A": 21.72,
+        "B": 21.68,
+        "C": 16.72
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_abs": 4969,
+      "te_decisions_phase": 0
+    },
+    "recovery": {
+      "n_snaps": 12,
+      "avg_lat": {
+        "A": 17.91,
+        "B": 18.46,
+        "C": 17.68
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_phase": 0
+    },
+    "te_path_before": null,
+    "te_path_during": null,
+    "te_path_after": null,
+    "te_note": "te_decisions_suite=0 expected: log is append-only, no new TE decisions without active inter-domain flows. te_path=None correct: no s1\u2192s9 flow active."
+  }
+]

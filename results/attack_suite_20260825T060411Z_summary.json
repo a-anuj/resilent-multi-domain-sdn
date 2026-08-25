@@ -1,0 +1,170 @@
+[
+  {
+    "attack": "eastwest",
+    "result": "OK",
+    "ts": "20260825T060435Z",
+    "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_eastwest_20260825T060435Z.log",
+    "atk_elapsed_s": 82.5,
+    "atk_returncode": 0,
+    "baseline": {
+      "n_snaps": 12,
+      "avg_lat": {
+        "A": 3.94,
+        "B": 3.92,
+        "C": 3.9
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_abs": 4969,
+      "te_decisions_suite": 0
+    },
+    "during": {
+      "n_snaps": 17,
+      "avg_lat": {
+        "A": 4.2,
+        "B": 4.1,
+        "C": 4.12
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_abs": 4969,
+      "te_decisions_phase": 0
+    },
+    "recovery": {
+      "n_snaps": 12,
+      "avg_lat": {
+        "A": 3.87,
+        "B": 3.92,
+        "C": 3.77
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_phase": 0
+    },
+    "te_path_before": null,
+    "te_path_during": null,
+    "te_path_after": null,
+    "te_note": "te_decisions_suite=0 expected: log is append-only, no new TE decisions without active inter-domain flows. te_path=None correct: no s1\u2192s9 flow active."
+  },
+  {
+    "attack": "poison",
+    "result": "OK",
+    "ts": "20260825T060828Z",
+    "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_poison_20260825T060828Z.log",
+    "atk_elapsed_s": 10.4,
+    "atk_returncode": 0,
+    "baseline": {
+      "n_snaps": 12,
+      "avg_lat": {
+        "A": 4.12,
+        "B": 3.98,
+        "C": 4.12
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_abs": 4969,
+      "te_decisions_suite": 0
+    },
+    "during": {
+      "n_snaps": 3,
+      "avg_lat": {
+        "A": 4.04,
+        "B": 3.89,
+        "C": 3.81
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_abs": 4969,
+      "te_decisions_phase": 0
+    },
+    "recovery": {
+      "n_snaps": 12,
+      "avg_lat": {
+        "A": 3.97,
+        "B": 3.91,
+        "C": 3.85
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_phase": 0
+    },
+    "te_path_before": null,
+    "te_path_during": null,
+    "te_path_after": null,
+    "te_note": "te_decisions_suite=0 expected: log is append-only, no new TE decisions without active inter-domain flows. te_path=None correct: no s1\u2192s9 flow active."
+  },
+  {
+    "attack": "packetin",
+    "result": "OK",
+    "ts": "20260825T061109Z",
+    "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_packetin_20260825T061109Z.log",
+    "atk_elapsed_s": 111.9,
+    "atk_returncode": 0,
+    "baseline": {
+      "n_snaps": 12,
+      "avg_lat": {
+        "A": 4.01,
+        "B": 3.89,
+        "C": 3.91
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_abs": 4969,
+      "te_decisions_suite": 0
+    },
+    "during": {
+      "n_snaps": 23,
+      "avg_lat": {
+        "A": 3.87,
+        "B": 3.87,
+        "C": 3.88
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_abs": 4969,
+      "te_decisions_phase": 0
+    },
+    "recovery": {
+      "n_snaps": 12,
+      "avg_lat": {
+        "A": 3.83,
+        "B": 3.97,
+        "C": 4.04
+      },
+      "timeout_pct": {
+        "A": 0.0,
+        "B": 0.0,
+        "C": 0.0
+      },
+      "te_decisions_phase": 0
+    },
+    "te_path_before": null,
+    "te_path_during": null,
+    "te_path_after": null,
+    "te_note": "te_decisions_suite=0 expected: log is append-only, no new TE decisions without active inter-domain flows. te_path=None correct: no s1\u2192s9 flow active."
+  }
+]

@@ -1,0 +1,55 @@
+{
+  "attack": "packetin",
+  "result": "OK",
+  "ts": "20260825T025248Z",
+  "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_packetin_20260825T025248Z.log",
+  "atk_elapsed_s": 130.0,
+  "atk_returncode": null,
+  "baseline": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 20.81,
+      "B": 21.55,
+      "C": 21.07
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_abs": 4969
+  },
+  "during": {
+    "n_snaps": 25,
+    "avg_lat": {
+      "A": 18.98,
+      "B": 20.36,
+      "C": 18.9
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_abs": 4969,
+    "te_decisions_delta": 0
+  },
+  "recovery": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 18.88,
+      "B": 20.74,
+      "C": 20.19
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_delta": 0
+  },
+  "te_path_before": null,
+  "te_path_during": null,
+  "te_path_after": null,
+  "te_note": "te_decisions is read live from te_decisions.log on every poll. A static value indicates zero new TE decisions during the suite \u2014 expected when no inter-domain iperf flows are active. te_path=None is correct when no s1\u2192s9 flow is currently active."
+}

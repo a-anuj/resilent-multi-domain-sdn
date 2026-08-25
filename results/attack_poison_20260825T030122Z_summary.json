@@ -1,0 +1,55 @@
+{
+  "attack": "poison",
+  "result": "EARLY_EXIT",
+  "ts": "20260825T030122Z",
+  "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_poison_20260825T030122Z.log",
+  "atk_elapsed_s": 10.7,
+  "atk_returncode": 0,
+  "baseline": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 18.62,
+      "B": 21.68,
+      "C": 19.51
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_abs": 4969
+  },
+  "during": {
+    "n_snaps": 3,
+    "avg_lat": {
+      "A": 20.11,
+      "B": 22.28,
+      "C": 20.48
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_abs": 4969,
+    "te_decisions_delta": 0
+  },
+  "recovery": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 20.11,
+      "B": 20.44,
+      "C": 20.57
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_delta": 0
+  },
+  "te_path_before": null,
+  "te_path_during": null,
+  "te_path_after": null,
+  "te_note": "te_decisions is read live from te_decisions.log on every poll. A static value indicates zero new TE decisions during the suite \u2014 expected when no inter-domain iperf flows are active. te_path=None is correct when no s1\u2192s9 flow is currently active."
+}

@@ -1,0 +1,49 @@
+{
+  "attack": "eastwest",
+  "ts": "20260824T154829Z",
+  "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_eastwest_20260824T154829Z.log",
+  "baseline": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 18.27,
+      "B": 18.32,
+      "C": 16.8
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions": 4969
+  },
+  "during": {
+    "n_snaps": 1,
+    "avg_lat": {
+      "A": 14.72,
+      "B": 26.02,
+      "C": 31.82
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions": 4969
+  },
+  "recovery": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 18.64,
+      "B": 18.44,
+      "C": 18.89
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    }
+  },
+  "te_path_before": null,
+  "te_path_during": null,
+  "te_path_after": null
+}

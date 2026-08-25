@@ -1,0 +1,56 @@
+{
+  "attack": "packetin",
+  "result": "OK",
+  "ts": "20260825T053725Z",
+  "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_packetin_20260825T053725Z.log",
+  "atk_elapsed_s": 112.0,
+  "atk_returncode": 0,
+  "baseline": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 3.79,
+      "B": 3.8,
+      "C": 3.83
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_abs": 4969,
+    "te_decisions_suite": 0
+  },
+  "during": {
+    "n_snaps": 23,
+    "avg_lat": {
+      "A": 4.05,
+      "B": 4.09,
+      "C": 4.04
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_abs": 4969,
+    "te_decisions_phase": 0
+  },
+  "recovery": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 4.1,
+      "B": 4.06,
+      "C": 4.17
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_phase": 0
+  },
+  "te_path_before": null,
+  "te_path_during": null,
+  "te_path_after": null,
+  "te_note": "te_decisions_suite=0 expected: log is append-only, no new TE decisions without active inter-domain flows. te_path=None correct: no s1\u2192s9 flow active."
+}

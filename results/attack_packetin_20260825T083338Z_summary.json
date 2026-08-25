@@ -1,0 +1,56 @@
+{
+  "attack": "packetin",
+  "result": "RECOVERY_FAILED",
+  "ts": "20260825T083338Z",
+  "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_packetin_20260825T083338Z.log",
+  "atk_elapsed_s": 112.5,
+  "atk_returncode": 0,
+  "baseline": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 16.43,
+      "B": 16.63,
+      "C": 17.12
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_abs": 4969,
+    "te_decisions_suite": 0
+  },
+  "during": {
+    "n_snaps": 21,
+    "avg_lat": {
+      "A": 116.58,
+      "B": 83.18,
+      "C": 85.21
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_abs": 4969,
+    "te_decisions_phase": 0
+  },
+  "recovery": {
+    "n_snaps": 63,
+    "avg_lat": {
+      "A": 1696.33,
+      "B": 674.24,
+      "C": 548.84
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_phase": 0
+  },
+  "te_path_before": null,
+  "te_path_during": null,
+  "te_path_after": null,
+  "te_note": "te_decisions_suite=0 expected: log is append-only, no new TE decisions without active inter-domain flows. te_path=None correct: no s1\u2192s9 flow active."
+}

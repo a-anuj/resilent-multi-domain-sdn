@@ -53,7 +53,7 @@ EW_HOST        = "127.0.0.1"
 HTTP_TIMEOUT   = 3
 POLL_INTERVAL  = 5        # seconds between metric snapshots
 BASELINE_DUR   = 60       # seconds
-RECOVERY_DUR   = 60       # seconds
+RECOVERY_DUR   = 300      # seconds
 
 # Attack durations (watchdog-enforced in the attack scripts themselves)
 #
@@ -420,13 +420,14 @@ def run_attack_experiment(attack_key: str, cfg: dict,
         # PacketIn flood must run inside h1's namespace via Mininet
         if attack_key == "packetin" and net is not None:
             h1 = net.get("h1")
-            cmd = " ".join(
-                [sys.executable, cfg["script"]] + cfg["args"] + ["--yes"]
-            )
-            log.info("Launching packetin flood inside h1 namespace: %s", cmd)
-            # Run non-blocking inside h1's namespace via popen
-            h1.cmd(f"nohup {cmd} > /tmp/atk_packetin.log 2>&1 &")
-            attack_pid = h1.cmd("echo $!").strip()
+            # We want to properly capture exit status, but h1.cmd() is non-blocking with '&'
+            # and nohup, making exit code capture hard. We will use h1.popen() instead,
+            # which returns a standard Python subprocess.Popen object, allowing us to use
+            # our exact same wait/drain logic!
+            cmd = [sys.executable, cfg["script"]] + cfg["args"] + ["--yes"]
+            log.info("Launching packetin flood via h1.popen: %s", " ".join(cmd))
+            atk_proc = h1.popen(cmd, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, env={"PYTHONPATH": "/home/a-anuj/.local/lib/python3.14/site-packages"})
+            attack_pid = atk_proc.pid
             log.info("Attack PID in h1 namespace: %s", attack_pid)
         else:
             # eastwest_flood and topology_poison run from host Python directly
@@ -452,15 +453,37 @@ def run_attack_experiment(attack_key: str, cfg: dict,
         # and to capture the subprocess's stdout/stderr for failure diagnosis.
         atk_returncode: int | None = None
         atk_output: str = ""
-        if attack_key == "packetin" and net is not None:
-            time.sleep(cfg["duration"] + 10)
-        elif atk_proc is not None:
+        if atk_proc is not None:
             atk_returncode, atk_output = _drain_subprocess_output(
                 atk_proc, timeout=cfg["duration"] + 30
             )
 
         dur_stop.set()
         dur_thread.join(timeout=10)
+
+        # ── 5. Evaluate completion status ─────────────────────────────────────
+        # For packetin, the stdout is in atk_output because we used popen now,
+        # but let's still log the tail for debugging.
+        if atk_output:
+            tail = atk_output[-4000:]   # last 4KB is most relevant for crashes
+            log.info(
+                "Attack subprocess stdout/stderr (last 4KB):\n%s",
+                tail,
+            )
+        
+        # Check if the process exited correctly. If not, mark as a failure.
+        atk_exit_early = False
+        subprocess_error = False
+
+        if atk_returncode not in (None, 0):
+            log.error(
+                "Attack subprocess exited with non-zero returncode=%s",
+                atk_returncode,
+            )
+            subprocess_error = True
+        elif atk_returncode is None:
+            log.error("Attack subprocess returncode is None! Could not determine exit status.")
+            subprocess_error = True
 
         atk_elapsed = time.time() - atk_start
 
@@ -479,7 +502,7 @@ def run_attack_experiment(attack_key: str, cfg: dict,
             expected_min = cfg["duration"] * 0.5
             mode_desc = f"50% of {cfg['duration']}s duration"
 
-        if atk_elapsed < expected_min:
+        if atk_elapsed < expected_min and not subprocess_error:
             atk_exit_early = True
             log.error(
                 "EARLY EXIT DETECTED: attack ran %.1f s but expected ≥ %.1f s "
@@ -490,37 +513,6 @@ def run_attack_experiment(attack_key: str, cfg: dict,
             log.info(
                 "Attack phase done. Elapsed: %.1f s  (returncode=%s)",
                 atk_elapsed, atk_returncode,
-            )
-
-        # For packetin (h1 namespace): read the nohup log now that the attack has run
-        if attack_key == "packetin" and net is not None:
-            try:
-                with open("/tmp/atk_packetin.log") as _pf:
-                    atk_output = _pf.read()
-                # Extract exit code from the log if the script logged ATTACK STOP
-                if "ATTACK STOP" in atk_output:
-                    atk_returncode = 0
-                    log.info("packetin flood: ATTACK STOP line found → inferred returncode=0")
-                elif "ModuleNotFoundError" in atk_output or "Error" in atk_output:
-                    atk_returncode = 1
-                    log.error("packetin flood: error detected in /tmp/atk_packetin.log")
-                else:
-                    atk_returncode = None
-                    log.warning("packetin flood: cannot determine exit status from log")
-            except FileNotFoundError:
-                log.warning("packetin flood: /tmp/atk_packetin.log not found")
-
-        # Log subprocess output regardless of exit status — essential for debugging
-        if atk_output:
-            tail = atk_output[-4000:]   # last 4KB is most relevant for crashes
-            log.info(
-                "Attack subprocess stdout/stderr (last 4KB):\n%s",
-                tail,
-            )
-        if atk_returncode not in (None, 0):
-            log.error(
-                "Attack subprocess exited with non-zero returncode=%d",
-                atk_returncode,
             )
 
         # Snapshot count sanity check (skip for fixed-repeat attacks: fewer snapshots expected)
@@ -535,13 +527,47 @@ def run_attack_experiment(attack_key: str, cfg: dict,
                     actual_snaps, expected_snaps, POLL_INTERVAL, cfg["duration"],
                 )
 
+        # ── Packet-count sanity check for flood attacks ────────────────────────
+        # A clean returncode=0 is necessary but NOT sufficient for success.
+        # The script itself logs "ZERO packets sent" if the worker thread crashed.
+        # We parse the output here and force a failure if no packets were sent.
+        zero_packets_failure = False
+        if attack_key == "packetin" and atk_output:
+            import re as _re
+            # Look for the completion summary line: "Total sent      : N packets"
+            sent_match = _re.search(r"Total sent\s*:\s*(\d+)\s*packets", atk_output)
+            if sent_match:
+                total_sent_by_script = int(sent_match.group(1))
+                # Expected lower bound: if attack ran, at minimum it should have
+                # sent start_rate * (duration * 0.1) packets (10% of nominal)
+                expected_min_pkts = cfg.get("min_expected_pkts", 100)
+                if total_sent_by_script == 0:
+                    log.error(
+                        "ZERO PACKETS SENT: packetin_flood ran for %.1fs but sent 0 packets. "
+                        "The flood worker thread crashed (likely a scapy/interface issue). "
+                        "This is an attack failure, not a controller resilience result.",
+                        atk_elapsed,
+                    )
+                    zero_packets_failure = True
+                elif total_sent_by_script < expected_min_pkts:
+                    log.warning(
+                        "LOW PACKET COUNT: packetin_flood sent only %d packets (expected >= %d). "
+                        "Results may be statistically weak.",
+                        total_sent_by_script, expected_min_pkts,
+                    )
+                else:
+                    log.info("Packet count OK: %d packets sent by flood script.", total_sent_by_script)
+            elif "ZERO packets sent" in atk_output or "WARNING: ZERO" in atk_output:
+                log.error("Zero-packet WARNING detected in attack output — marking as failure.")
+                zero_packets_failure = True
+
         # Snapshot TE path immediately after attack to check poison effect
         te_during = fetch_te_path(src_dpid=1, dst_dpid=9)
         log.info("TE path DURING/AFTER attack (s1→s9): %s", te_during)
 
         # ── 5. Recovery window (60 s) ─────────────────────────────────────────
         log.info("─" * 70)
-        log.info("PHASE: RECOVERY (60 s)")
+        log.info("PHASE: RECOVERY (%d s)", RECOVERY_DUR)
         log.info("─" * 70)
 
         rec_thread, rec_stop = start_metric_logger(log, snapshots["recovery"], "recovery")
@@ -578,15 +604,34 @@ def run_attack_experiment(attack_key: str, cfg: dict,
             return phase_snaps[-1]["te_decisions_suite"] - phase_snaps[0]["te_decisions_suite"]
 
         # Determine overall experiment status
-        if atk_exit_early:
-            exp_result = "EARLY_EXIT"
-        elif atk_returncode is not None and atk_returncode != 0:
+        # Check if recovery phase actually recovered to baseline
+        recovery_failed = False
+        if not subprocess_error and not atk_exit_early and len(snapshots["recovery"]) >= 3 and len(snapshots["baseline"]) >= 3:
+            for domain in EW_PORTS:
+                bl_avg = _avg_lat(snapshots["baseline"], domain)
+                # avg of last 3 recovery snaps
+                rec_avg = _avg_lat(snapshots["recovery"][-3:], domain)
+                if bl_avg and rec_avg:
+                    # If it's more than 30% higher AND more than 5ms absolute difference
+                    if rec_avg > bl_avg * 1.3 and (rec_avg - bl_avg) > 5.0:
+                        log.error("SYSTEM DID NOT RECOVER: [%s] baseline=%.1fms, end_recovery=%.1fms",
+                                  domain, bl_avg, rec_avg)
+                        recovery_failed = True
+
+        if subprocess_error:
             exp_result = "SUBPROCESS_ERROR"
-        elif len(snapshots["during"]) < (cfg["duration"] // POLL_INTERVAL) // 2:
+        elif atk_exit_early:
+            exp_result = "EARLY_EXIT"
+        elif zero_packets_failure:
+            exp_result = "ATTACK_DID_NOTHING"
+        elif recovery_failed:
+            exp_result = "RECOVERY_FAILED"
+        elif completion.get("mode") != "repeat" and len(snapshots["during"]) < (cfg["duration"] // POLL_INTERVAL) // 2:
             exp_result = "INSUFFICIENT_DATA"
         else:
             exp_result = "OK"
 
+        log.info("Experiment %s concluded with result: %s", label, exp_result)
         summary = {
             "attack":   label,
             "result":   exp_result,
@@ -677,9 +722,9 @@ def main() -> int:
     parser.add_argument(
         "--attacks",
         nargs="+",
+        default=["eastwest", "poison", "packetin"],
         choices=list(ATTACK_CONFIGS.keys()),
-        default=list(ATTACK_CONFIGS.keys()),
-        help="Which attacks to run (default: all three)"
+        help="Space-separated list of attacks to run (default: eastwest poison packetin)",
     )
     parser.add_argument(
         "--with-mininet",
@@ -735,8 +780,34 @@ def main() -> int:
 
             # Brief cool-down between attacks
             if atk_key != args.attacks[-1]:
+                if summary.get("result") == "RECOVERY_FAILED":
+                    root_log.error("ABORTING SUITE: System failed to recover after '%s'. Network is contaminated.", atk_key)
+                    break
+                    
                 root_log.info("Cool-down 30 s before next experiment...")
                 time.sleep(30)
+                
+                # Pre-next-experiment cleanup and verification
+                root_log.info("Verifying network is clean before next experiment...")
+                # Kill any lingering flood processes inside Mininet (in case of detached subprocesses)
+                if net is not None:
+                    h1 = net.get("h1")
+                    h1.cmd("pkill -9 -f packetin_flood")
+                subprocess.call(["pkill", "-9", "-f", "eastwest_flood|topology_poison"], stderr=subprocess.DEVNULL)
+                
+                # Take one quick snapshot to verify latency
+                snap = collect_snapshot(root_log, label="verification")
+                bad_domains = []
+                for domain in EW_PORTS:
+                    lat = snap["latency_ms"].get(domain)
+                    bl_avg = summary["baseline"]["avg_lat"].get(domain)
+                    if lat and bl_avg:
+                        if lat > bl_avg * 1.4 and (lat - bl_avg) > 10.0:
+                            bad_domains.append(f"{domain} (bl={bl_avg}, now={lat})")
+                
+                if bad_domains:
+                    root_log.error("ABORTING SUITE: Network STILL contaminated after cooldown: %s", ", ".join(bad_domains))
+                    break
 
     finally:
         if net is not None:

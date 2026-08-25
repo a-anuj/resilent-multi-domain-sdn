@@ -1,0 +1,56 @@
+{
+  "attack": "eastwest",
+  "result": "OK",
+  "ts": "20260825T045326Z",
+  "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_eastwest_20260825T045326Z.log",
+  "atk_elapsed_s": 82.5,
+  "atk_returncode": 0,
+  "baseline": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 18.41,
+      "B": 18.37,
+      "C": 20.88
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_abs": 4969,
+    "te_decisions_suite": 0
+  },
+  "during": {
+    "n_snaps": 16,
+    "avg_lat": {
+      "A": 20.47,
+      "B": 17.92,
+      "C": 19.39
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_abs": 4969,
+    "te_decisions_phase": 0
+  },
+  "recovery": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 20.26,
+      "B": 20.14,
+      "C": 20.35
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_phase": 0
+  },
+  "te_path_before": null,
+  "te_path_during": null,
+  "te_path_after": null,
+  "te_note": "te_decisions_suite=0 expected: log is append-only, no new TE decisions without active inter-domain flows. te_path=None correct: no s1\u2192s9 flow active."
+}

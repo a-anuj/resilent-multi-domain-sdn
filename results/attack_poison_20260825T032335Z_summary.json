@@ -1,0 +1,56 @@
+{
+  "attack": "poison",
+  "result": "OK",
+  "ts": "20260825T032335Z",
+  "log": "/home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/attack_poison_20260825T032335Z.log",
+  "atk_elapsed_s": 10.6,
+  "atk_returncode": 0,
+  "baseline": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 18.91,
+      "B": 17.46,
+      "C": 19.16
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_abs": 4969,
+    "te_decisions_suite": 0
+  },
+  "during": {
+    "n_snaps": 3,
+    "avg_lat": {
+      "A": 21.72,
+      "B": 21.68,
+      "C": 16.72
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_abs": 4969,
+    "te_decisions_phase": 0
+  },
+  "recovery": {
+    "n_snaps": 12,
+    "avg_lat": {
+      "A": 17.91,
+      "B": 18.46,
+      "C": 17.68
+    },
+    "timeout_pct": {
+      "A": 0.0,
+      "B": 0.0,
+      "C": 0.0
+    },
+    "te_decisions_phase": 0
+  },
+  "te_path_before": null,
+  "te_path_during": null,
+  "te_path_after": null,
+  "te_note": "te_decisions_suite=0 expected: log is append-only, no new TE decisions without active inter-domain flows. te_path=None correct: no s1\u2192s9 flow active."
+}
