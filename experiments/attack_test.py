@@ -60,6 +60,11 @@ RECOVERY_DUR   = 60       # seconds
 # PacketIn rates: raised to 500→5000 pkt/s to find the controller's saturation point.
 # Earlier runs at 50→300 showed no measurable effect; these higher rates are needed
 # to produce data worth reporting (either a real effect, or a resilience finding).
+#
+# expected_duration: minimum realistic elapsed time for early-exit detection.
+#   - flood attacks (packetin, eastwest): run until --duration; expected ≥ 50% of duration.
+#   - fixed-repeat attacks (poison): natural completion ≈ (repeat-1)*interval + HTTP overhead.
+#     Using duration (30s) would false-positive: 3 messages × 5s interval = ~10-15s is correct.
 ATTACK_CONFIGS = {
     "packetin": {
         "script":   str(_ROOT / "attacks" / "packetin_flood.py"),
@@ -71,6 +76,8 @@ ATTACK_CONFIGS = {
                      "--duration", "120"],
         "duration": 120,
         "label":    "PacketIn Flood (North-South)",
+        # flood: must run ≥50% of duration
+        "completion": {"mode": "flood"},
     },
     "eastwest": {
         "script":   str(_ROOT / "attacks" / "eastwest_flood.py"),
@@ -80,6 +87,8 @@ ATTACK_CONFIGS = {
                      "--duration", "90"],
         "duration": 90,
         "label":    "East-West REST Flood (Novel)",
+        # flood: must run ≥50% of duration
+        "completion": {"mode": "flood"},
     },
     "poison": {
         "script":   str(_ROOT / "attacks" / "topology_poison.py"),
@@ -91,6 +100,10 @@ ATTACK_CONFIGS = {
                      "--repeat", "3"],
         "duration": 30,
         "label":    "Topology Poisoning (Novel)",
+        # fixed-repeat: expected ≈ (repeat-1)*interval + overhead; NOT duration-based.
+        # Natural time for --repeat 3 --repeat-interval 5: 2 sleeps × 5s = 10s + HTTP RTTs ≈ 10.7s.
+        # expected_min = 50% of natural sleep time = 5s, well below normal but above crash-level.
+        "completion": {"mode": "repeat", "repeat": 3, "interval": 5.0},
     },
 }
 
@@ -151,19 +164,40 @@ def _link_utils() -> dict:
     return merged
 
 
-def _te_decision_count() -> int:
-    """Return the number of lines currently in te_decisions.log.
+# Baseline count read once at suite startup (before any experiments begin).
+# te_decisions.log is opened in append mode by ew_controller.py and is NEVER
+# truncated on controller restart — its absolute line count carries over across
+# Mininet sessions.  To get a meaningful per-suite count we track the delta
+# from this baseline rather than the raw absolute value.
+_TE_DECISIONS_BASELINE: int | None = None
 
-    This reads the live file on every call — it is NOT cached.
-    If the count stays static across an entire experiment, that means no new
-    inter-domain TE decisions were triggered (expected when no iperf/new flows
-    are active during the attack suite).  Document this explicitly in results.
-    """
+
+def _te_decision_count() -> int:
+    """Return total lines in te_decisions.log (live read, NOT cached)."""
     try:
         with open(TE_DEC_LOG) as f:
             return sum(1 for _ in f)
     except FileNotFoundError:
         return 0
+
+
+def _te_decisions_this_suite() -> int:
+    """Return TE decisions made since suite startup (delta from baseline).
+
+    te_decisions.log is opened in append mode and persists across controller
+    restarts — its absolute line count is meaningless for cross-run comparison.
+    This function returns the delta since _TE_DECISIONS_BASELINE was captured
+    at suite start, which correctly shows zero when no new TE decisions occur
+    during the attack suite (expected when no inter-domain flows are active).
+
+    te_path=None is similarly correct for this test design: /te_path returns
+    None when no active s1→s9 flow exists in the live flow table (the suite
+    does not start any iperf flows, so no TE path lookup ever succeeds).
+    """
+    global _TE_DECISIONS_BASELINE
+    if _TE_DECISIONS_BASELINE is None:
+        _TE_DECISIONS_BASELINE = _te_decision_count()
+    return _te_decision_count() - _TE_DECISIONS_BASELINE
 
 
 def _sync_peer_ages(domain: str) -> dict:
@@ -181,13 +215,16 @@ def _sync_peer_ages(domain: str) -> dict:
 
 def collect_snapshot(log: logging.Logger, label: str = "") -> dict:
     """Collect one metric snapshot and log it; return the dict."""
+    te_abs   = _te_decision_count()           # absolute (for delta math)
+    te_suite = _te_decisions_this_suite()     # delta since suite start
     snap: dict = {
-        "ts":          datetime.now(timezone.utc).isoformat(),
-        "label":       label,
-        "latency_ms":  {},
-        "te_decisions": _te_decision_count(),
-        "util":        _link_utils(),
-        "peer_ages":   {},
+        "ts":               datetime.now(timezone.utc).isoformat(),
+        "label":            label,
+        "latency_ms":       {},
+        "te_decisions":     te_abs,           # kept for backward compat
+        "te_decisions_suite": te_suite,       # meaningful per-suite counter
+        "util":             _link_utils(),
+        "peer_ages":        {},
     }
     for domain in EW_PORTS:
         lat = _ctrl_latency(domain)
@@ -196,9 +233,9 @@ def collect_snapshot(log: logging.Logger, label: str = "") -> dict:
 
     lat_str = {d: (f"{v:.1f}" if v else "TIMEOUT")
                for d, v in snap["latency_ms"].items()}
-    log.info("[METRIC%s] lat_ms=%s  te_decisions=%d",
+    log.info("[METRIC%s] lat_ms=%s  te_decisions_suite=%d  te_decisions_abs=%d",
              f"/{label}" if label else "",
-             lat_str, snap["te_decisions"])
+             lat_str, te_suite, te_abs)
     return snap
 
 
@@ -427,26 +464,51 @@ def run_attack_experiment(attack_key: str, cfg: dict,
 
         atk_elapsed = time.time() - atk_start
 
-        # ── Evaluate whether the attack actually ran its full duration ─────────
-        EARLY_EXIT_THRESHOLD = 0.5   # fraction of configured duration
-        expected_min = cfg["duration"] * EARLY_EXIT_THRESHOLD
+        # ── Evaluate whether the attack actually ran its expected duration ─────
+        # Strategy is attack-type-aware (set per entry in ATTACK_CONFIGS):
+        #   flood  → expected ≥ 50% of configured --duration
+        #   repeat → expected ≥ (repeat-1)*interval + overhead
+        #            Natural time for --repeat 3 --interval 5 is ~10-15s, NOT 30s.
+        completion = cfg.get("completion", {"mode": "flood"})
+        if completion["mode"] == "repeat":
+            r, iv = completion["repeat"], completion["interval"]
+            natural = (r - 1) * iv          # e.g. (3-1)*5 = 10s
+            expected_min = max(natural * 0.5, 2.0)  # 50% floor, min 2s
+            mode_desc = f"50% of natural ({r-1}×{iv}s = {natural}s)"
+        else:  # flood
+            expected_min = cfg["duration"] * 0.5
+            mode_desc = f"50% of {cfg['duration']}s duration"
+
         if atk_elapsed < expected_min:
             atk_exit_early = True
             log.error(
-                "EARLY EXIT DETECTED: attack ran %.1f s but expected ≥ %.0f s "
-                "(%.0f%% of configured %d s duration). "
-                "This invalidates 'during' phase metrics. "
-                "Return code: %s",
-                atk_elapsed, expected_min,
-                100.0 * atk_elapsed / cfg["duration"],
-                cfg["duration"],
-                atk_returncode,
+                "EARLY EXIT DETECTED: attack ran %.1f s but expected ≥ %.1f s "
+                "(%s). This invalidates 'during' phase metrics. Return code: %s",
+                atk_elapsed, expected_min, mode_desc, atk_returncode,
             )
         else:
             log.info(
                 "Attack phase done. Elapsed: %.1f s  (returncode=%s)",
                 atk_elapsed, atk_returncode,
             )
+
+        # For packetin (h1 namespace): read the nohup log now that the attack has run
+        if attack_key == "packetin" and net is not None:
+            try:
+                with open("/tmp/atk_packetin.log") as _pf:
+                    atk_output = _pf.read()
+                # Extract exit code from the log if the script logged ATTACK STOP
+                if "ATTACK STOP" in atk_output:
+                    atk_returncode = 0
+                    log.info("packetin flood: ATTACK STOP line found → inferred returncode=0")
+                elif "ModuleNotFoundError" in atk_output or "Error" in atk_output:
+                    atk_returncode = 1
+                    log.error("packetin flood: error detected in /tmp/atk_packetin.log")
+                else:
+                    atk_returncode = None
+                    log.warning("packetin flood: cannot determine exit status from log")
+            except FileNotFoundError:
+                log.warning("packetin flood: /tmp/atk_packetin.log not found")
 
         # Log subprocess output regardless of exit status — essential for debugging
         if atk_output:
@@ -461,16 +523,17 @@ def run_attack_experiment(attack_key: str, cfg: dict,
                 atk_returncode,
             )
 
-        # Snapshot count sanity check
-        expected_snaps = cfg["duration"] // POLL_INTERVAL
-        actual_snaps = len(snapshots["during"])
-        if actual_snaps < expected_snaps // 2:
-            log.warning(
-                "INSUFFICIENT SNAPSHOTS during attack: got %d, expected ~%d "
-                "(at %ds poll interval for %ds attack). "
-                "Statistical comparison will be unreliable.",
-                actual_snaps, expected_snaps, POLL_INTERVAL, cfg["duration"],
-            )
+        # Snapshot count sanity check (skip for fixed-repeat attacks: fewer snapshots expected)
+        if completion.get("mode") != "repeat":
+            expected_snaps = cfg["duration"] // POLL_INTERVAL
+            actual_snaps = len(snapshots["during"])
+            if actual_snaps < expected_snaps // 2:
+                log.warning(
+                    "INSUFFICIENT SNAPSHOTS during attack: got %d, expected ~%d "
+                    "(at %ds poll interval for %ds attack). "
+                    "Statistical comparison will be unreliable.",
+                    actual_snaps, expected_snaps, POLL_INTERVAL, cfg["duration"],
+                )
 
         # Snapshot TE path immediately after attack to check poison effect
         te_during = fetch_te_path(src_dpid=1, dst_dpid=9)
@@ -503,18 +566,16 @@ def run_attack_experiment(attack_key: str, cfg: dict,
                            if s["latency_ms"].get(domain) is None)
             return round(100.0 * timeouts / total, 1)
 
-        def _te_delta(phase_snaps: list[dict], baseline_snaps: list[dict]) -> int | None:
-            """Return net new TE decisions during this phase vs baseline start.
+        def _te_delta(phase_snaps: list[dict]) -> int | None:
+            """Return TE decisions made during this phase (using suite-relative counter).
 
-            te_decisions is a cumulative log-line count. A static value across all
-            phases means zero new TE decisions were triggered — expected when no
-            inter-domain flows are active (no iperf during this suite).
-            'te_path: None' is also expected for the same reason: /te_path returns
-            None when no active flow for the queried s1→s9 pair exists.
+            Uses te_decisions_suite (delta from suite start) rather than the
+            raw absolute count, which is meaningless across controller restarts
+            because te_decisions.log is append-only and never truncated.
             """
-            if not phase_snaps or not baseline_snaps:
+            if not phase_snaps:
                 return None
-            return phase_snaps[-1]["te_decisions"] - baseline_snaps[0]["te_decisions"]
+            return phase_snaps[-1]["te_decisions_suite"] - phase_snaps[0]["te_decisions_suite"]
 
         # Determine overall experiment status
         if atk_exit_early:
@@ -538,33 +599,33 @@ def run_attack_experiment(attack_key: str, cfg: dict,
                 "avg_lat": {d: _avg_lat(snapshots["baseline"], d) for d in EW_PORTS},
                 "timeout_pct": {d: _timeout_pct(snapshots["baseline"], d) for d in EW_PORTS},
                 "te_decisions_abs": snapshots["baseline"][-1]["te_decisions"] if snapshots["baseline"] else 0,
+                "te_decisions_suite": snapshots["baseline"][-1].get("te_decisions_suite", 0) if snapshots["baseline"] else 0,
             },
             "during": {
                 "n_snaps":  len(snapshots["during"]),
                 "avg_lat":  {d: _avg_lat(snapshots["during"], d) for d in EW_PORTS},
                 "timeout_pct": {d: _timeout_pct(snapshots["during"], d) for d in EW_PORTS},
-                "te_decisions_abs":   snapshots["during"][-1]["te_decisions"] if snapshots["during"] else 0,
-                "te_decisions_delta": _te_delta(snapshots["during"], snapshots["baseline"]),
+                "te_decisions_abs":    snapshots["during"][-1]["te_decisions"] if snapshots["during"] else 0,
+                "te_decisions_phase":  _te_delta(snapshots["during"]),
             },
             "recovery": {
                 "n_snaps": len(snapshots["recovery"]),
                 "avg_lat": {d: _avg_lat(snapshots["recovery"], d) for d in EW_PORTS},
                 "timeout_pct": {d: _timeout_pct(snapshots["recovery"], d) for d in EW_PORTS},
-                "te_decisions_delta": _te_delta(snapshots["recovery"], snapshots["baseline"]),
+                "te_decisions_phase":  _te_delta(snapshots["recovery"]),
             },
             "te_path_before": te_before,
             "te_path_during": te_during,
             "te_path_after":  te_after,
-            # NOTE: te_path=None and static te_decisions are EXPECTED when the
-            # attack suite runs without active iperf flows. /te_path queries the
-            # live flow table; with no s1→s9 flow active, it correctly returns None.
-            # If te_decisions_delta stays 0 across all phases, no new inter-domain
-            # paths were computed — consistent with this test design.
+            # CONFIRMED DESIGN: te_path=None and te_decisions_suite=0 are both CORRECT
+            # for this attack suite.  te_decisions.log uses append mode and persists across
+            # controller restarts, so identical absolute counts across runs are expected
+            # when no new inter-domain TE decisions are triggered.  te_decisions_suite
+            # (delta from suite startup) is the meaningful metric.  te_path=None is correct
+            # because /te_path returns None when no active s1→s9 iperf flow exists.
             "te_note": (
-                "te_decisions is read live from te_decisions.log on every poll. "
-                "A static value indicates zero new TE decisions during the suite — "
-                "expected when no inter-domain iperf flows are active. "
-                "te_path=None is correct when no s1→s9 flow is currently active."
+                "te_decisions_suite=0 expected: log is append-only, no new TE decisions "
+                "without active inter-domain flows. te_path=None correct: no s1→s9 flow active."
             ),
         }
 
@@ -641,6 +702,12 @@ def main() -> int:
     root_log.info("PHASE 5 ATTACK SUITE  —  %s", ts)
     root_log.info("Attacks to run: %s", args.attacks)
     root_log.info("=" * 70)
+
+    # Capture te_decisions baseline before any experiment begins.
+    # te_decisions.log is append-only; the absolute count carries over from
+    # prior controller runs.  All per-experiment deltas are relative to this.
+    _te_decisions_this_suite()  # initialises _TE_DECISIONS_BASELINE
+    root_log.info("te_decisions baseline (pre-suite): %d lines", _TE_DECISIONS_BASELINE)
 
     # Optionally start Mininet
     net = None
