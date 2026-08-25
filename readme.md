@@ -1,4 +1,4 @@
-# SDN Multi-Controller Research Testbed & Automated Circuit Breaker
+# 🌊 FlowBreaker: Automated SDN Circuit Breaker & Multi-Controller Testbed
 
 A comprehensive research platform for studying **multi-controller SDN architectures**, East-West (E-W) communication protocols, and defending against coordinated control-plane saturation attacks using an automated Circuit Breaker.
 
