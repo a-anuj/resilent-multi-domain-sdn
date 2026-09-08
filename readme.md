@@ -96,9 +96,6 @@ We built an automated evaluation pipeline (`experiments/circuit_breaker_eval.py`
 [![Attack Latency Comparison](results/figures/fig2_attack_latency.png)](results/figures/fig2_attack_latency.pdf)
 **Figure 2:** Logarithmic comparison of Domain A peak latency. Only the PacketIn flood causes unbounded saturation; data-plane/TE attacks (East-West and Poisoning) do not saturate the controller CPU.
 
-[![Detection Accuracy](results/figures/fig3_detection_accuracy.png)](results/figures/fig3_detection_accuracy.pdf)
-**Figure 3:** Anticipated precision/recall improvement when replacing the threshold-based detector with an ML model (future work).
-
 ---
 
 ## 📁 Project Structure
