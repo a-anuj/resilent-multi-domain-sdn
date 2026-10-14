@@ -21,10 +21,21 @@ Security note
 # ── DELIBERATE BASELINE VULNERABILITY ────────────────────────────────────────
 # This REST API has NO authentication (no API keys, no TLS, no HMAC signing).
 # POST /update blindly merges whatever JSON payload a caller supplies.
-# This is intentional: Phase 4 of the research will mount a topology
-# poisoning attack by sending crafted /update payloads, and Phase 5 will
-# add HMAC + schema validation to mitigate it.
-# DO NOT add auth/validation here until the attack experiments are complete.
+# This is intentional: Phase 4/5 of the research mounts topology-poisoning
+# and EW-flood attacks against this unauthenticated endpoint.
+#
+# Phase 6 defense modules are available and can be activated here:
+#
+#   Rate limiting (EW Flood):    defense/ew_flood_mitigator.py
+#       from defense.ew_flood_mitigator import install_ew_flood_mitigator
+#       mitigator = install_ew_flood_mitigator(_app)
+#
+#   Auth + Validation (Poisoning): defense/topology_guard.py
+#       from defense.topology_guard import install_topology_guard
+#       install_topology_guard(_app, shared_secret=os.environ.get("EW_SHARED_SECRET"))
+#
+# Call these AFTER route registration but BEFORE start_api() launches the server.
+# DO NOT enable them until attack experiments are complete.
 # ─────────────────────────────────────────────────────────────────────────────
 """
 
@@ -116,6 +127,10 @@ def post_update():
     The received JSON is merged into global_topology WITHOUT any
     validation or authentication.  A malicious peer (or MITM) can inject
     arbitrary switch/link data here.
+
+    To activate defense:
+      • Rate limiting:     install_ew_flood_mitigator(_app)   # defense/ew_flood_mitigator.py
+      • Auth+validation:   install_topology_guard(_app, ...)  # defense/topology_guard.py
     """
     body      = request.get_data()
     peer_domain = request.headers.get('X-Domain-Id', 'UNKNOWN')
