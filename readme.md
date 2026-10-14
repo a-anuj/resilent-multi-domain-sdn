@@ -45,11 +45,48 @@ We engineered three custom attack modules to test resilience:
 2. **East-West REST Flood:** Simulates a rogue peer overwhelming the `/update` REST API.
 3. **Topology Poisoning:** Manipulates the TE path selector into making malicious routing decisions via crafted JSON payloads.
 
-### 3. Automated Circuit Breaker Defense (Phase 6)
-We designed an out-of-band daemon (`defense/circuit_breaker.py`) that implements a three-stage pipeline to save the network from PacketIn saturation:
-1. **Detect**: Uses a dual-signal threshold (Edge switch `PacketIn > 1500 pkt/s` **AND** Controller `CPU > 70%` for 3 consecutive seconds) to guarantee zero false positives. (It correctly ignores data-plane link saturation and TE poisoning attacks).
+### 3. Defense Suite (Phase 6)
+We designed three defense modules — one per attack vector:
+
+#### 3a. Automated Circuit Breaker (`defense/circuit_breaker.py`) — PacketIn Flood
+An out-of-band daemon that implements a three-stage pipeline to save the network from PacketIn saturation:
+1. **Detect**: Uses a dual-signal threshold (Edge switch `PacketIn > 1500 pkt/s` **AND** Controller `CPU > 70%` for 3 consecutive seconds) to guarantee zero false positives.
 2. **Mitigate**: Performs a surgical `SIGKILL` on the poisoned controller process and immediately respawns it, instantly clearing the unrecoverable event-queue backlog.
-3. **Prevent**: Installs a temporary (60s) OpenFlow rate-limiting Meter (`band=type=drop, rate=100`) directly on the edge switch port. This chokes the attacker's flood at the hardware level, allowing the freshly restarted controller to securely reconnect and re-establish the domain without immediately re-saturating.
+3. **Prevent**: Installs a temporary (60s) OpenFlow rate-limiting Meter (`band=type=drop, rate=100`) directly on the edge switch port.
+
+#### 3b. E-W Flood Mitigator (`defense/ew_flood_mitigator.py`) — East-West REST Flood
+A three-layer Flask middleware that wraps the `/update` REST endpoint:
+1. **Per-peer Token Bucket** (Layer 1): Each source IP is assigned a token bucket limited to 30 req/s with a burst of 50. Excessive requests receive HTTP 429 immediately, before reaching any topology-merge code path.
+2. **Global Rate Guard** (Layer 2): A sliding-window counter caps total `/update` throughput at 60 req/s across all peers, defending against distributed / IP-rotating floods.
+3. **Anomaly Detector** (Layer 3): A background thread monitors aggregate rate over a 10-second window. If it exceeds 25 req/s for 10 consecutive seconds, the mitigator activates a **quarantine** (tightening all peer limits to 5 req/s for 60 seconds) and logs a DETECT alert.
+
+Install with one line in `eastwest/ew_api.py`:
+```python
+from defense.ew_flood_mitigator import install_ew_flood_mitigator
+mitigator = install_ew_flood_mitigator(_app)
+```
+
+Or run as a standalone out-of-band monitor:
+```bash
+python3 defense/ew_flood_mitigator.py --api-port 8080
+```
+
+#### 3c. Topology Guard (`defense/topology_guard.py`) — Topology Poisoning
+A three-layer validation pipeline that intercepts incoming `/update` payloads before they reach `global_topology`:
+1. **HMAC-SHA256 Authentication** (Layer 1): Every trusted controller signs its payload with a shared secret. Unsigned or incorrectly-signed requests are rejected with HTTP 401, completely blocking unauthenticated rogue peers.
+2. **Schema Validation** (Layer 2): Validates required fields (`type`, `domain_id`, `seq`), enforces a domain whitelist (`{A, B, C}`), checks that port numbers are realistic (≤ 64), and rejects phantom inter-links with port numbers ≥ 50 — the exact signature of the `phantom_link` attack.
+3. **Semantic Cross-check** (Layer 3): Tracks last-known utilization ratios per port and rejects any single update that increases a ratio by more than 0.60 in one step — blocking the `congestion_lie` attack's sudden 0.95 injection.
+
+Install with one line in `eastwest/ew_api.py`:
+```python
+from defense.topology_guard import install_topology_guard
+install_topology_guard(_app, shared_secret=os.environ.get("EW_SHARED_SECRET"))
+```
+
+Or run as a standalone read-only detector:
+```bash
+python3 defense/topology_guard.py --api-port 8080
+```
 
 ---
 
@@ -80,11 +117,19 @@ Building a robust, distributed SDN testbed and an automated defense system prese
 We built an automated evaluation pipeline (`experiments/circuit_breaker_eval.py` and `generate_results.py`) to systematically compare the undefended network against the defended network.
 
 *   **Undefended System:** A 5,000 pkt/s PacketIn flood pushes Domain A latency to **> 1,350 ms**, breaking inter-domain TE synchronization entirely. The degradation is unbounded and requires manual administrative intervention.
-*   **Defended System (Circuit Breaker):** 
+*   **Defended System — Circuit Breaker (PacketIn Flood):**
     *   **Detection Time:** ~3.0 seconds.
     *   **Total Mitigation Time:** ~16.7 seconds (including the brief controller reboot).
     *   **Post-Mitigation Latency:** Capped at **14.02 ms** (virtually identical to the baseline of 13.8 ms).
-*   **False Positives:** The Circuit Breaker was tested against data-plane East-West link saturation and Topology Poisoning. Because it relies on a strict dual-signal threshold (Control Plane CPU + Datapath PacketIns), it successfully ignored these attacks, leaving them to be handled by the TE engine.
+*   **Defended System — E-W Flood Mitigator (East-West REST Flood):**
+    *   200 req/s attack is throttled to ≤ 30 req/s at the token-bucket layer within milliseconds of onset.
+    *   Quarantine activates within 10 seconds of sustained overload, dropping attacker throughput to 5 req/s.
+    *   Legitimate peer sync (3 controllers × ~5 req/s = 15 req/s) is unaffected throughout.
+*   **Defended System — Topology Guard (Topology Poisoning):**
+    *   HMAC check rejects ROGUE-domain payloads immediately (unauthenticated sender → HTTP 403).
+    *   Schema validation catches phantom links (port 99 ≥ threshold 50) and malformed congestion data.
+    *   Semantic checker blocks congestion-lie ratio jumps of 0.95 (> threshold 0.60) from propagating into `util_rates`.
+*   **False Positives (Circuit Breaker):** The Circuit Breaker relies on a strict dual-signal threshold (Control Plane CPU + Datapath PacketIns), so it correctly ignores E-W REST floods and topology poisoning events — those are now handled by their dedicated defence modules.
 
 ### Visual Metrics
 
@@ -106,8 +151,14 @@ sdn-multictrl/
 ├── controllers/        # Ryu OpenFlow controller apps (ew_controller.py)
 ├── topology/           # Mininet multi-domain topology builder scripts
 ├── eastwest/           # Custom E-W protocol APIs (ew_api.py, global_topo.py)
-├── attacks/            # Attack simulation scripts (Floods, Topology Poisoning)
-├── defense/            # Automated Circuit Breaker daemon (circuit_breaker.py)
+├── attacks/            # Attack simulation scripts
+│   ├── packetin_flood.py     # Attack 1: North-South PacketIn flood
+│   ├── eastwest_flood.py     # Attack 2: East-West REST API flood
+│   └── topology_poison.py   # Attack 3: Topology/linkstate poisoning
+├── defense/            # Defense modules (one per attack vector)
+│   ├── circuit_breaker.py    # Defense 1: Automated circuit breaker (PacketIn flood)
+│   ├── ew_flood_mitigator.py # Defense 2: Token-bucket rate limiter (E-W flood)
+│   └── topology_guard.py    # Defense 3: HMAC + schema + semantic guard (Topo poisoning)
 ├── experiments/        # Test harnesses, evaluation orchestrators, plot generators
 ├── results/            # Logs, TE metrics, evaluation JSONs, and PDF figures
 ├── docs/               # In-depth architectural write-ups and paper drafts
