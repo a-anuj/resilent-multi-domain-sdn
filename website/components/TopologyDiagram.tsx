@@ -4,23 +4,23 @@ import { useState } from "react";
 type DomainId = "a" | "b" | "c" | null;
 
 /* ─── colour constants ──────────────────────────────── */
-const BG       = "#090E18";
-const GRID     = "#111A2B";
-const BOX_STR  = "#1B2840";
-const NODE_BG  = "#0D1420";
-const NODE_STR = "#253548";    // solid switch border
-const NODE_BND = "#1E3250";    // dashed boundary switch border
-const NODE_TXT = "#C8D4E0";
-const CTRL_BG  = "#111A2B";
-const CTRL_TXT = "#2D4460";
-const LINK     = "#1E3050";    // intra-domain
-const INTER    = "#283D58";    // inter-domain dashed
-const ALT      = "#2C4668";    // A-C alternate (slightly brighter)
-const HOST_BG  = "#0D1420";
-const HOST_STR = "#1B2840";
-const HOST_TXT = "#2D4460";
-const LABEL    = "#4F8EF7";    // domain headings (single accent)
-const ANNO     = "#243550";    // link annotations / legend
+const BG       = "#060C16";
+const GRID     = "#0D1928";
+const BOX_STR  = "#2A4068";       // domain box border — clearly visible
+const NODE_BG  = "#0D1D32";
+const NODE_STR = "#4A6E9A";       // solid switch border — bright blue-grey
+const NODE_BND = "#4A6E9A";       // boundary switch border (same brightness)
+const NODE_TXT = "#E8F0FA";       // switch label — near white
+const CTRL_BG  = "#0A1628";
+const CTRL_TXT = "#5A80A8";       // controller text — readable
+const LINK     = "#3A608C";       // intra-domain links — clearly visible
+const INTER    = "#5080B0";       // inter-domain dashed — prominent
+const ALT      = "#3A6090";       // A-C alternate — distinct dashed
+const HOST_BG  = "#0D1D32";
+const HOST_STR = "#4A6E9A";       // host border matches switch
+const HOST_TXT = "#8AAED0";       // host label — clearly readable
+const LABEL    = "#5B9EFF";       // domain headings (accent)
+const ANNO     = "#4A6888";       // link annotations / legend — visible
 
 /* ─── layout constants ──────────────────────────────── */
 // Uniform switch Y positions (same for all three domains)
@@ -29,7 +29,7 @@ const Y_MID = 270;   // s2 / s5 / s8
 const Y_BOT = 390;   // s3 / s6 / s9
 
 // Switch radius
-const R = 21;
+const R = 26;   // switch node radius — larger & more prominent
 
 // Domain A
 const A_LEFT  = 82;   // x of s1, s3 (spine)
@@ -58,23 +58,23 @@ function SwNode({
       <circle
         cx={cx} cy={cy} r={R}
         fill={NODE_BG}
-        stroke={dashed ? NODE_BND : NODE_STR}
-        strokeWidth="1.5"
-        strokeDasharray={dashed ? "5 3" : undefined}
+        stroke={NODE_STR}
+        strokeWidth={dashed ? 1.5 : 2}
+        strokeDasharray={dashed ? "6 3" : undefined}
       />
       <text
-        x={cx} y={cy + 4.5}
+        x={cx} y={cy + 5}
         fontFamily="Space Grotesk, sans-serif"
-        fontSize="12" fontWeight="700"
+        fontSize="13" fontWeight="700"
         fill={NODE_TXT} textAnchor="middle"
       >
         {label}
       </text>
       {role && (
         <text
-          x={cx} y={cy + R + 16}
+          x={cx} y={cy + R + 17}
           fontFamily="JetBrains Mono, monospace"
-          fontSize="7" fill={ANNO} textAnchor="middle"
+          fontSize="8" fill={ANNO} textAnchor="middle"
         >
           {role}
         </text>
@@ -90,7 +90,7 @@ function Host({
   hx: number; hy: number; label: string;
   sx: number; sy: number; side: "left" | "right";
 }) {
-  const HW = label.length > 2 ? 28 : 24, HH = 14;
+  const HW = label.length > 2 ? 36 : 32, HH = 20;
   /* connection point on the switch edge */
   const swEdgeX = side === "left" ? sx - R : sx + R;
   /* connection point on the host rect */
@@ -100,16 +100,16 @@ function Host({
       <line
         x1={hostEdgeX} y1={hy + HH / 2}
         x2={swEdgeX}   y2={sy}
-        stroke={LINK} strokeWidth="1"
+        stroke={LINK} strokeWidth="1.5"
       />
       <rect
-        x={hx} y={hy} width={HW} height={HH} rx="2"
-        fill={HOST_BG} stroke={HOST_STR} strokeWidth="1"
+        x={hx} y={hy} width={HW} height={HH} rx="3"
+        fill={HOST_BG} stroke={HOST_STR} strokeWidth="1.5"
       />
       <text
-        x={hx + HW / 2} y={hy + HH / 2 + 3.5}
+        x={hx + HW / 2} y={hy + HH / 2 + 4}
         fontFamily="JetBrains Mono, monospace"
-        fontSize="7" fill={HOST_TXT} textAnchor="middle"
+        fontSize="9" fontWeight="600" fill={HOST_TXT} textAnchor="middle"
       >
         {label}
       </text>
@@ -152,21 +152,21 @@ export function TopologyDiagram() {
         <line
           x1={A_LEFT} y1={Y_BOT}
           x2={B_LEFT} y2={Y_TOP}
-          stroke={INTER} strokeWidth="1.5" strokeDasharray="8 5"
+          stroke={INTER} strokeWidth="2" strokeDasharray="9 5"
         />
 
         {/* s6 ↔ s7  (B boundary → C boundary) */}
         <line
           x1={B_LEFT} y1={Y_BOT}
           x2={C_LEFT} y2={Y_TOP}
-          stroke={INTER} strokeWidth="1.5" strokeDasharray="8 5"
+          stroke={INTER} strokeWidth="2" strokeDasharray="9 5"
         />
 
         {/* s1 ↔ s8  (A-C alternate / TE path) */}
         <line
           x1={A_LEFT} y1={Y_TOP}
           x2={C_RIGHT} y2={Y_MID}
-          stroke={ALT} strokeWidth="1" strokeDasharray="5 5" opacity="0.55"
+          stroke={ALT} strokeWidth="1.5" strokeDasharray="6 5" opacity="0.75"
         />
 
         {/* ═══════════════════════════════════════
@@ -202,15 +202,15 @@ export function TopologyDiagram() {
 
           {/* Intra links */}
           <line x1={A_LEFT} y1={Y_TOP} x2={A_RIGHT} y2={Y_MID}
-            stroke={LINK} strokeWidth="1.5" />
+            stroke={LINK} strokeWidth="2" />
           <line x1={A_LEFT} y1={Y_TOP} x2={A_LEFT}  y2={Y_BOT}
-            stroke={LINK} strokeWidth="1.5" />
+            stroke={LINK} strokeWidth="2" />
           <line x1={A_RIGHT} y1={Y_MID} x2={A_LEFT} y2={Y_BOT}
-            stroke={LINK} strokeWidth="1.5" />
+            stroke={LINK} strokeWidth="2" />
 
           {/* Hosts: h1 and h2 to the LEFT of s1 */}
-          <Host hx={16} hy={Y_TOP - 18} label="h1" sx={A_LEFT} sy={Y_TOP} side="left" />
-          <Host hx={16} hy={Y_TOP +  6} label="h2" sx={A_LEFT} sy={Y_TOP} side="left" />
+          <Host hx={14} hy={Y_TOP - 22} label="h1" sx={A_LEFT} sy={Y_TOP} side="left" />
+          <Host hx={14} hy={Y_TOP +  6} label="h2" sx={A_LEFT} sy={Y_TOP} side="left" />
 
           {/* Switches */}
           <SwNode cx={A_LEFT}  cy={Y_TOP} label="s1" role="edge" />
@@ -246,15 +246,15 @@ export function TopologyDiagram() {
             stroke={GRID} strokeWidth="0.8" strokeDasharray="3 4" />
 
           <line x1={B_LEFT} y1={Y_TOP} x2={B_RIGHT} y2={Y_MID}
-            stroke={LINK} strokeWidth="1.5" />
+            stroke={LINK} strokeWidth="2" />
           <line x1={B_LEFT} y1={Y_TOP} x2={B_LEFT}  y2={Y_BOT}
-            stroke={LINK} strokeWidth="1.5" />
+            stroke={LINK} strokeWidth="2" />
           <line x1={B_RIGHT} y1={Y_MID} x2={B_LEFT} y2={Y_BOT}
-            stroke={LINK} strokeWidth="1.5" />
+            stroke={LINK} strokeWidth="2" />
 
           {/* Hosts: h6 and h7 to the RIGHT of s5 */}
-          <Host hx={B_RIGHT + R + 6} hy={Y_MID - 18} label="h6" sx={B_RIGHT} sy={Y_MID} side="right" />
-          <Host hx={B_RIGHT + R + 6} hy={Y_MID +  6} label="h7" sx={B_RIGHT} sy={Y_MID} side="right" />
+          <Host hx={B_RIGHT + R + 4} hy={Y_MID - 22} label="h6" sx={B_RIGHT} sy={Y_MID} side="right" />
+          <Host hx={B_RIGHT + R + 4} hy={Y_MID +  6} label="h7" sx={B_RIGHT} sy={Y_MID} side="right" />
 
           <SwNode cx={B_LEFT}  cy={Y_TOP} label="s4" role="boundary" />
           <SwNode cx={B_RIGHT} cy={Y_MID} label="s5" />
@@ -289,15 +289,15 @@ export function TopologyDiagram() {
             stroke={GRID} strokeWidth="0.8" strokeDasharray="3 4" />
 
           <line x1={C_LEFT} y1={Y_TOP} x2={C_RIGHT} y2={Y_MID}
-            stroke={LINK} strokeWidth="1.5" />
+            stroke={LINK} strokeWidth="2" />
           <line x1={C_LEFT} y1={Y_TOP} x2={C_LEFT}  y2={Y_BOT}
-            stroke={LINK} strokeWidth="1.5" />
+            stroke={LINK} strokeWidth="2" />
           <line x1={C_RIGHT} y1={Y_MID} x2={C_LEFT} y2={Y_BOT}
-            stroke={LINK} strokeWidth="1.5" />
+            stroke={LINK} strokeWidth="2" />
 
           {/* Hosts: h10 and h11 to the RIGHT of s8 */}
-          <Host hx={C_RIGHT + R + 6} hy={Y_MID - 18} label="h10" sx={C_RIGHT} sy={Y_MID} side="right" />
-          <Host hx={C_RIGHT + R + 6} hy={Y_MID +  6} label="h11" sx={C_RIGHT} sy={Y_MID} side="right" />
+          <Host hx={C_RIGHT + R + 4} hy={Y_MID - 22} label="h10" sx={C_RIGHT} sy={Y_MID} side="right" />
+          <Host hx={C_RIGHT + R + 4} hy={Y_MID +  6} label="h11" sx={C_RIGHT} sy={Y_MID} side="right" />
 
           <SwNode cx={C_LEFT}  cy={Y_TOP} label="s7" role="boundary" />
           <SwNode cx={C_RIGHT} cy={Y_MID} label="s8" />
@@ -311,7 +311,7 @@ export function TopologyDiagram() {
         <text
           x={(A_LEFT + B_LEFT) / 2}
           y={(Y_BOT + Y_TOP) / 2 + 6}
-          fontFamily="JetBrains Mono, monospace" fontSize="7" fill={ANNO}
+          fontFamily="JetBrains Mono, monospace" fontSize="8" fill={ANNO}
           textAnchor="middle"
           transform={`rotate(-36, ${(A_LEFT + B_LEFT) / 2}, ${(Y_BOT + Y_TOP) / 2 + 6})`}
         >
@@ -321,7 +321,7 @@ export function TopologyDiagram() {
         <text
           x={(B_LEFT + C_LEFT) / 2}
           y={(Y_BOT + Y_TOP) / 2 + 6}
-          fontFamily="JetBrains Mono, monospace" fontSize="7" fill={ANNO}
+          fontFamily="JetBrains Mono, monospace" fontSize="8" fill={ANNO}
           textAnchor="middle"
           transform={`rotate(-36, ${(B_LEFT + C_LEFT) / 2}, ${(Y_BOT + Y_TOP) / 2 + 6})`}
         >
@@ -331,7 +331,7 @@ export function TopologyDiagram() {
         <text
           x={(A_LEFT + C_RIGHT) / 2}
           y={(Y_TOP + Y_MID) / 2 - 10}
-          fontFamily="JetBrains Mono, monospace" fontSize="7" fill={ANNO}
+          fontFamily="JetBrains Mono, monospace" fontSize="8" fill={ANNO}
           textAnchor="middle"
         >
           s1 — s8  (TE alternate path)
