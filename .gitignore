@@ -35,3 +35,9 @@ Thumbs.db
 
 # Mininet artefacts
 *.pid
+
+# documents
+01-specifications.md
+02-theme-animation-font.md
+03-tech-stack.md
+main.pdf
