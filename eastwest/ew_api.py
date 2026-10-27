@@ -61,6 +61,8 @@ _api_port     : int  = 8080
 _ew_log_path  : str  = 'results/eastwest_traffic.log'
 _local_topo_fn       = None    # callable() → dict with switches/links/inter_links
 _flow_install_fn     = None    # callable(data: dict) → str  — registered by ew_controller
+_failover_fn         = None    # callable(dpids: list) → list — registered by ew_controller
+_relinquish_fn       = None    # callable(dpids: list) → list — registered by ew_controller
 _seq          : int  = 0
 _seq_lock             = threading.Lock()
 
@@ -251,11 +253,59 @@ def get_hosts():
     return jsonify(gt.get_hosts()), 200
 
 
+@_app.route('/failover', methods=['POST'])
+def handle_failover():
+    """
+    Trigger HA failover: promote standby switches to MASTER and assume active domain control.
+    Optional JSON payload: {"dpids": [1, 2, 3]}
+    """
+    data = request.get_json(silent=True) or {}
+    dpids = data.get('dpids')
+    if _failover_fn is None:
+        return jsonify({'error': 'failover_fn not registered'}), 503
+    try:
+        promoted = _failover_fn(dpids)
+        return jsonify({
+            'status': 'ok',
+            'action': 'promoted_to_master',
+            'promoted_dpids': list(promoted),
+            'domain': _domain_id
+        }), 200
+    except Exception as exc:
+        log.error('[EW-API] /failover error: %s', exc)
+        return jsonify({'error': str(exc)}), 500
+
+
+@_app.route('/relinquish', methods=['POST'])
+def handle_relinquish():
+    """
+    Relinquish mastership for backup switches back to the primary controller.
+    Optional JSON payload: {"dpids": [1, 2, 3]}
+    """
+    data = request.get_json(silent=True) or {}
+    dpids = data.get('dpids')
+    if _relinquish_fn is None:
+        return jsonify({'error': 'relinquish_fn not registered'}), 503
+    try:
+        relinquished = _relinquish_fn(dpids)
+        return jsonify({
+            'status': 'ok',
+            'action': 'relinquished_to_slave',
+            'relinquished_dpids': list(relinquished),
+            'domain': _domain_id
+        }), 200
+    except Exception as exc:
+        log.error('[EW-API] /relinquish error: %s', exc)
+        return jsonify({'error': str(exc)}), 500
+
+
 # ── Server startup ─────────────────────────────────────────────────────────────
 
 def start_api(domain_id: str, api_port: int, local_topo_fn,
               ew_log_path: str = 'results/eastwest_traffic.log',
-              flow_install_fn=None):
+              flow_install_fn=None,
+              failover_fn=None,
+              relinquish_fn=None):
     """
     Start the Flask REST API in a background daemon thread.
 
@@ -266,14 +316,18 @@ def start_api(domain_id: str, api_port: int, local_topo_fn,
     local_topo_fn  : callable() → dict with 'switches', 'links', 'inter_links'
     ew_log_path    : path for the East-West traffic log
     flow_install_fn: optional callable(data: dict) called by POST /install_path
+    failover_fn    : optional callable(dpids: list) called by POST /failover
+    relinquish_fn  : optional callable(dpids: list) called by POST /relinquish
     """
-    global _domain_id, _api_port, _ew_log_path, _local_topo_fn, _flow_install_fn
+    global _domain_id, _api_port, _ew_log_path, _local_topo_fn, _flow_install_fn, _failover_fn, _relinquish_fn
 
     _domain_id       = domain_id
     _api_port        = api_port
     _ew_log_path     = ew_log_path
     _local_topo_fn   = local_topo_fn
     _flow_install_fn = flow_install_fn
+    _failover_fn     = failover_fn
+    _relinquish_fn   = relinquish_fn
 
     # Suppress Flask's noisy startup banner and request logs
     import logging as _lg

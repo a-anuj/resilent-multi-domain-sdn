@@ -66,6 +66,9 @@ _raw         = os.environ.get('DOMAIN_DPIDS', '')
 DOMAIN_DPIDS = frozenset(int(d) for d in _raw.split(',') if d.strip().isdigit())
 EW_API_PORT  = int(os.environ.get('EW_API_PORT', 8080))
 TE_ENABLED   = os.environ.get('TE_ENABLED', '1') != '0'
+FAILBACK_DELAY = int(os.environ.get('FAILBACK_DELAY', '0'))
+PEER_API_PORT  = int(os.environ.get('PEER_API_PORT', '0'))
+BACKUP_PEER_DOMAIN = {'A': 'B', 'B': 'C', 'C': 'A'}
 
 # Flow priorities
 PRI_MISS         = 0
@@ -225,11 +228,31 @@ class EWController(app_manager.RyuApp):
         self.mac_to_port: dict[int, dict] = defaultdict(dict)
         self.foreign_events: dict[int, int] = defaultdict(int)
 
+        self.active_dpids: set[int] = set(DOMAIN_DPIDS)
+        # Standby/Backup configuration for High Availability (HA):
+        # Domain B backs up Domain A (1, 2, 3)
+        # Domain C backs up Domain B (4, 5, 6)
+        # Domain A backs up Domain C (7, 8, 9)
+        backup_map = {
+            'A': {7, 8, 9},
+            'B': {1, 2, 3},
+            'C': {4, 5, 6},
+        }
+        self.backup_dpids: set[int] = backup_map.get(DOMAIN_ID, set())
+        self.standby_dps: dict[int, object] = {}
+        self.standby_lock = threading.Lock()
+
+        # Graceful non-preemptive failback configuration:
+        self.failback_delay = FAILBACK_DELAY
+        self.failback_completed = False
+        self._failback_scheduled = False
+        self.recovering_dps: dict[int, object] = {}
+
         if not DOMAIN_DPIDS:
             self.logger.warning('[Domain %s] DOMAIN_DPIDS not set.', DOMAIN_ID)
         else:
-            self.logger.info('[Domain %s] EW+TE Controller started. DPIDs=%s  TE=%s',
-                             DOMAIN_ID, sorted(DOMAIN_DPIDS), TE_ENABLED)
+            self.logger.info('[Domain %s] EW+TE Controller started. DPIDs=%s (Standby=%s) TE=%s',
+                             DOMAIN_ID, sorted(DOMAIN_DPIDS), sorted(self.backup_dpids), TE_ENABLED)
 
         self._seed_static_topology()
         self._start_ew_infrastructure()
@@ -287,8 +310,8 @@ class EWController(app_manager.RyuApp):
         hard_to  = int(data.get('hard_to', HARD_TO))
         flow_id  = data.get('flow_id', 'unknown')
 
-        if dpid not in DOMAIN_DPIDS:
-            raise ValueError(f'dpid={dpid} not in this domain ({DOMAIN_ID})')
+        if dpid not in self.active_dpids:
+            raise ValueError(f'dpid={dpid} not in active DPIDs for domain ({DOMAIN_ID})')
 
         with _dp_map_lock:
             dp = _dp_map.get(dpid)
@@ -318,6 +341,8 @@ class EWController(app_manager.RyuApp):
                 local_topo_fn=_local_topology_snapshot,
                 ew_log_path=EW_TRAFFIC_LOG,
                 flow_install_fn=self._flow_install_callback,
+                failover_fn=self.failover_takeover,
+                relinquish_fn=self.failover_relinquish,
             )
             self._sync_agent = start_sync_agent(
                 domain_id=DOMAIN_ID,
@@ -341,7 +366,7 @@ class EWController(app_manager.RyuApp):
                     with _dp_map_lock:
                         dps = list(_dp_map.values())
                     for dp in dps:
-                        if dp.id in DOMAIN_DPIDS:
+                        if dp.id in self.active_dpids:
                             try:
                                 self._request_port_stats(dp)
                             except Exception as exc:
@@ -405,7 +430,7 @@ class EWController(app_manager.RyuApp):
     # ── OpenFlow helpers ──────────────────────────────────────────────────────
 
     def _owned(self, dpid: int) -> bool:
-        return dpid in DOMAIN_DPIDS
+        return dpid in self.active_dpids
 
     def _add_flow(self, dp, priority, match, actions,
                   idle=IDLE_TO, hard=HARD_TO):
@@ -456,7 +481,8 @@ class EWController(app_manager.RyuApp):
 
         # All switch-to-switch ports for this dpid (intra + inter domain)
         all_sw_ports: set[int] = set()
-        for link in _DOMAIN_INTRA_LINKS.get(DOMAIN_ID, []):
+        sw_domain = DPID_DOMAIN.get(dpid, DOMAIN_ID)
+        for link in _DOMAIN_INTRA_LINKS.get(sw_domain, []):
             if link['src_dpid'] == dpid:
                 all_sw_ports.add(link['src_port'])
             elif link['dst_dpid'] == dpid:
@@ -482,7 +508,7 @@ class EWController(app_manager.RyuApp):
         # 2. Add spanning-tree switch ports (intra-domain chain only, never inter-domain)
         for neighbor_dpid in TREE_NEIGHBORS.get(dpid, []):
             # Find the port on this switch that connects to neighbor_dpid
-            for link in _DOMAIN_INTRA_LINKS.get(DOMAIN_ID, []):
+            for link in _DOMAIN_INTRA_LINKS.get(sw_domain, []):
                 if link['src_dpid'] == dpid and link['dst_dpid'] == neighbor_dpid:
                     p = link['src_port']
                     if p and p != in_port:
@@ -496,35 +522,112 @@ class EWController(app_manager.RyuApp):
 
     # ── Switch handshake ──────────────────────────────────────────────────────
 
-    @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
-    def switch_features_handler(self, ev):
-        dp    = ev.msg.datapath
-        dpid  = dp.id
-        ofp   = dp.ofproto
+    # ── HA Failover & Switch Handshake ────────────────────────────────────────
+
+    def failover_takeover(self, dpids=None) -> list[int]:
+        """
+        HA Failover: Promote standby switch connections to MASTER and assume routing.
+        """
+        target_dpids = set(dpids) if dpids else self.backup_dpids
+        promoted = []
+        with self.standby_lock:
+            for dpid in target_dpids:
+                dp = self.standby_dps.get(dpid)
+                if dp:
+                    ofp = dp.ofproto
+                    parser = dp.ofproto_parser
+                    req = parser.OFPRoleRequest(dp, ofp.OFPCR_ROLE_MASTER, 0)
+                    dp.send_msg(req)
+                    self.active_dpids.add(dpid)
+                    with _dp_map_lock:
+                        _dp_map[dpid] = dp
+                    _switch_registry.setdefault(dpid, {'ports': {}})
+                    self._setup_switch_flows(dp, dpid)
+                    promoted.append(dpid)
+        self.logger.info('[Domain %s] HA FAILOVER TAKEOVER: Promoted DPIDs %s to MASTER',
+                         DOMAIN_ID, promoted)
+        return promoted
+
+    def failover_relinquish(self, dpids=None) -> list[int]:
+        """
+        HA Relinquish: Demote MASTER role for backup switches back to SLAVE
+        when the primary controller has completed its 30s stability window.
+        """
+        target_dpids = set(dpids) if dpids else self.backup_dpids
+        relinquished = []
+        with self.standby_lock:
+            for dpid in target_dpids:
+                if dpid in self.backup_dpids:
+                    dp = self.standby_dps.get(dpid)
+                    if not dp:
+                        with _dp_map_lock:
+                            dp = _dp_map.get(dpid)
+                    if dp:
+                        ofp = dp.ofproto
+                        parser = dp.ofproto_parser
+                        req = parser.OFPRoleRequest(dp, ofp.OFPCR_ROLE_SLAVE, 0)
+                        dp.send_msg(req)
+                        self.standby_dps[dpid] = dp
+                    self.active_dpids.discard(dpid)
+                    with _dp_map_lock:
+                        _dp_map.pop(dpid, None)
+                    relinquished.append(dpid)
+        self.logger.info('[Domain %s] HA RELINQUISH: Stepped down from MASTER to SLAVE for DPIDs %s',
+                         DOMAIN_ID, relinquished)
+        return relinquished
+
+    def _schedule_delayed_failback(self):
+        """Wait for the 30s stability window before gracefully reclaiming MASTER."""
+        if self._failback_scheduled:
+            return
+        self._failback_scheduled = True
+
+        def _delayed_worker():
+            self.logger.info('[Domain %s] Failback stability timer started: holding SLAVE for %ds...',
+                             DOMAIN_ID, self.failback_delay)
+            hub.sleep(self.failback_delay)
+            self.logger.info('[Domain %s] Stability window (%ds) elapsed. Gracefully promoting switches to MASTER...',
+                             DOMAIN_ID, self.failback_delay)
+            promoted = []
+            with self.standby_lock:
+                for dpid, dp in list(self.recovering_dps.items()):
+                    ofp = dp.ofproto
+                    parser = dp.ofproto_parser
+                    req = parser.OFPRoleRequest(dp, ofp.OFPCR_ROLE_MASTER, 0)
+                    dp.send_msg(req)
+                    with _dp_map_lock:
+                        _dp_map[dpid] = dp
+                    _switch_registry.setdefault(dpid, {'ports': {}})
+                    self._setup_switch_flows(dp, dpid)
+                    promoted.append(dpid)
+            self.failback_completed = True
+
+            # Notify standby peer to relinquish
+            peer_api = PEER_API_PORT or DOMAIN_API_PORTS.get(BACKUP_PEER_DOMAIN.get(DOMAIN_ID, 'B'), 8081)
+            try:
+                requests.post(f"http://127.0.0.1:{peer_api}/relinquish",
+                              json={"dpids": promoted, "domain": DOMAIN_ID},
+                              timeout=2.0)
+                self.logger.info('[Domain %s] Notified standby peer (API %d) to relinquish backup role for DPIDs %s',
+                                 DOMAIN_ID, peer_api, promoted)
+            except Exception as e:
+                self.logger.warning('[Domain %s] Peer relinquish notification error: %s', DOMAIN_ID, e)
+
+            self.logger.info('[Domain %s] Failback complete: Controller %s is now primary MASTER for DPIDs %s',
+                             DOMAIN_ID, DOMAIN_ID, promoted)
+
+        hub.spawn(_delayed_worker)
+
+    def _setup_switch_flows(self, dp, dpid):
+        ofp = dp.ofproto
         parser = dp.ofproto_parser
 
-        if not self._owned(dpid):
-            self.foreign_events[dpid] += 1
-            self.logger.warning('[Domain %s] SwitchFeatures from FOREIGN dpid=%d',
-                                DOMAIN_ID, dpid)
-            return
-
-        self.logger.info('[Domain %s] Switch connected: dpid=%d', DOMAIN_ID, dpid)
-
-        with _dp_map_lock:
-            _dp_map[dpid] = dp
-
-        _switch_registry.setdefault(dpid, {'ports': {}})
-
         # Table-miss → CONTROLLER
-        match   = parser.OFPMatch()
+        match = parser.OFPMatch()
         actions = [parser.OFPActionOutput(ofp.OFPP_CONTROLLER, ofp.OFPCML_NO_BUFFER)]
         self._add_flow(dp, PRI_MISS, match, actions, idle=0, hard=0)
 
         # Software spanning tree: block intra-domain triangle hypotenuse to prevent loops
-        # Domain A: s1(p2) ↔ s3(p2)
-        # Domain B: s4(p2) ↔ s6(p2)
-        # Domain C: s7(p2) ↔ s9(p2)
         hypotenuse_ports = {1: 2, 3: 2, 4: 2, 6: 2, 7: 2, 9: 2}
         if dpid in hypotenuse_ports:
             h_port = hypotenuse_ports[dpid]
@@ -536,13 +639,60 @@ class EWController(app_manager.RyuApp):
         dp.send_msg(req)
 
         # Update global topology with this switch
+        sw_domain = DPID_DOMAIN.get(dpid, DOMAIN_ID)
         gt.merge_local_topology(
-            DOMAIN_ID,
-            {str(dpid): {'dpid': dpid, 'domain': DOMAIN_ID,
+            sw_domain,
+            {str(dpid): {'dpid': dpid, 'domain': sw_domain,
                          'ports': list(_switch_registry[dpid]['ports'].keys())}},
-            links=_DOMAIN_INTRA_LINKS.get(DOMAIN_ID, []),
+            links=_DOMAIN_INTRA_LINKS.get(sw_domain, []),
             inter_links=[il for il in _inter_links if il.get('src_port') is not None],
         )
+
+    @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
+    def switch_features_handler(self, ev):
+        dp = ev.msg.datapath
+        dpid = dp.id
+        ofp = dp.ofproto
+        parser = dp.ofproto_parser
+
+        # 1. If this switch belongs to our standby backup set, establish SLAVE role
+        if dpid in self.backup_dpids and dpid not in self.active_dpids:
+            self.logger.info('[Domain %s] Switch connected as STANDBY: dpid=%d', DOMAIN_ID, dpid)
+            with self.standby_lock:
+                self.standby_dps[dpid] = dp
+            # Send OpenFlow 1.3 Role Request -> OFPCR_ROLE_SLAVE
+            req = parser.OFPRoleRequest(dp, ofp.OFPCR_ROLE_SLAVE, 0)
+            dp.send_msg(req)
+            return
+
+        # 2. Check if in delayed failback recovery mode (connect as SLAVE initially)
+        if dpid in self.active_dpids and self.failback_delay > 0 and not self.failback_completed:
+            self.logger.info('[Domain %s] Switch connected as SLAVE (recovery mode, waiting %ds stability): dpid=%d',
+                             DOMAIN_ID, self.failback_delay, dpid)
+            with self.standby_lock:
+                self.recovering_dps[dpid] = dp
+            req = parser.OFPRoleRequest(dp, ofp.OFPCR_ROLE_SLAVE, 0)
+            dp.send_msg(req)
+            self._schedule_delayed_failback()
+            return
+
+        # 3. Foreign switch not in active or backup
+        if not self._owned(dpid):
+            self.foreign_events[dpid] += 1
+            self.logger.warning('[Domain %s] SwitchFeatures from FOREIGN dpid=%d',
+                                DOMAIN_ID, dpid)
+            return
+
+        # 3. Active switch: establish MASTER role
+        self.logger.info('[Domain %s] Switch connected as MASTER: dpid=%d', DOMAIN_ID, dpid)
+        req = parser.OFPRoleRequest(dp, ofp.OFPCR_ROLE_MASTER, 0)
+        dp.send_msg(req)
+
+        with _dp_map_lock:
+            _dp_map[dpid] = dp
+
+        _switch_registry.setdefault(dpid, {'ports': {}})
+        self._setup_switch_flows(dp, dpid)
 
         if len(_dp_map) == 1:
             self._start_stats_polling()
@@ -551,7 +701,7 @@ class EWController(app_manager.RyuApp):
     def port_desc_stats_reply_handler(self, ev):
         dp   = ev.msg.datapath
         dpid = dp.id
-        if dpid not in DOMAIN_DPIDS:
+        if dpid not in self.active_dpids:
             return
         ports = {p.port_no: p.name.decode('utf-8', errors='replace')
                  for p in ev.msg.body}
@@ -605,11 +755,12 @@ class EWController(app_manager.RyuApp):
             if il.get('dst_port') and il['dst_dpid'] == dpid
         }
         
+        sw_domain = DPID_DOMAIN.get(dpid, DOMAIN_ID)
         _intra_in_ports = {
-            l['src_port'] for l in _DOMAIN_INTRA_LINKS.get(DOMAIN_ID, [])
+            l['src_port'] for l in _DOMAIN_INTRA_LINKS.get(sw_domain, [])
             if l['src_dpid'] == dpid
         } | {
-            l['dst_port'] for l in _DOMAIN_INTRA_LINKS.get(DOMAIN_ID, [])
+            l['dst_port'] for l in _DOMAIN_INTRA_LINKS.get(sw_domain, [])
             if l['dst_dpid'] == dpid
         }
 

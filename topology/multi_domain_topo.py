@@ -61,6 +61,17 @@ SWITCH_CTRL_PORT = {
     **{sw: CTRL_B_PORT for sw in DOMAIN_B},
     **{sw: CTRL_C_PORT for sw in DOMAIN_C},
 }
+SWITCH_PRIMARY_CTRL = SWITCH_CTRL_PORT
+
+# Backup/Standby controllers for High Availability (HA)
+# Domain B backs up Domain A (6634 for s1-s3)
+# Domain C backs up Domain B (6653 for s4-s6)
+# Domain A backs up Domain C (6633 for s7-s9)
+SWITCH_BACKUP_CTRL = {
+    **{sw: CTRL_B_PORT for sw in DOMAIN_A},
+    **{sw: CTRL_C_PORT for sw in DOMAIN_B},
+    **{sw: CTRL_A_PORT for sw in DOMAIN_C},
+}
 
 # For external import (used by domain_test.py)
 DOMAIN_HOSTS = {
@@ -145,12 +156,13 @@ def build_network() -> Mininet:
 
 
 def assign_controllers(net: Mininet):
-    """Assign each OVS switch to exactly one remote controller via ovs-vsctl."""
-    info('*** Assigning switches to domain controllers\n')
+    """Assign each OVS switch to primary AND backup domain controllers via ovs-vsctl."""
+    info('*** Assigning switches to primary and backup domain controllers (HA)\n')
     for sw in net.switches:
-        port = SWITCH_CTRL_PORT[sw.name]
-        sw.cmd(f'ovs-vsctl set-controller {sw.name} tcp:{CTRL_IP}:{port}')
-        info(f'  {sw.name} → controller port {port}\n')
+        p_port = SWITCH_PRIMARY_CTRL[sw.name]
+        b_port = SWITCH_BACKUP_CTRL[sw.name]
+        sw.cmd(f'ovs-vsctl set-controller {sw.name} tcp:{CTRL_IP}:{p_port} tcp:{CTRL_IP}:{b_port}')
+        info(f'  {sw.name} → primary {p_port}, backup {b_port}\n')
 
 
 def enable_rstp(net: Mininet, wait: int = 8):
