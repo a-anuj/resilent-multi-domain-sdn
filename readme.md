@@ -129,82 +129,104 @@ Building a robust, distributed SDN testbed and an automated defense system prese
 
 ## Results & Evaluation
 
-We executed a comprehensive 10-run evaluation suite (`experiments/eval_circuit_breaker.py`) systematically comparing the undefended network against the defended network (5 undefended runs and 5 defended runs alternating, git commit `28edf42`):
+We executed a comprehensive 10-run evaluation suite (`experiments/eval_circuit_breaker.py`) systematically comparing the undefended network against the defended network (5 undefended runs and 5 defended runs alternating):
 
-*   **Undefended System:** A 5,000 pkt/s PacketIn flood pushes Domain A mean attack latency to **116.63 ms** and unrecoverable queue saturation keeps recovery latency at an average of **249.51 ms** (spilling over to Domain B at 229.07 ms and Domain C at 150.22 ms). Control plane queue saturation is unmitigated and cascading.
-*   **Defended System — Circuit Breaker (PacketIn Flood):**
+*   **Undefended System:** A 5,000 pkt/s PacketIn flood pushes Domain A median attack latency to **117.45 ms** (peaks >177 ms) and unrecoverable event queue backlog keeps recovery latency at a median of **327.14 ms** (spilling over to Domain B at 78.26 ms and Domain C at 23.59 ms). Control plane queue saturation is unmitigated and cascading (0/5 recovered).
+*   **Defended System (HA Circuit Breaker):**
     *   **Average Detection Time:** ~3.0 seconds (dual-signal: PacketIn > 1,500 pkt/s + CPU > 70% for 3s).
-    *   **Average Controller Restart Time:** 1.00 second (`SIGKILL` + clean process respawn).
-    *   **Average Reconnection Time:** 3.28 seconds (confirmed via `/health` REST polling).
-    *   **Average Datapath Rule Installation:** 0.15 seconds (`in_port=3, hard_timeout=60, actions=drop`).
-    *   **Average Total Time-to-Mitigation (TTM):** **4.44 seconds** (median 4.41s).
-    *   **Attack-Phase Latency:** Held at an average of **5.76 ms** (median 5.64 ms, a **95.1% latency reduction**).
-    *   **Recovery-Phase Latency:** Restored to an average of **9.25 ms** (median 8.54 ms, a **96.3% latency restoration**).
-*   **Defended System — E-W Flood Mitigator (East-West REST Flood):**
-    *   200 req/s attack is throttled to ≤ 30 req/s at the token-bucket layer within milliseconds of onset.
-    *   Quarantine activates within 10 seconds of sustained overload, dropping attacker throughput to 5 req/s.
-    *   Legitimate peer sync (3 controllers × ~5 req/s = 15 req/s) is unaffected throughout.
-*   **Defended System — Topology Guard (Topology Poisoning):**
-    *   HMAC check rejects ROGUE-domain payloads immediately (unauthenticated sender → HTTP 403).
-    *   Schema validation catches phantom links (port 99 ≥ threshold 50) and malformed congestion data.
-    *   Semantic checker blocks congestion-lie ratio jumps of 0.95 (> threshold 0.60) from propagating into `util_rates`.
-*   **Zero False Positives & Broadcast Storm Immunity:** Due to proactive triangle hypotenuse blocking (`controllers/ew_controller.py`), baseline Packet-In rate is 0 pkt/s (<1% CPU). The Circuit Breaker exhibits **0.0% false triggers** and triggers **exactly once** per attack.
-
-### Visual Metrics
-
-*(Click on any chart to view the high-resolution PDF version)*
-
-[![TE Link Utilization](results/figures/fig1_te_utilization.png)](results/figures/fig1_te_utilization.pdf)
-**Figure 1:** Traffic Engineering (TE) load-balancing activation triggering at the 70% threshold (15s mark).
-
-[![Attack Latency Comparison](results/figures/fig2_attack_latency.png)](results/figures/fig2_attack_latency.pdf)
-**Figure 2:** Logarithmic comparison of Domain A peak latency. Only the PacketIn flood causes unbounded saturation; data-plane/TE attacks (East-West and Poisoning) do not saturate the controller CPU.
+    *   **Standby Failover Time:** **0.010 – 0.019 seconds** (instantaneous OpenFlow `OFPCR_ROLE_MASTER` promotion of backup controller via E-W REST `/failover`).
+    *   **Total Time-to-Mitigation (TTM):** **0.70 seconds median** (0.68 – 0.72s, down from 4.44s before HA).
+    *   **Attack-Phase Latency:** Held at a median of **5.02 ms** (near baseline).
+    *   **Recovery-Phase Latency:** Restored to a median of **4.44 ms** (exact baseline, **100% recovery** across 5/5 runs).
+    *   **Dynamic Rule Persistence:** Datapath meter installed with `idle_timeout=30s` preventing rule expiry and flapping during sustained floods.
 
 ---
 
-### Southbound PacketIn Flood: Defended vs. Undefended Evaluation (10-Run Suite)
+### Comparative Evaluation Graphs
 
-The evaluation suite was executed following the broadcast loop elimination and single surgical trigger fix (`commit 28edf42`):
+The two charts below illustrate the empirical contrast between the undefended network and the defended High Availability Circuit Breaker network:
 
-#### 1. Latency Reduction & Queue Stabilization
+#### 1. Latency by Operational Phase: Defended vs. Undefended
 [![Domain-A Controller Latency by Phase](results/figures/fig4_defended_vs_undefended_latency.png)](results/figures/fig4_defended_vs_undefended_latency.pdf)
-**Figure 4:** Domain-A controller response latency across Baseline (30s), Attack (60s), and Recovery (60s). The Circuit Breaker achieves a **95.1% reduction in mean attack latency** (5.76 ms vs. 116.63 ms) and a **96.3% reduction in mean recovery latency** (9.25 ms vs. 249.51 ms).
+**Figure 1:** Controller REST latency across Baseline (30s), Attack (60s), and Recovery (60s). Under defense, latency stays pinned to baseline (<5.5 ms), whereas undefended runs remain paralyzed (>320 ms).
 
-#### 2. Probe Health Check & Zero False-Trigger Reliability
-[![Probe Health & Reliability](results/figures/fig5_probe_health_reliability.png)](results/figures/fig5_probe_health_reliability.pdf)
-**Figure 5:** *(Left)* Health probe availability by phase in defended runs: 100% in baseline (0 fails) and 100% in recovery (0 fails), with only ~2–3 failed probes occurring strictly during the surgical ~4.4s controller restart window. *(Right)* Pre-fix vs. post-fix baseline reliability: eliminating the circular triangle loop dropped baseline probe outages from **22.7% down to 0.0%**.
-
-#### 3. Cross-Domain Multi-Controller Spillover Protection
-[![Cross-Domain Collateral Spillover](results/figures/fig6_multidomain_spillover.png)](results/figures/fig6_multidomain_spillover.pdf)
-**Figure 6:** Cross-domain collateral impact across Domains A, B, and C. In undefended runs, control-plane saturation cascades to peer controllers (Domain B surges to an average of 74.06 ms attack and 229.07 ms recovery). Under Circuit Breaker protection, Domains B and C remain completely isolated at near-baseline latencies (<8 ms).
-
-#### 4. End-to-End Latency Dynamics Timeline
+#### 2. End-to-End Latency Dynamics Timeline
 [![End-to-End Latency Dynamics Timeline](results/figures/fig7_attack_timeline_profile.png)](results/figures/fig7_attack_timeline_profile.pdf)
-**Figure 7:** Continuous 150-second latency timeline comparison between a representative undefended run (persistent event queue saturation) and a defended run. The Circuit Breaker detects the flood at $t=44.2\text{s}$, reboots Controller A within 1.0s, reconnects within 3.3s, and installs the datapath drop rule (`in_port=3`) within 0.13s (Total Time-to-Mitigation: **4.42s**), immediately returning latency to baseline.
+**Figure 2:** Continuous 150-second timeline comparing an undefended run (persistent event queue saturation) against a defended HA run. Detection occurs at onset, followed by sub-second standby failover and meter installation (TTM = 0.70s), completely neutralizing the flood.
 
-### Consolidated Experimental Telemetry (5-Test Averages & Medians)
+---
 
-The table below summarizes the exact arithmetic mean and median across all 5 undefended and all 5 defended test runs:
+### Architectural Evolution: Before HA (Cold Restart) vs. After HA (Standby Failover)
+
+#### Operational Log Comparison
+
+**1. Before HA (`results/before_ha/circuit_breaker_run_4.log` — Cold Restart):**
+```text
+Circuit Breaker Started
+[15:58:56] Monitoring Domain A (Switches: ['s1', 's2', 's3'])
+[15:59:38] DETECT [TRIGGER]: Thresholds exceeded for 3 consecutive seconds.
+[15:59:38] TIMING: t_detect=1793096978.4904
+[15:59:38] MITIGATE: Killing affected controller PID 35742
+[15:59:39] MITIGATE: Restart initiated. Time from detection to restart: 1.00s
+[15:59:39] MITIGATE: Waiting for controller to reconnect and API to come up...
+[15:59:42] MITIGATE: Reconnection confirmed! Time from restart to recon: 3.27s
+[15:59:42] TIMING: t_reconnect_confirmed=1793096982.7608 (elapsed=4.270s)
+[15:59:42] PREVENT: Installing OpenFlow rate-limit meter on edge switch...
+[15:59:42] PREVENT: Rule installed. Expires in 60s.
+[15:59:42] PIPELINE COMPLETE: Total time-to-mitigation: 4.40s
+```
+
+**2. After HA (`results/after_ha/circuit_breaker_run_4.log` — Standby Failover):**
+```text
+Circuit Breaker Started
+[20:15:32] Monitoring Domain A (Switches: ['s1', 's2', 's3'])
+[20:16:14] DETECT [TRIGGER]: Thresholds exceeded for 3 consecutive seconds.
+[20:16:14] TIMING: t_detect=1793112374.8748
+[20:16:14] MITIGATE [HA]: Attempting fast failover to Standby Controller (API port 8081)...
+[20:16:14] MITIGATE [HA SUCCESS]: Standby controller promoted to MASTER for DPIDs [1, 2, 3] in 0.010s (Zero-Downtime HA)!
+[20:16:15] MITIGATE [HA]: Respawned Controller A in background (SLAVE mode, 30s stability delay before failback)
+[20:16:15] TIMING: t_reconnect_confirmed=1793112374.8853 (elapsed=0.010s)
+[20:16:15] PREVENT: Installing OpenFlow rate-limit meter on edge switch...
+[20:16:15] PREVENT: Rule installed with idle_timeout=30s (persists while attack active, clears 30s after idle).
+[20:16:15] PIPELINE COMPLETE: Total time-to-mitigation: 0.71s
+```
+
+**3. Standby Controller Promotion Log (`results/after_ha/ryu_B.log`):**
+```text
+[Domain B] HA FAILOVER TAKEOVER: Promoted DPIDs [1, 2, 3] to MASTER
+```
+
+---
+
+### Architectural & Telemetry Comparison Table
+
+| Metric / Dimension | Before HA (`before_ha` — Cold Restart) | After HA (`after_ha` — Fast Standby Failover) | Impact / Delta |
+|---|---|---|---|
+| **Mitigation Architecture** | Surgical SIGKILL + local controller respawn | Dual-controller OVS primary/backup + REST `/failover` | Zero-downtime control plane migration |
+| **Switch Reconnection Mechanism** | Reconnection polling via `/health` API (cold reboot) | Standby switch promoted to `MASTER` via OpenFlow role request | **0.01s vs 3.28s (99.7% faster)** |
+| **Total Time-to-Mitigation (TTM)** | **4.40 s – 4.44 s** | **0.68 s – 0.72 s** (median **0.70 s**) | **84% reduction in total mitigation time** |
+| **Domain A Attack Latency** | 5.76 ms (mean) | **5.02 ms** (median) | Near baseline under active attack |
+| **Domain A Recovery Latency** | 9.25 ms (mean) | **4.44 ms** (median) | Clean return to exact baseline (<5 ms) |
+| **Domain B Cross-Domain Spillover** | 74.06 ms (undefended) / 4.66 ms (defended) | 78.26 ms (undefended) / **4.15 ms** (defended) | Complete cross-domain isolation |
+| **Datapath Meter Rule Timeout** | Fixed `hard_timeout=60s` (risks flapping on long attacks) | Dynamic `idle_timeout=30s` (persists for attack duration) | Zero controller flapping verified |
+| **Recovery Success Rate** | 3 / 5 (60%) | **5 / 5 (100.0%)** | 100% reliable automated recovery |
+
+---
+
+### Detailed Defended vs. Undefended Experimental Telemetry ($N=5$ Pairs)
 
 | Telemetry Metric | Undefended Runs ($N=5$) | Defended Runs ($N=5$) | Delta / Defense Impact |
 |---|---|---|---|
-| **Domain A Baseline Latency** | **4.43 ms** (median 4.41 ms) | **4.50 ms** (median 4.36 ms) | Clean, storm-free baseline (<5 ms) |
-| **Domain A Attack-Phase Latency** | **116.63 ms** (median 119.35 ms) | **5.76 ms** (median 5.64 ms) | **-95.1% latency reduction** |
-| **Domain A Recovery-Phase Latency**| **249.51 ms** (median 263.90 ms) | **9.25 ms** (median 8.54 ms) | **-96.3% queue recovery restoration** |
-| **Domain B Attack-Phase Latency** | **74.06 ms** (median 77.06 ms) | **4.66 ms** (median 4.24 ms) | **-93.7% cross-domain isolation** |
-| **Domain B Recovery-Phase Latency**| **229.07 ms** (median 236.55 ms) | **7.47 ms** (median 7.33 ms) | **-96.7% cross-domain isolation** |
-| **Domain C Attack-Phase Latency** | **22.49 ms** (median 22.40 ms) | **4.18 ms** (median 3.66 ms) | **-81.4% transit path protection** |
-| **Domain C Recovery-Phase Latency**| **150.22 ms** (median 114.47 ms) | **8.85 ms** (median 10.11 ms) | **-94.1% transit path protection** |
-| **Edge OpenFlow PacketIn Rate** | 5,490.0 pkt/s (5,428 – 5,535) | 774.1 pkt/s (735 – 793) | Throttled at edge datapath after TTM |
-| **Controller Event Queue Load** | 340,264 pkts (330k – 343k) | 46,785 pkts (44k – 48k) | **-86.3% controller packet load** |
-| **Attacker Generated Packets** | ~237,500 pkts (full wire rate) | ~237,500 pkts (full wire rate) | Equal attack pressure applied |
-| **Overall Failed Probes (%)** | 0.0% (0 / 66 probes per run) | 3.20% (2–3 / 75 probes per run) | Drops only during ~4.4s reboot window |
-| **Baseline Failed Probes (%)** | 0.0% (0 / 15 probes per run) | 0.0% (0 / 15 probes per run) | Zero false triggers in baseline |
-| **Recovery Failed Probes (%)** | 0.0% (0 / 30 probes per run) | 0.0% (0 / 30 probes per run) | Zero post-attack probe degradation |
-| **Total Time-to-Mitigation (TTM)**| N/A (unmitigated failure) | **4.44 s** (median 4.41 s) | Sub-5s automated recovery pipeline |
-| **Restart-to-Reconnection Time** | N/A | **3.28 s** (median 3.29 s) | Fast Ryu controller process reload |
-| **Reconnection-to-Meter Time** | N/A | **0.15 s** (median 0.13 s) | Instantaneous datapath drop injection |
-| **Recovery Verdict** | **0 / 5 (0.0% recovered)** | **3 / 5 strict (<1.3× BL)** | Event loop clears backlog completely |
+| **Achieved PacketIn Rate (pkt/s)** | Median: 5,469.26 (5,399.79 – 5,517.68) | Median: 572.79 (392.52 – 580.11) | Throttled at edge datapath after TTM |
+| **Domain A Baseline Latency (ms)** | Median: 4.58 (Range: 4.35 – 5.27) | Median: 4.18 (Range: 4.10 – 4.62) | Clean, storm-free baseline (<5 ms) |
+| **Domain A Attack-Phase Latency (ms)**| Median: 117.45 (Range: 73.92 – 177.50) | Median: 5.02 (Range: 4.49 – 9.59) | **-95.7% latency reduction** |
+| **Domain A Recovery-Phase Latency (ms)**| Median: 327.14 (Range: 226.74 – 383.58) | Median: 4.44 (Range: 4.37 – 4.77) | **-98.6% queue recovery restoration** |
+| **Domain B Attack-Phase Latency (ms)**| Median: 78.26 (Range: 74.15 – 82.50) | Median: 4.15 (Range: 3.82 – 5.12) | **-94.7% cross-domain isolation** |
+| **Domain C Attack-Phase Latency (ms)**| Median: 23.59 (Range: 19.80 – 28.10) | Median: 4.04 (Range: 3.65 – 4.80) | Transit path protected |
+| **Total Time-to-Mitigation (TTM)** | N/A (unmitigated failure) | Median: **0.70 s** (Range: 0.68 – 0.71 s) | Sub-second zero-downtime mitigation |
+| **Restart-to-Reconnection Time** | N/A | Median: **0.01 s** (Range: 0.01 – 0.02 s) | Instantaneous standby role promotion |
+| **Reconnection-to-Meter Time** | N/A | Median: **0.68 s** (Range: 0.66 – 0.70 s) | Rapid OpenFlow meter installation |
+| **Recovery Verdict** | **0 / 5 (0.0% recovered)** | **5 / 5 (100.0% recovered)** | Clean event loop and queue clearance |
 
 ---
 
