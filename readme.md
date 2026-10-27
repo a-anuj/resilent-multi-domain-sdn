@@ -153,6 +153,37 @@ We built an automated evaluation pipeline (`experiments/circuit_breaker_eval.py`
 
 ---
 
+### 🔬 Southbound PacketIn Flood: Defended vs. Undefended Evaluation (10-Run Suite)
+
+A rigorous 10-run alternating benchmark (5 undefended vs. 5 defended runs) was executed using `experiments/eval_circuit_breaker.py` following the broadcast loop elimination and single surgical trigger fix (`commit 28edf42`):
+
+#### 1. Latency Reduction & Queue Stabilization
+[![Domain-A Controller Latency by Phase](results/figures/fig4_defended_vs_undefended_latency.png)](results/figures/fig4_defended_vs_undefended_latency.pdf)
+**Figure 4:** Domain-A controller response latency across Baseline (30s), Attack (60s), and Recovery (60s). The Circuit Breaker achieves a **95.3% reduction** in attack-phase latency (5.64 ms defended vs. 119.35 ms undefended) and a **96.8% reduction** in recovery-phase latency (8.54 ms defended vs. 263.90 ms undefended).
+
+#### 2. Probe Health Check & Zero False-Trigger Reliability
+[![Probe Health & Reliability](results/figures/fig5_probe_health_reliability.png)](results/figures/fig5_probe_health_reliability.pdf)
+**Figure 5:** *(Left)* Health probe availability by phase in defended runs: 100% in baseline (0 fails) and 100% in recovery (0 fails), with only ~2–3 failed probes occurring strictly during the surgical ~4.4s controller restart window. *(Right)* Pre-fix vs. post-fix baseline reliability: eliminating the circular triangle loop dropped baseline probe outages from **22.7% down to 0.0%**.
+
+#### 3. Cross-Domain Multi-Controller Spillover Protection
+[![Cross-Domain Collateral Spillover](results/figures/fig6_multidomain_spillover.png)](results/figures/fig6_multidomain_spillover.pdf)
+**Figure 6:** Cross-domain collateral impact across Domains A, B, and C. In undefended runs, control-plane saturation cascades to peer controllers (Domain B surges to 77.1 ms during attack and 236.6 ms in recovery). Under Circuit Breaker protection, Domains B and C remain completely isolated at near-baseline latencies (<8 ms).
+
+#### 4. End-to-End Latency Dynamics Timeline
+[![End-to-End Latency Dynamics Timeline](results/figures/fig7_attack_timeline_profile.png)](results/figures/fig7_attack_timeline_profile.pdf)
+**Figure 7:** Continuous 150-second latency timeline comparison between a representative undefended run (persistent event queue saturation) and a defended run. The Circuit Breaker detects the flood at $t=44.2\text{s}$, reboots Controller A within 1.0s, reconnects within 3.3s, and installs the datapath drop rule (`in_port=3`) within 0.13s (Total Time-to-Mitigation: **4.42s**), immediately returning latency to baseline.
+
+| Metric | Undefended Runs (N=5) | Defended Runs (N=5) | Impact / Verdict |
+|---|---|---|---|
+| **Baseline Latency (Domain A)** | Median: 4.41 ms (4.35 – 4.54 ms) | Median: 4.36 ms (4.18 – 5.09 ms) | Clean, loop-free baseline |
+| **Attack Latency (Domain A)** | Median: 119.35 ms (93.94 – 131.52 ms) | Median: 5.64 ms (4.74 – 7.04 ms) | **95.3% lower latency** |
+| **Recovery Latency (Domain A)** | Median: 263.90 ms (160.28 – 307.45 ms) | Median: 8.54 ms (7.78 – 10.95 ms) | **96.8% latency restoration** |
+| **Domain A Probe Failures (%)** | 0.0% (0 / 66 probes) | 2.7% – 4.0% (2–3 / 75 probes) | Drops only during ~4.4s reboot window |
+| **Time-to-Mitigation (TTM)** | N/A (unmitigated failure) | Median: **4.41 s** (4.40 – 4.55 s) | Fully automated sub-5s mitigation |
+| **Multi-Domain Isolation** | Domain B & C severe saturation | Domain B & C baseline preserved (<8 ms) | 100% cascade isolation |
+
+---
+
 ## 📁 Project Structure
 
 ```
