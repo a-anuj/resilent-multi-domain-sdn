@@ -153,7 +153,7 @@ def compute_probe_stats(probe_history):
         }
     return stats
 
-def run_single_eval(run_num, condition, discarded_runs_log):
+def run_single_eval(run_num, condition, discarded_runs_log, attack_duration=60):
     """
     condition: 'undefended' or 'defended'
     Returns summary dict if successful, None if baseline violated and needs redo.
@@ -238,8 +238,8 @@ def run_single_eval(run_num, condition, discarded_runs_log):
         stop_controllers()
         return None  # Signal to redo
 
-    # ── PHASE 2: Attack (60s) ──
-    log("PHASE 2: Launching PacketIn flood attack (60s)...")
+    # ── PHASE 2: Attack ──
+    log(f"PHASE 2: Launching PacketIn flood attack ({attack_duration}s)...")
     c_start = get_packetin_count(["s1", "s2", "s3"])
     h1 = net.get("h1")
     
@@ -251,7 +251,7 @@ def run_single_eval(run_num, condition, discarded_runs_log):
         "--max-rate", "5000",
         "--step", "1000",
         "--ramp-interval", "5",
-        "--duration", "60",
+        "--duration", str(attack_duration),
         "--yes"
     ]
     env_vars = os.environ.copy()
@@ -485,16 +485,15 @@ def main():
     log("SDN MULTI-CONTROLLER: EVALUATION OF PACKETIN FLOOD + CIRCUIT BREAKER")
     log("======================================================================")
     
-    # 5 undefended and 5 defended, alternating:
-    # 1: undefended, 2: defended, 3: undefended, 4: defended, 5: undefended,
-    # 6: defended, 7: undefended, 8: defended, 9: undefended, 10: defended
-    plan = [
-        "undefended", "defended",
-        "undefended", "defended",
-        "undefended", "defended",
-        "undefended", "defended",
-        "undefended", "defended"
-    ]
+    import argparse
+    parser = argparse.ArgumentParser(description="Evaluate PacketIn flood + Circuit Breaker")
+    parser.add_argument("--pairs", type=int, default=5, help="Number of undefended/defended pairs (default 5)")
+    parser.add_argument("--attack-duration", type=int, default=60, help="Duration of attack in seconds (default 60)")
+    args = parser.parse_args()
+
+    plan = []
+    for _ in range(args.pairs):
+        plan.extend(["undefended", "defended"])
     
     completed_runs = []
     discarded_runs = []
@@ -503,7 +502,7 @@ def main():
     for condition in plan:
         success = False
         while not success:
-            summary = run_single_eval(run_idx, condition, discarded_runs)
+            summary = run_single_eval(run_idx, condition, discarded_runs, attack_duration=args.attack_duration)
             if summary is not None:
                 completed_runs.append(summary)
                 success = True
@@ -512,7 +511,7 @@ def main():
                 log(f"Redoing run {run_idx} ({condition})...")
                 time.sleep(3)
                 
-    log("All 10 runs completed successfully!")
+    log(f"All {len(plan)} runs completed successfully!")
     report_content = generate_report(completed_runs, discarded_runs)
     print("\n" + "="*70)
     print("FINAL REPORT:")

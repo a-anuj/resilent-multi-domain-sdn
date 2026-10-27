@@ -103,14 +103,14 @@ def mitigate(args, pid, trigger_rate, trigger_cpu, log, switches):
     if ret.returncode != 0:
         log("PREVENT: Meter not supported by datapath. Falling back to targeted port drop.")
         # Fallback: drop PacketIn triggers from host 1 temporarily (60s) (h1 is on s1 port 3)
-        subprocess.run(["sudo", "ovs-ofctl", "-O", "OpenFlow13", "add-flow", switches[0], "priority=1,in_port=3,hard_timeout=60,actions=drop"], stderr=subprocess.DEVNULL)
+        subprocess.run(["sudo", "ovs-ofctl", "-O", "OpenFlow13", "add-flow", switches[0], "priority=1,in_port=3,idle_timeout=30,actions=drop"], stderr=subprocess.DEVNULL)
     else:
-        flow_cmd = ["sudo", "ovs-ofctl", "-O", "OpenFlow13", "add-flow", switches[0], "priority=1,hard_timeout=60,actions=meter:1,CONTROLLER:65535"]
+        flow_cmd = ["sudo", "ovs-ofctl", "-O", "OpenFlow13", "add-flow", switches[0], "priority=1,idle_timeout=30,actions=meter:1,CONTROLLER:65535"]
         subprocess.run(flow_cmd, stderr=subprocess.DEVNULL)
         
     t_meter_installed = time.time()
     log(f"TIMING: t_meter_installed={t_meter_installed:.4f} (elapsed={t_meter_installed - t_detect:.3f}s)")
-    log("PREVENT: Rule installed. Expires in 60s.")
+    log("PREVENT: Rule installed with idle_timeout=30s (persists while attack active, clears 30s after idle).")
     log(f"PIPELINE COMPLETE: Total time-to-mitigation: {time.time() - t_detect:.2f}s")
     
     timings_file = os.path.join(os.path.dirname(args.log) or '.', "circuit_breaker_timings.json")
