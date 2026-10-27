@@ -40,59 +40,100 @@ def mitigate(args, pid, trigger_rate, trigger_cpu, log, switches):
     t_detect = time.time()
     log(f"TIMING: t_detect={t_detect:.4f}")
     
+    ha_failover_success = False
+    dpids_list = [int(s.replace('s', '')) for s in switches if s.replace('s', '').isdigit()]
     t_kill = None
-    if pid:
-        log(f"MITIGATE: Killing affected controller PID {pid}")
-        try:
-            os.kill(pid, 9)
-            t_kill = time.time()
-        except Exception as e:
-            log(f"Failed to kill: {e}")
-            t_kill = time.time()
-    else:
-        t_kill = time.time()
-    log(f"TIMING: t_kill={t_kill:.4f} (elapsed={t_kill - t_detect:.3f}s)")
-    
-    time.sleep(1)
-    
-    # Restart controller using identical environment vars from testbed
-    domain_dpids = args.switches.replace('s', '')
-    cb_restart_log = os.path.join(os.path.dirname(args.log) or '.', "cb_restart.log")
-    cmd = (f"DOMAIN_ID={args.domain} DOMAIN_DPIDS={domain_dpids} EW_API_PORT={args.api_port} "
-           f"TE_ENABLED=1 nohup /home/a-anuj/ryu311/bin/python /home/a-anuj/ryu311/bin/ryu-manager "
-           f"controllers/ew_controller.py --ofp-tcp-listen-port {args.port} > {cb_restart_log} 2>&1 &")
-    subprocess.Popen(cmd, shell=True)
-    
-    t_restart = time.time()
-    log(f"MITIGATE: Restart initiated. Time from detection to restart: {t_restart - t_detect:.2f}s")
-    
-    # Wait for switch reconnection - poll /health or /topology, exit on first HTTP 200
-    log("MITIGATE: Waiting for controller to reconnect and API to come up...")
-    connected = False
+    t_restart = None
     t_reconnect_confirmed = None
-    while time.time() - t_restart < 15:
+    connected = False
+
+    ha_peer_api = getattr(args, 'ha_peer_api', None)
+    if ha_peer_api and ha_peer_api > 0:
         try:
-            r = requests.get(f"http://127.0.0.1:{args.api_port}/health", timeout=1)
-            if r.status_code == 200:
-                connected = True
-                t_reconnect_confirmed = time.time()
-                break
-        except Exception:
+            log(f"MITIGATE [HA]: Attempting fast failover to Standby Controller (API port {ha_peer_api})...")
+            r = requests.post(
+                f"http://127.0.0.1:{ha_peer_api}/failover",
+                json={"dpids": dpids_list, "domain": args.domain},
+                timeout=1.0
+            )
+            if r.status_code == 200 and r.json().get('status') == 'ok':
+                promoted = r.json().get('promoted_dpids', [])
+                if promoted:
+                    ha_failover_success = True
+                    t_kill = t_detect
+                    t_restart = t_detect
+                    t_reconnect_confirmed = time.time()
+                    connected = True
+                    log(f"MITIGATE [HA SUCCESS]: Standby controller promoted to MASTER for DPIDs {promoted} in {t_reconnect_confirmed - t_detect:.3f}s (Zero-Downtime HA)!")
+                    
+                    # Cleanly restart the saturated controller in background with 30s stability delay
+                    if pid:
+                        try:
+                            os.kill(pid, 9)
+                        except Exception:
+                            pass
+                    time.sleep(0.5)
+                    domain_dpids = args.switches.replace('s', '')
+                    cb_restart_log = os.path.join(os.path.dirname(args.log) or '.', "cb_restart.log")
+                    bg_cmd = (f"DOMAIN_ID={args.domain} DOMAIN_DPIDS={domain_dpids} EW_API_PORT={args.api_port} "
+                              f"TE_ENABLED=1 FAILBACK_DELAY=30 PEER_API_PORT={ha_peer_api} nohup /home/a-anuj/ryu311/bin/python /home/a-anuj/ryu311/bin/ryu-manager "
+                              f"controllers/ew_controller.py --ofp-tcp-listen-port {args.port} > {cb_restart_log} 2>&1 &")
+                    subprocess.Popen(bg_cmd, shell=True)
+                    log(f"MITIGATE [HA]: Respawned Controller {args.domain} in background (SLAVE mode, 30s stability delay before failback)")
+        except Exception as e:
+            log(f"MITIGATE [HA]: Standby failover unavailable ({e}). Falling back to local restart.")
+
+    if not ha_failover_success:
+        if pid:
+            log(f"MITIGATE: Killing affected controller PID {pid}")
             try:
-                r2 = requests.get(f"http://127.0.0.1:{args.api_port}/topology", timeout=1)
-                if r2.status_code == 200:
+                os.kill(pid, 9)
+                t_kill = time.time()
+            except Exception as e:
+                log(f"Failed to kill: {e}")
+                t_kill = time.time()
+        else:
+            t_kill = time.time()
+        log(f"TIMING: t_kill={t_kill:.4f} (elapsed={t_kill - t_detect:.3f}s)")
+        
+        time.sleep(1)
+        
+        # Restart controller using identical environment vars from testbed
+        domain_dpids = args.switches.replace('s', '')
+        cb_restart_log = os.path.join(os.path.dirname(args.log) or '.', "cb_restart.log")
+        cmd = (f"DOMAIN_ID={args.domain} DOMAIN_DPIDS={domain_dpids} EW_API_PORT={args.api_port} "
+               f"TE_ENABLED=1 nohup /home/a-anuj/ryu311/bin/python /home/a-anuj/ryu311/bin/ryu-manager "
+               f"controllers/ew_controller.py --ofp-tcp-listen-port {args.port} > {cb_restart_log} 2>&1 &")
+        subprocess.Popen(cmd, shell=True)
+        
+        t_restart = time.time()
+        log(f"MITIGATE: Restart initiated. Time from detection to restart: {t_restart - t_detect:.2f}s")
+        
+        # Wait for switch reconnection - poll /health or /topology, exit on first HTTP 200
+        log("MITIGATE: Waiting for controller to reconnect and API to come up...")
+        while time.time() - t_restart < 15:
+            try:
+                r = requests.get(f"http://127.0.0.1:{args.api_port}/health", timeout=1)
+                if r.status_code == 200:
                     connected = True
                     t_reconnect_confirmed = time.time()
                     break
             except Exception:
-                pass
-        time.sleep(0.2)
-        
-    if not connected:
-        t_reconnect_confirmed = time.time()
-        log(f"MITIGATE: Reconnection NOT confirmed after 15s (API unresponsive)")
-    else:
-        log(f"MITIGATE: Reconnection confirmed! Time from restart to recon: {t_reconnect_confirmed - t_restart:.2f}s")
+                try:
+                    r2 = requests.get(f"http://127.0.0.1:{args.api_port}/topology", timeout=1)
+                    if r2.status_code == 200:
+                        connected = True
+                        t_reconnect_confirmed = time.time()
+                        break
+                except Exception:
+                    pass
+            time.sleep(0.2)
+            
+        if not connected:
+            t_reconnect_confirmed = time.time()
+            log(f"MITIGATE: Reconnection NOT confirmed after 15s (API unresponsive)")
+        else:
+            log(f"MITIGATE: Reconnection confirmed! Time from restart to recon: {t_reconnect_confirmed - t_restart:.2f}s")
     log(f"TIMING: t_reconnect_confirmed={t_reconnect_confirmed:.4f} (elapsed={t_reconnect_confirmed - t_detect:.3f}s)")
 
     # Post-restart Prevent Stage
@@ -146,6 +187,7 @@ def main():
     parser.add_argument("--switches", default="s1,s2,s3")
     parser.add_argument("--port", type=int, default=6633)
     parser.add_argument("--api-port", type=int, default=8080)
+    parser.add_argument("--ha-peer-api", type=int, default=8081, help="Backup peer controller API port for zero-downtime failover (0 to disable)")
     parser.add_argument("--rate-threshold", type=int, default=1500, help="PacketIn per second threshold")
     parser.add_argument("--cpu-threshold", type=float, default=70.0, help="Sustained CPU percent threshold")
     parser.add_argument("--log", default="results/circuit_breaker.log")
