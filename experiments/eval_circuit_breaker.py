@@ -233,7 +233,7 @@ def run_single_eval(run_num, condition, discarded_runs_log):
         if cb_proc:
             cb_proc.terminate()
             cb_proc.wait()
-            subprocess.run(["pkill", "-f", "circuit_breaker.py"])
+            subprocess.run(["pkill", "-f", "defense/circuit_breaker\\.py"])
         net.stop()
         stop_controllers()
         return None  # Signal to redo
@@ -293,7 +293,7 @@ def run_single_eval(run_num, condition, discarded_runs_log):
             cb_proc.wait(timeout=5)
         except Exception:
             cb_proc.kill()
-        subprocess.run(["pkill", "-f", "circuit_breaker.py"])
+        subprocess.run(["pkill", "-f", "defense/circuit_breaker\\.py"])
         
         # Load CB timings if recorded
         if os.path.exists(cb_timings_path):
