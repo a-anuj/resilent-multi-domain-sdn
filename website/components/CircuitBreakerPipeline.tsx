@@ -6,99 +6,91 @@ const STAGES = [
     id: "monitor",
     num: "01",
     name: "Monitor",
-    color: "var(--cyan)",
     timing: "0–∞ s",
-    detail: "Polls edge switch s1 PacketIn rate and controller A CPU% once per second via OVS port stats and psutil.",
+    detail: "Polls edge switch s1 PacketIn rate and controller A CPU every second via OVS port stats and psutil.",
   },
   {
     id: "detect",
     num: "02",
     name: "Detect",
-    color: "var(--coral)",
     timing: "~3 s",
-    detail: "Both signals exceed threshold (>1,500 pkt/s AND >70% CPU) for 3 consecutive samples. Dual-signal prevents false positives.",
+    detail: "Both signals exceed threshold (>1,500 pkt/s AND >70% CPU) for 3 consecutive samples.",
   },
   {
     id: "isolate",
     num: "03",
     name: "Isolate",
-    color: "var(--amber)",
     timing: "~0.1 s",
-    detail: "SIGKILL the poisoned ryu-manager A process — instantly clearing the unbounded event-queue backlog. Immediately respawn.",
+    detail: "SIGKILL the saturated ryu-manager A process — clearing the unbounded event-queue. Immediately respawn.",
   },
   {
     id: "prevent",
     num: "04",
     name: "Prevent",
-    color: "var(--blue)",
     timing: "~60 s",
-    detail: "Install OpenFlow Meter on s1 via ovs-ofctl: band=type=drop, rate=100 pkt/s for 60 seconds, before controller reconnects.",
+    detail: "Install OpenFlow Meter on s1: rate=100 pkt/s for 60 seconds, before controller reconnects.",
   },
   {
     id: "verify",
     num: "05",
     name: "Verify",
-    color: "var(--mint)",
     timing: "~13 s",
-    detail: "Poll GET /stats/switches on the restarted controller. Success confirms reconnection. Meter expires automatically at 60 s.",
+    detail: "Poll GET /stats/switches until the restarted controller responds. Meter expires automatically.",
   },
 ];
 
 export function CircuitBreakerPipeline() {
-  const [active, setActive] = useState<number | null>(null);
-  const [animating, setAnimating] = useState(false);
-  const [signalPos, setSignalPos] = useState(0);
-  const animRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
+  const [running, setRunning]     = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const runAnimation = () => {
+  const replay = () => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mq.matches) return;
-    if (animating) return;
-    setAnimating(true);
-    setSignalPos(0);
-    setActive(0);
+    if (mq.matches || running) return;
+    setRunning(true);
+    setActiveIdx(0);
     let i = 0;
     const step = () => {
       i++;
       if (i < STAGES.length) {
-        setActive(i);
-        setSignalPos(i);
-        animRef.current = setTimeout(step, 900);
+        setActiveIdx(i);
+        timer.current = setTimeout(step, 800);
       } else {
-        setAnimating(false);
-        setActive(null);
-        setSignalPos(-1);
+        setRunning(false);
+        setActiveIdx(null);
       }
     };
-    animRef.current = setTimeout(step, 900);
+    timer.current = setTimeout(step, 800);
   };
 
-  useEffect(() => {
-    return () => { if (animRef.current) clearTimeout(animRef.current); };
-  }, []);
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
 
   return (
     <div>
-      <div
-        className="pipeline"
-        role="list"
-        aria-label="Circuit breaker pipeline stages"
-      >
+      <div className="pipeline" role="list" aria-label="Circuit breaker pipeline stages">
         {STAGES.map((stage, i) => (
           <div
             key={stage.id}
-            className={`pipeline-stage ${stage.id}`}
+            className="pipeline-stage"
             role="listitem"
             style={{
-              borderColor: active === i ? stage.color : "var(--border)",
-              background: active === i ? `color-mix(in srgb, ${stage.color} 8%, var(--bg-surface))` : "var(--bg-surface)",
-              transition: "border-color 0.3s, background 0.3s",
+              background: activeIdx === i ? "var(--bg-elevated)" : "var(--bg-surface)",
+              borderTop: activeIdx === i ? "2px solid var(--accent)" : "2px solid transparent",
             }}
           >
             <div className="pipeline-stage-num">Stage {stage.num}</div>
-            <div className="pipeline-stage-name" style={{ color: stage.color }}>{stage.name}</div>
+            <div
+              className={`pipeline-stage-name${activeIdx === i ? " active-stage" : ""}`}
+            >
+              {stage.name}
+            </div>
             <div className="pipeline-stage-desc">{stage.detail}</div>
-            <div style={{ marginTop: "0.6rem", fontFamily: "var(--font-jetbrains-mono, monospace)", fontSize: "0.7rem", color: "var(--text-muted)" }}>
+            <div style={{
+              marginTop: "0.55rem",
+              fontFamily: "var(--font-jetbrains-mono, monospace)",
+              fontSize: "0.67rem",
+              color: "var(--text-muted)",
+            }}>
               {stage.timing}
             </div>
           </div>
@@ -107,26 +99,25 @@ export function CircuitBreakerPipeline() {
 
       <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
         <button
-          id="replay-circuit-breaker"
+          id="replay-pipeline"
           className="btn btn-secondary"
-          onClick={runAnimation}
-          disabled={animating}
-          aria-label="Replay circuit breaker animation sequence"
-          style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}
+          onClick={replay}
+          disabled={running}
+          aria-label="Replay circuit breaker animation"
+          style={{ fontSize: "0.82rem", padding: "0.45rem 0.9rem" }}
         >
-          {animating ? "Animating…" : "▶ Replay sequence"}
+          {running ? "Running…" : "▶ Replay"}
         </button>
-        <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
-          Total: ~16.7 s end-to-end (preliminary testbed result)
+        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+          Total ~16.7 s · preliminary testbed measurement
         </span>
       </div>
 
-      <div className="callout warning" style={{ marginTop: "1.5rem" }}>
-        <div className="callout-title">Preliminary Result</div>
+      <div className="callout warning" style={{ marginTop: "1.25rem" }}>
+        <div className="callout-title">Preliminary</div>
         <p>
-          The ~16.7 s total mitigation time includes the 3 s detection window, ~0.1 s for SIGKILL/respawn,
-          and ~13 s for the health-verification polling window. This was measured in one Mininet testbed run
-          against a 5,000 pkt/s flood. Results may vary.
+          The ~16.7 s figure includes: 3 s detection, ~0.1 s SIGKILL/respawn, ~13 s
+          health-check polling. Measured in one Mininet run at 5,000 pkt/s. Results may vary.
         </p>
       </div>
     </div>

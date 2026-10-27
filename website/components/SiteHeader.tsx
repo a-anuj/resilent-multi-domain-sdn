@@ -9,10 +9,8 @@ const NAV_LINKS = [
   { href: "/architecture", label: "Architecture" },
   { href: "/methodology", label: "Methodology" },
   { href: "/results", label: "Results" },
-  { href: "/docs", label: "Docs" },
+  { href: "/docs", label: "Documentation" },
 ];
-
-const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? "";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -22,11 +20,7 @@ export function SiteHeader() {
     <header className="site-header" role="banner">
       <div className="container">
         <div className="site-header-inner">
-          <Link href="/" className="site-logo" aria-label="Resilient SDN — Home">
-            <span className="site-logo-dot" aria-hidden="true" />
-            <span>Resilient SDN</span>
-          </Link>
-
+          {/* Mobile toggle */}
           <button
             className="nav-toggle"
             aria-label={open ? "Close navigation" : "Open navigation"}
@@ -34,7 +28,7 @@ export function SiteHeader() {
             aria-controls="site-nav"
             onClick={() => setOpen((o) => !o)}
           >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               {open ? (
                 <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
               ) : (

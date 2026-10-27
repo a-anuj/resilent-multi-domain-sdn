@@ -11,10 +11,10 @@ export const metadata: Metadata = {
 };
 
 const METRICS = [
-  { label: "Detection Time", value: "~3.0 s", accent: "cyan", caveat: "preliminary testbed" },
-  { label: "Total Mitigation", value: "~16.7 s", accent: "mint", caveat: "preliminary testbed" },
-  { label: "Post-Recovery Latency", value: "14.02 ms", accent: "blue", caveat: "vs 13.8 ms baseline" },
-  { label: "Baseline Latency", value: "~13.8 ms", accent: "amber", caveat: "no attack" },
+  { label: "Detection Time",       value: "~3.0 s",   caveat: "preliminary testbed" },
+  { label: "Total Mitigation",     value: "~16.7 s",  caveat: "preliminary testbed" },
+  { label: "Post-Recovery Latency",value: "14.02 ms", caveat: "vs 13.8 ms baseline" },
+  { label: "Baseline Latency",     value: "~13.8 ms", caveat: "no attack" },
 ];
 
 const OBJECTIVES = [
@@ -54,14 +54,13 @@ export default function HomePage() {
         <div className="hero-glow" aria-hidden="true" />
         <div className="container" style={{ position: "relative", zIndex: 1 }}>
           <div className="hero-badge" aria-label="Research project">
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "var(--cyan)", display: "inline-block" }} aria-hidden="true" />
             Research Project · SDN Security
           </div>
 
           <h1 id="hero-heading" className="hero-title">
             Resilient Multi-Domain SDN
             <br />
-            <span style={{ color: "var(--cyan)" }}>Automated Circuit Breaker</span>
+            <span style={{ color: "var(--accent)" }}>Automated Circuit Breaker</span>
           </h1>
 
           <p className="hero-subtitle">
@@ -110,7 +109,7 @@ export default function HomePage() {
 
           <div className="metric-grid">
             {METRICS.map((m) => (
-              <div key={m.label} className={`metric-card ${m.accent}`}>
+              <div key={m.label} className="metric-card">
                 <div className="metric-label">{m.label}</div>
                 <div className="metric-value">{m.value}</div>
                 <div className="metric-sub">{m.caveat}</div>
@@ -145,20 +144,17 @@ export default function HomePage() {
           <ScrollReveal>
             <div className="card-grid" style={{ marginTop: "2.5rem" }}>
               {[
-                { domain: "Domain A", color: "var(--cyan)", switches: "s1, s2, s3", controller: "Ryu A — TCP 6633 / REST 8080", role: "Primary attack target in evaluation" },
-                { domain: "Domain B", color: "var(--blue)", switches: "s4, s5, s6", controller: "Ryu B — TCP 6634 / REST 8081", role: "Intermediate routing domain" },
-                { domain: "Domain C", color: "var(--mint)", switches: "s7, s8, s9", controller: "Ryu C — TCP 6653 / REST 8082", role: "TE alternate path egress" },
+                { domain: "Domain A", switches: "s1, s2, s3", controller: "Ryu A — TCP 6633 / REST 8080", role: "Primary attack target in evaluation" },
+                { domain: "Domain B", switches: "s4, s5, s6", controller: "Ryu B — TCP 6634 / REST 8081", role: "Intermediate routing domain" },
+                { domain: "Domain C", switches: "s7, s8, s9", controller: "Ryu C — TCP 6653 / REST 8082", role: "TE alternate path egress" },
               ].map((d) => (
                 <div key={d.domain} className="card">
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: d.color, flexShrink: 0 }} aria-hidden="true" />
-                    <h3 style={{ fontSize: "1rem", margin: 0, color: d.color }}>{d.domain}</h3>
-                  </div>
-                  <p style={{ fontSize: "0.85rem", margin: "0 0 0.35rem" }}>
+                  <h3 style={{ fontSize: "0.95rem", margin: "0 0 0.65rem", color: "var(--text-primary)" }}>{d.domain}</h3>
+                  <p style={{ fontSize: "0.85rem", margin: "0 0 0.3rem" }}>
                     <strong style={{ color: "var(--text-primary)" }}>Switches:</strong>{" "}
                     <code>{d.switches}</code>
                   </p>
-                  <p style={{ fontSize: "0.85rem", margin: "0 0 0.35rem" }}>
+                  <p style={{ fontSize: "0.85rem", margin: "0 0 0.3rem" }}>
                     <strong style={{ color: "var(--text-primary)" }}>Controller:</strong>{" "}
                     <code>{d.controller}</code>
                   </p>
@@ -185,8 +181,8 @@ export default function HomePage() {
             {OBJECTIVES.map((o, i) => (
               <ScrollReveal key={o.num}>
                 <div className="card" style={{ height: "100%" }}>
-                  <div style={{ fontFamily: "var(--font-jetbrains-mono, monospace)", fontSize: "0.7rem", color: "var(--cyan)", marginBottom: "0.5rem", letterSpacing: "0.1em" }}>
-                    OBJECTIVE {o.num}
+                  <div style={{ fontFamily: "var(--font-jetbrains-mono, monospace)", fontSize: "0.68rem", color: "var(--text-muted)", marginBottom: "0.5rem", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                    Objective {o.num}
                   </div>
                   <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>{o.title}</h3>
                   <p style={{ fontSize: "0.88rem", margin: 0 }}>{o.desc}</p>

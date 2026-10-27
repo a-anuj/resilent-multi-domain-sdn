@@ -3,186 +3,367 @@ import { useState } from "react";
 
 type DomainId = "a" | "b" | "c" | null;
 
-export function TopologyDiagram() {
-  const [hovered, setHovered] = useState<DomainId>(null);
+/* ─── colour constants ──────────────────────────────── */
+const BG       = "#060C16";
+const GRID     = "#0D1928";
+const BOX_STR  = "#2A4068";       // domain box border — clearly visible
+const NODE_BG  = "#0D1D32";
+const NODE_STR = "#4A6E9A";       // solid switch border — bright blue-grey
+const NODE_BND = "#4A6E9A";       // boundary switch border (same brightness)
+const NODE_TXT = "#E8F0FA";       // switch label — near white
+const CTRL_BG  = "#0A1628";
+const CTRL_TXT = "#5A80A8";       // controller text — readable
+const LINK     = "#3A608C";       // intra-domain links — clearly visible
+const INTER    = "#5080B0";       // inter-domain dashed — prominent
+const ALT      = "#3A6090";       // A-C alternate — distinct dashed
+const HOST_BG  = "#0D1D32";
+const HOST_STR = "#4A6E9A";       // host border matches switch
+const HOST_TXT = "#8AAED0";       // host label — clearly readable
+const LABEL    = "#5B9EFF";       // domain headings (accent)
+const ANNO     = "#4A6888";       // link annotations / legend — visible
 
-  const domainOpacity = (id: DomainId) =>
-    hovered === null || hovered === id ? 1 : 0.35;
+/* ─── layout constants ──────────────────────────────── */
+// Uniform switch Y positions (same for all three domains)
+const Y_TOP = 150;   // s1 / s4 / s7
+const Y_MID = 270;   // s2 / s5 / s8
+const Y_BOT = 390;   // s3 / s6 / s9
+
+// Switch radius
+const R = 26;   // switch node radius — larger & more prominent
+
+// Domain A
+const A_LEFT  = 82;   // x of s1, s3 (spine)
+const A_RIGHT = 192;  // x of s2 (right node)
+const A_CX    = 137;  // controller badge center
+
+// Domain B
+const B_LEFT  = 400;
+const B_RIGHT = 510;
+const B_CX    = 455;
+
+// Domain C
+const C_LEFT  = 718;
+const C_RIGHT = 828;
+const C_CX    = 773;
+
+/* ─── helper: single switch node ───────────────────── */
+function SwNode({
+  cx, cy, label, role,
+}: {
+  cx: number; cy: number; label: string; role?: "edge" | "boundary" | "";
+}) {
+  const dashed = role === "boundary";
+  return (
+    <g>
+      <circle
+        cx={cx} cy={cy} r={R}
+        fill={NODE_BG}
+        stroke={NODE_STR}
+        strokeWidth={dashed ? 1.5 : 2}
+        strokeDasharray={dashed ? "6 3" : undefined}
+      />
+      <text
+        x={cx} y={cy + 5}
+        fontFamily="Space Grotesk, sans-serif"
+        fontSize="13" fontWeight="700"
+        fill={NODE_TXT} textAnchor="middle"
+      >
+        {label}
+      </text>
+      {role && (
+        <text
+          x={cx} y={cy + R + 17}
+          fontFamily="JetBrains Mono, monospace"
+          fontSize="8" fill={ANNO} textAnchor="middle"
+        >
+          {role}
+        </text>
+      )}
+    </g>
+  );
+}
+
+/* ─── helper: host rectangle + wire ────────────────── */
+function Host({
+  hx, hy, label, sx, sy, side,
+}: {
+  hx: number; hy: number; label: string;
+  sx: number; sy: number; side: "left" | "right";
+}) {
+  const HW = label.length > 2 ? 36 : 32, HH = 20;
+  /* connection point on the switch edge */
+  const swEdgeX = side === "left" ? sx - R : sx + R;
+  /* connection point on the host rect */
+  const hostEdgeX = side === "left" ? hx + HW : hx;
+  return (
+    <g>
+      <line
+        x1={hostEdgeX} y1={hy + HH / 2}
+        x2={swEdgeX}   y2={sy}
+        stroke={LINK} strokeWidth="1.5"
+      />
+      <rect
+        x={hx} y={hy} width={HW} height={HH} rx="3"
+        fill={HOST_BG} stroke={HOST_STR} strokeWidth="1.5"
+      />
+      <text
+        x={hx + HW / 2} y={hy + HH / 2 + 4}
+        fontFamily="JetBrains Mono, monospace"
+        fontSize="9" fontWeight="600" fill={HOST_TXT} textAnchor="middle"
+      >
+        {label}
+      </text>
+    </g>
+  );
+}
+
+/* ─── main component ─────────────────────────────────── */
+export function TopologyDiagram() {
+  const [hov, setHov] = useState<DomainId>(null);
+  const fade = (id: DomainId) =>
+    hov === null || hov === id ? 1 : 0.22;
 
   return (
-    <div className="diagram-frame" role="img" aria-label="9-switch 3-domain SDN topology. Domain A: switches s1, s2, s3 controlled by Ryu A on port 6633. Domain B: switches s4, s5, s6 on port 6634. Domain C: switches s7, s8, s9 on port 6653. Domains connected by inter-domain boundary links.">
+    <div
+      className="diagram-frame"
+      role="img"
+      aria-label="9-switch 3-domain SDN topology. Domain A: s1 (edge), s2, s3 (boundary). Domain B: s4 (boundary), s5, s6 (boundary). Domain C: s7 (boundary), s8, s9 (edge). Inter-domain: s3–s4, s6–s7, and s1–s8 alternate TE path."
+    >
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 860 460"
+        viewBox="0 0 900 520"
         style={{ maxWidth: "100%", height: "auto" }}
-        aria-hidden="true"
-        focusable="false"
+        aria-hidden="true" focusable="false"
       >
-        {/* Background grid */}
+        {/* ── BG ── */}
+        <rect width="900" height="520" fill={BG} />
         <defs>
-          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#263A50" strokeWidth="0.5" opacity="0.4"/>
+          <pattern id="tg" width="44" height="44" patternUnits="userSpaceOnUse">
+            <path d="M44 0L0 0 0 44" fill="none" stroke={GRID} strokeWidth="1" />
           </pattern>
         </defs>
-        <rect width="860" height="460" fill="#08111F"/>
-        <rect width="860" height="460" fill="url(#grid)"/>
+        <rect width="900" height="520" fill="url(#tg)" />
 
-        {/* === DOMAIN A === */}
+        {/* ═══════════════════════════════════════════════
+            INTER-DOMAIN LINKS — drawn first (behind nodes)
+        ═══════════════════════════════════════════════ */}
+
+        {/* s3 ↔ s4  (A boundary → B boundary) */}
+        <line
+          x1={A_LEFT} y1={Y_BOT}
+          x2={B_LEFT} y2={Y_TOP}
+          stroke={INTER} strokeWidth="2" strokeDasharray="9 5"
+        />
+
+        {/* s6 ↔ s7  (B boundary → C boundary) */}
+        <line
+          x1={B_LEFT} y1={Y_BOT}
+          x2={C_LEFT} y2={Y_TOP}
+          stroke={INTER} strokeWidth="2" strokeDasharray="9 5"
+        />
+
+        {/* s1 ↔ s8  (A-C alternate / TE path) */}
+        <line
+          x1={A_LEFT} y1={Y_TOP}
+          x2={C_RIGHT} y2={Y_MID}
+          stroke={ALT} strokeWidth="1.5" strokeDasharray="6 5" opacity="0.75"
+        />
+
+        {/* ═══════════════════════════════════════
+            DOMAIN A
+        ═══════════════════════════════════════ */}
         <g
-          style={{ opacity: domainOpacity("a"), transition: "opacity 0.25s ease", cursor: "pointer" }}
-          onMouseEnter={() => setHovered("a")}
-          onMouseLeave={() => setHovered(null)}
+          style={{ opacity: fade("a"), transition: "opacity 0.2s" }}
+          onMouseEnter={() => setHov("a")}
+          onMouseLeave={() => setHov(null)}
           role="group"
-          aria-label="Domain A: switches s1, s2, s3"
+          aria-label="Domain A"
         >
-          <rect x="16" y="30" width="230" height="400" rx="8" fill="#0D1B2A" stroke="#38D6E8" strokeWidth="1.5" opacity="0.7"/>
-          <text x="131" y="22" fontFamily="Space Grotesk, sans-serif" fontSize="11" fontWeight="700" fill="#38D6E8" textAnchor="middle" letterSpacing="2">DOMAIN A</text>
+          {/* Box */}
+          <rect x="10" y="25" width="250" height="455" rx="6"
+            fill="none" stroke={BOX_STR} strokeWidth="1.5" />
 
-          {/* Controller A */}
-          <rect x="68" y="42" width="126" height="26" rx="4" fill="#112338" stroke="#38D6E8" strokeWidth="1"/>
-          <text x="131" y="59" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="#38D6E8" textAnchor="middle">Ryu-A  :6633/:8080</text>
+          {/* Domain label */}
+          <text x={A_CX} y="18" fontFamily="JetBrains Mono, monospace"
+            fontSize="9" fontWeight="600" fill={LABEL}
+            textAnchor="middle" letterSpacing="3">DOMAIN A</text>
 
-          {/* s1 */}
-          <circle cx="80" cy="160" r="26" fill="#112338" stroke="#38D6E8" strokeWidth="2"/>
-          <text x="80" y="165" fontFamily="Space Grotesk, sans-serif" fontSize="13" fontWeight="700" fill="#EAF2F8" textAnchor="middle">s1</text>
-          <text x="80" y="195" fontFamily="JetBrains Mono, monospace" fontSize="7" fill="#A8B8C8" textAnchor="middle">edge</text>
+          {/* Controller badge */}
+          <rect x={A_CX - 76} y="33" width="152" height="20" rx="3"
+            fill={CTRL_BG} stroke={BOX_STR} strokeWidth="1" />
+          <text x={A_CX} y="47" fontFamily="JetBrains Mono, monospace"
+            fontSize="7.5" fill={CTRL_TXT} textAnchor="middle">
+            Ryu-A  ·  :6633 / :8080
+          </text>
 
-          {/* s2 */}
-          <circle cx="185" cy="230" r="26" fill="#112338" stroke="#38D6E8" strokeWidth="2"/>
-          <text x="185" y="235" fontFamily="Space Grotesk, sans-serif" fontSize="13" fontWeight="700" fill="#EAF2F8" textAnchor="middle">s2</text>
+          {/* Guide: controller → s1 */}
+          <line x1={A_CX} y1="53" x2={A_LEFT} y2={Y_TOP - R}
+            stroke={GRID} strokeWidth="0.8" strokeDasharray="3 4" />
 
-          {/* s3 */}
-          <circle cx="80" cy="330" r="26" fill="#112338" stroke="#38D6E8" strokeWidth="2" strokeDasharray="5,3"/>
-          <text x="80" y="335" fontFamily="Space Grotesk, sans-serif" fontSize="13" fontWeight="700" fill="#EAF2F8" textAnchor="middle">s3</text>
-          <text x="80" y="364" fontFamily="JetBrains Mono, monospace" fontSize="7" fill="#A8B8C8" textAnchor="middle">boundary</text>
+          {/* Intra links */}
+          <line x1={A_LEFT} y1={Y_TOP} x2={A_RIGHT} y2={Y_MID}
+            stroke={LINK} strokeWidth="2" />
+          <line x1={A_LEFT} y1={Y_TOP} x2={A_LEFT}  y2={Y_BOT}
+            stroke={LINK} strokeWidth="2" />
+          <line x1={A_RIGHT} y1={Y_MID} x2={A_LEFT} y2={Y_BOT}
+            stroke={LINK} strokeWidth="2" />
 
-          {/* Hosts h1, h2 */}
-          <rect x="20" y="140" width="26" height="16" rx="3" fill="#263A50" stroke="#A8B8C8" strokeWidth="1"/>
-          <text x="33" y="152" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill="#A8B8C8" textAnchor="middle">h1</text>
-          <rect x="20" y="162" width="26" height="16" rx="3" fill="#263A50" stroke="#A8B8C8" strokeWidth="1"/>
-          <text x="33" y="174" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill="#A8B8C8" textAnchor="middle">h2</text>
+          {/* Hosts: h1 and h2 to the LEFT of s1 */}
+          <Host hx={14} hy={Y_TOP - 22} label="h1" sx={A_LEFT} sy={Y_TOP} side="left" />
+          <Host hx={14} hy={Y_TOP +  6} label="h2" sx={A_LEFT} sy={Y_TOP} side="left" />
 
-          {/* A intra links */}
-          <line x1="131" y1="68" x2="131" y2="138" stroke="#38D6E8" strokeWidth="1" strokeDasharray="4,4" opacity="0.4"/>
-          <line x1="46" y1="150" x2="54" y2="156" stroke="#A8B8C8" strokeWidth="1"/>
-          <line x1="46" y1="168" x2="54" y2="163" stroke="#A8B8C8" strokeWidth="1"/>
-          <line x1="104" y1="170" x2="163" y2="215" stroke="#38D6E8" strokeWidth="1.5"/>
-          <line x1="80" y1="186" x2="80" y2="304" stroke="#38D6E8" strokeWidth="1.5"/>
-          <line x1="160" y1="244" x2="104" y2="316" stroke="#38D6E8" strokeWidth="1.5"/>
-
-          {/* 1G label */}
-          <text x="152" y="195" fontFamily="JetBrains Mono, monospace" fontSize="7" fill="#A8B8C8" textAnchor="middle">1G</text>
-          <text x="64" y="248" fontFamily="JetBrains Mono, monospace" fontSize="7" fill="#A8B8C8" textAnchor="middle">1G</text>
+          {/* Switches */}
+          <SwNode cx={A_LEFT}  cy={Y_TOP} label="s1" role="edge" />
+          <SwNode cx={A_RIGHT} cy={Y_MID} label="s2" />
+          <SwNode cx={A_LEFT}  cy={Y_BOT} label="s3" role="boundary" />
         </g>
 
-        {/* === DOMAIN B === */}
+        {/* ═══════════════════════════════════════
+            DOMAIN B
+        ═══════════════════════════════════════ */}
         <g
-          style={{ opacity: domainOpacity("b"), transition: "opacity 0.25s ease", cursor: "pointer" }}
-          onMouseEnter={() => setHovered("b")}
-          onMouseLeave={() => setHovered(null)}
+          style={{ opacity: fade("b"), transition: "opacity 0.2s" }}
+          onMouseEnter={() => setHov("b")}
+          onMouseLeave={() => setHov(null)}
           role="group"
-          aria-label="Domain B: switches s4, s5, s6"
+          aria-label="Domain B"
         >
-          <rect x="315" y="30" width="230" height="400" rx="8" fill="#0D1B2A" stroke="#5B8CFF" strokeWidth="1.5" opacity="0.7"/>
-          <text x="430" y="22" fontFamily="Space Grotesk, sans-serif" fontSize="11" fontWeight="700" fill="#5B8CFF" textAnchor="middle" letterSpacing="2">DOMAIN B</text>
+          <rect x="328" y="25" width="250" height="455" rx="6"
+            fill="none" stroke={BOX_STR} strokeWidth="1.5" />
 
-          <rect x="367" y="42" width="126" height="26" rx="4" fill="#112338" stroke="#5B8CFF" strokeWidth="1"/>
-          <text x="430" y="59" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="#5B8CFF" textAnchor="middle">Ryu-B  :6634/:8081</text>
+          <text x={B_CX} y="18" fontFamily="JetBrains Mono, monospace"
+            fontSize="9" fontWeight="600" fill={LABEL}
+            textAnchor="middle" letterSpacing="3">DOMAIN B</text>
 
-          {/* s4 */}
-          <circle cx="380" cy="160" r="26" fill="#112338" stroke="#5B8CFF" strokeWidth="2" strokeDasharray="5,3"/>
-          <text x="380" y="165" fontFamily="Space Grotesk, sans-serif" fontSize="13" fontWeight="700" fill="#EAF2F8" textAnchor="middle">s4</text>
-          <text x="380" y="195" fontFamily="JetBrains Mono, monospace" fontSize="7" fill="#A8B8C8" textAnchor="middle">boundary</text>
+          <rect x={B_CX - 76} y="33" width="152" height="20" rx="3"
+            fill={CTRL_BG} stroke={BOX_STR} strokeWidth="1" />
+          <text x={B_CX} y="47" fontFamily="JetBrains Mono, monospace"
+            fontSize="7.5" fill={CTRL_TXT} textAnchor="middle">
+            Ryu-B  ·  :6634 / :8081
+          </text>
 
-          {/* s5 */}
-          <circle cx="480" cy="230" r="26" fill="#112338" stroke="#5B8CFF" strokeWidth="2"/>
-          <text x="480" y="235" fontFamily="Space Grotesk, sans-serif" fontSize="13" fontWeight="700" fill="#EAF2F8" textAnchor="middle">s5</text>
+          <line x1={B_CX} y1="53" x2={B_LEFT} y2={Y_TOP - R}
+            stroke={GRID} strokeWidth="0.8" strokeDasharray="3 4" />
 
-          {/* s6 */}
-          <circle cx="380" cy="330" r="26" fill="#112338" stroke="#5B8CFF" strokeWidth="2" strokeDasharray="5,3"/>
-          <text x="380" y="335" fontFamily="Space Grotesk, sans-serif" fontSize="13" fontWeight="700" fill="#EAF2F8" textAnchor="middle">s6</text>
-          <text x="380" y="364" fontFamily="JetBrains Mono, monospace" fontSize="7" fill="#A8B8C8" textAnchor="middle">boundary</text>
+          <line x1={B_LEFT} y1={Y_TOP} x2={B_RIGHT} y2={Y_MID}
+            stroke={LINK} strokeWidth="2" />
+          <line x1={B_LEFT} y1={Y_TOP} x2={B_LEFT}  y2={Y_BOT}
+            stroke={LINK} strokeWidth="2" />
+          <line x1={B_RIGHT} y1={Y_MID} x2={B_LEFT} y2={Y_BOT}
+            stroke={LINK} strokeWidth="2" />
 
-          {/* Hosts h6, h7 */}
-          <rect x="510" y="216" width="26" height="16" rx="3" fill="#263A50" stroke="#A8B8C8" strokeWidth="1"/>
-          <text x="523" y="228" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill="#A8B8C8" textAnchor="middle">h6</text>
-          <rect x="510" y="236" width="26" height="16" rx="3" fill="#263A50" stroke="#A8B8C8" strokeWidth="1"/>
-          <text x="523" y="248" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill="#A8B8C8" textAnchor="middle">h7</text>
+          {/* Hosts: h6 and h7 to the RIGHT of s5 */}
+          <Host hx={B_RIGHT + R + 4} hy={Y_MID - 22} label="h6" sx={B_RIGHT} sy={Y_MID} side="right" />
+          <Host hx={B_RIGHT + R + 4} hy={Y_MID +  6} label="h7" sx={B_RIGHT} sy={Y_MID} side="right" />
 
-          {/* B intra links */}
-          <line x1="430" y1="68" x2="430" y2="138" stroke="#5B8CFF" strokeWidth="1" strokeDasharray="4,4" opacity="0.4"/>
-          <line x1="404" y1="170" x2="458" y2="215" stroke="#5B8CFF" strokeWidth="1.5"/>
-          <line x1="380" y1="186" x2="380" y2="304" stroke="#5B8CFF" strokeWidth="1.5"/>
-          <line x1="456" y1="244" x2="404" y2="316" stroke="#5B8CFF" strokeWidth="1.5"/>
-          <line x1="506" y1="224" x2="506" y2="224" stroke="#A8B8C8" strokeWidth="1"/>
+          <SwNode cx={B_LEFT}  cy={Y_TOP} label="s4" role="boundary" />
+          <SwNode cx={B_RIGHT} cy={Y_MID} label="s5" />
+          <SwNode cx={B_LEFT}  cy={Y_BOT} label="s6" role="boundary" />
         </g>
 
-        {/* === DOMAIN C === */}
+        {/* ═══════════════════════════════════════
+            DOMAIN C
+        ═══════════════════════════════════════ */}
         <g
-          style={{ opacity: domainOpacity("c"), transition: "opacity 0.25s ease", cursor: "pointer" }}
-          onMouseEnter={() => setHovered("c")}
-          onMouseLeave={() => setHovered(null)}
+          style={{ opacity: fade("c"), transition: "opacity 0.2s" }}
+          onMouseEnter={() => setHov("c")}
+          onMouseLeave={() => setHov(null)}
           role="group"
-          aria-label="Domain C: switches s7, s8, s9"
+          aria-label="Domain C"
         >
-          <rect x="614" y="30" width="230" height="400" rx="8" fill="#0D1B2A" stroke="#52D6A0" strokeWidth="1.5" opacity="0.7"/>
-          <text x="729" y="22" fontFamily="Space Grotesk, sans-serif" fontSize="11" fontWeight="700" fill="#52D6A0" textAnchor="middle" letterSpacing="2">DOMAIN C</text>
+          <rect x="646" y="25" width="250" height="455" rx="6"
+            fill="none" stroke={BOX_STR} strokeWidth="1.5" />
 
-          <rect x="666" y="42" width="126" height="26" rx="4" fill="#112338" stroke="#52D6A0" strokeWidth="1"/>
-          <text x="729" y="59" fontFamily="JetBrains Mono, monospace" fontSize="9" fill="#52D6A0" textAnchor="middle">Ryu-C  :6653/:8082</text>
+          <text x={C_CX} y="18" fontFamily="JetBrains Mono, monospace"
+            fontSize="9" fontWeight="600" fill={LABEL}
+            textAnchor="middle" letterSpacing="3">DOMAIN C</text>
 
-          {/* s7 */}
-          <circle cx="679" cy="160" r="26" fill="#112338" stroke="#52D6A0" strokeWidth="2" strokeDasharray="5,3"/>
-          <text x="679" y="165" fontFamily="Space Grotesk, sans-serif" fontSize="13" fontWeight="700" fill="#EAF2F8" textAnchor="middle">s7</text>
-          <text x="679" y="195" fontFamily="JetBrains Mono, monospace" fontSize="7" fill="#A8B8C8" textAnchor="middle">boundary</text>
+          <rect x={C_CX - 76} y="33" width="152" height="20" rx="3"
+            fill={CTRL_BG} stroke={BOX_STR} strokeWidth="1" />
+          <text x={C_CX} y="47" fontFamily="JetBrains Mono, monospace"
+            fontSize="7.5" fill={CTRL_TXT} textAnchor="middle">
+            Ryu-C  ·  :6653 / :8082
+          </text>
 
-          {/* s8 */}
-          <circle cx="779" cy="230" r="26" fill="#112338" stroke="#52D6A0" strokeWidth="2"/>
-          <text x="779" y="235" fontFamily="Space Grotesk, sans-serif" fontSize="13" fontWeight="700" fill="#EAF2F8" textAnchor="middle">s8</text>
+          <line x1={C_CX} y1="53" x2={C_LEFT} y2={Y_TOP - R}
+            stroke={GRID} strokeWidth="0.8" strokeDasharray="3 4" />
 
-          {/* s9 */}
-          <circle cx="679" cy="330" r="26" fill="#112338" stroke="#52D6A0" strokeWidth="2"/>
-          <text x="679" y="335" fontFamily="Space Grotesk, sans-serif" fontSize="13" fontWeight="700" fill="#EAF2F8" textAnchor="middle">s9</text>
-          <text x="679" y="364" fontFamily="JetBrains Mono, monospace" fontSize="7" fill="#A8B8C8" textAnchor="middle">edge</text>
+          <line x1={C_LEFT} y1={Y_TOP} x2={C_RIGHT} y2={Y_MID}
+            stroke={LINK} strokeWidth="2" />
+          <line x1={C_LEFT} y1={Y_TOP} x2={C_LEFT}  y2={Y_BOT}
+            stroke={LINK} strokeWidth="2" />
+          <line x1={C_RIGHT} y1={Y_MID} x2={C_LEFT} y2={Y_BOT}
+            stroke={LINK} strokeWidth="2" />
 
-          {/* Hosts h10, h11 */}
-          <rect x="809" y="216" width="30" height="16" rx="3" fill="#263A50" stroke="#A8B8C8" strokeWidth="1"/>
-          <text x="824" y="228" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill="#A8B8C8" textAnchor="middle">h10</text>
-          <rect x="809" y="236" width="30" height="16" rx="3" fill="#263A50" stroke="#A8B8C8" strokeWidth="1"/>
-          <text x="824" y="248" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill="#A8B8C8" textAnchor="middle">h11</text>
+          {/* Hosts: h10 and h11 to the RIGHT of s8 */}
+          <Host hx={C_RIGHT + R + 4} hy={Y_MID - 22} label="h10" sx={C_RIGHT} sy={Y_MID} side="right" />
+          <Host hx={C_RIGHT + R + 4} hy={Y_MID +  6} label="h11" sx={C_RIGHT} sy={Y_MID} side="right" />
 
-          {/* C intra links */}
-          <line x1="729" y1="68" x2="729" y2="138" stroke="#52D6A0" strokeWidth="1" strokeDasharray="4,4" opacity="0.4"/>
-          <line x1="703" y1="170" x2="756" y2="215" stroke="#52D6A0" strokeWidth="1.5"/>
-          <line x1="679" y1="186" x2="679" y2="304" stroke="#52D6A0" strokeWidth="1.5"/>
-          <line x1="755" y1="244" x2="703" y2="316" stroke="#52D6A0" strokeWidth="1.5"/>
+          <SwNode cx={C_LEFT}  cy={Y_TOP} label="s7" role="boundary" />
+          <SwNode cx={C_RIGHT} cy={Y_MID} label="s8" />
+          <SwNode cx={C_LEFT}  cy={Y_BOT} label="s9" role="edge" />
         </g>
 
-        {/* === INTER-DOMAIN LINKS (always visible) === */}
-        {/* A-B: s3 ↔ s4 */}
-        <line x1="106" y1="328" x2="354" y2="172" stroke="#F4B942" strokeWidth="2" strokeDasharray="7,4" opacity="0.9"/>
-        <text x="228" y="238" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill="#F4B942" textAnchor="middle" transform="rotate(-32,228,238)">s3 ↔ s4 · 1G</text>
+        {/* ═══════════════════════════════════════
+            ANNOTATIONS — inter-domain labels
+        ═══════════════════════════════════════ */}
+        {/* Label midpoint of s3→s4 line */}
+        <text
+          x={(A_LEFT + B_LEFT) / 2}
+          y={(Y_BOT + Y_TOP) / 2 + 6}
+          fontFamily="JetBrains Mono, monospace" fontSize="8" fill={ANNO}
+          textAnchor="middle"
+          transform={`rotate(-36, ${(A_LEFT + B_LEFT) / 2}, ${(Y_BOT + Y_TOP) / 2 + 6})`}
+        >
+          s3 — s4
+        </text>
+        {/* Label midpoint of s6→s7 line */}
+        <text
+          x={(B_LEFT + C_LEFT) / 2}
+          y={(Y_BOT + Y_TOP) / 2 + 6}
+          fontFamily="JetBrains Mono, monospace" fontSize="8" fill={ANNO}
+          textAnchor="middle"
+          transform={`rotate(-36, ${(B_LEFT + C_LEFT) / 2}, ${(Y_BOT + Y_TOP) / 2 + 6})`}
+        >
+          s6 — s7
+        </text>
+        {/* Label midpoint of s1→s8 alternate */}
+        <text
+          x={(A_LEFT + C_RIGHT) / 2}
+          y={(Y_TOP + Y_MID) / 2 - 10}
+          fontFamily="JetBrains Mono, monospace" fontSize="8" fill={ANNO}
+          textAnchor="middle"
+        >
+          s1 — s8  (TE alternate path)
+        </text>
 
-        {/* B-C: s6 ↔ s7 */}
-        <line x1="406" y1="328" x2="654" y2="172" stroke="#F4B942" strokeWidth="2" strokeDasharray="7,4" opacity="0.9"/>
-        <text x="528" y="238" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill="#F4B942" textAnchor="middle" transform="rotate(-32,528,238)">s6 ↔ s7 · 1G</text>
+        {/* ═══════════════════════════════════════
+            LEGEND
+        ═══════════════════════════════════════ */}
+        <g transform="translate(10, 496)">
+          {/* Solid switch */}
+          <circle cx="8" cy="6" r="5" fill="none" stroke={NODE_STR} strokeWidth="1.5" />
+          <text x="17" y="10" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill={ANNO}>Switch</text>
 
-        {/* A-C diagonal s1 ↔ s8 */}
-        <line x1="106" y1="160" x2="753" y2="230" stroke="#FF647C" strokeWidth="1.5" strokeDasharray="5,4" opacity="0.6"/>
-        <text x="430" y="182" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill="#FF647C" textAnchor="middle">s1 ↔ s8  (A–C TE alternate path)</text>
+          {/* Boundary switch */}
+          <circle cx="80" cy="6" r="5" fill="none" stroke={NODE_BND} strokeWidth="1.5" strokeDasharray="3 2" />
+          <text x="89" y="10" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill={ANNO}>Boundary switch</text>
 
-        {/* Legend */}
-        <g transform="translate(16, 440)">
-          <line x1="0" y1="8" x2="22" y2="8" stroke="#38D6E8" strokeWidth="2"/>
-          <text x="26" y="12" fontFamily="Inter, sans-serif" fontSize="8" fill="#A8B8C8">Domain A</text>
-          <line x1="90" y1="8" x2="112" y2="8" stroke="#5B8CFF" strokeWidth="2"/>
-          <text x="116" y="12" fontFamily="Inter, sans-serif" fontSize="8" fill="#A8B8C8">Domain B</text>
-          <line x1="180" y1="8" x2="202" y2="8" stroke="#52D6A0" strokeWidth="2"/>
-          <text x="206" y="12" fontFamily="Inter, sans-serif" fontSize="8" fill="#A8B8C8">Domain C</text>
-          <line x1="270" y1="8" x2="292" y2="8" stroke="#F4B942" strokeWidth="2" strokeDasharray="6,3"/>
-          <text x="296" y="12" fontFamily="Inter, sans-serif" fontSize="8" fill="#A8B8C8">Inter-domain boundary</text>
-          <line x1="430" y1="8" x2="452" y2="8" stroke="#FF647C" strokeWidth="1.5" strokeDasharray="5,3"/>
-          <text x="456" y="12" fontFamily="Inter, sans-serif" fontSize="8" fill="#A8B8C8">A–C alternate TE path</text>
+          {/* Intra link */}
+          <line x1="210" y1="6" x2="230" y2="6" stroke={LINK} strokeWidth="1.5" />
+          <text x="234" y="10" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill={ANNO}>Intra-domain</text>
+
+          {/* Inter-domain */}
+          <line x1="330" y1="6" x2="350" y2="6" stroke={INTER} strokeWidth="1.5" strokeDasharray="6 4" />
+          <text x="354" y="10" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill={ANNO}>Boundary link</text>
+
+          {/* Alternate TE */}
+          <line x1="452" y1="6" x2="472" y2="6" stroke={ALT} strokeWidth="1" strokeDasharray="5 4" opacity="0.6" />
+          <text x="476" y="10" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill={ANNO}>TE alternate</text>
+
+          {/* Host */}
+          <rect x="565" y="0" width="18" height="12" rx="2" fill="none" stroke={HOST_STR} strokeWidth="1" />
+          <text x="587" y="10" fontFamily="JetBrains Mono, monospace" fontSize="7.5" fill={ANNO}>Host</text>
         </g>
       </svg>
     </div>
