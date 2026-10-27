@@ -29,7 +29,7 @@ import numpy as np
 
 _ROOT = Path(__file__).resolve().parent.parent
 RESULTS_DIR = _ROOT / "results"
-EVAL_DIR = RESULTS_DIR / "eval_pktin"
+EVAL_DIR = RESULTS_DIR / "after_ha"
 FIG_DIR = RESULTS_DIR / "figures"
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 

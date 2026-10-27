@@ -29,7 +29,7 @@ from topology.multi_domain_topo import (
     build_network, assign_controllers, enable_rstp
 )
 
-RESULTS_DIR = _ROOT / "results" / "eval_pktin"
+RESULTS_DIR = _ROOT / "results" / "after_ha"
 RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
 EW_PORTS = {"A": 8080, "B": 8081, "C": 8082}
@@ -420,7 +420,7 @@ def generate_report(completed_runs, discarded_runs):
     md.append("# Evaluation Report: Southbound PacketIn Flood & Circuit Breaker Mitigation\n")
     md.append(f"**Generated:** {datetime.now(timezone.utc).isoformat()}  ")
     md.append(f"**Git Commit:** `{completed_runs[0]['git_commit'] if completed_runs else 'N/A'}`  ")
-    md.append(f"**Target Directory:** `results/eval_pktin/`  \n")
+    md.append(f"**Target Directory:** `results/after_ha/`  \n")
     
     md.append("## 1. Executive Summary & Verdict\n")
     md.append(f"**Verdict:** **`{verdict.upper()}`**  \n")
@@ -489,11 +489,17 @@ def main():
     parser = argparse.ArgumentParser(description="Evaluate PacketIn flood + Circuit Breaker")
     parser.add_argument("--pairs", type=int, default=5, help="Number of undefended/defended pairs (default 5)")
     parser.add_argument("--attack-duration", type=int, default=60, help="Duration of attack in seconds (default 60)")
+    parser.add_argument("--condition", choices=["both", "defended", "undefended"], default="both", help="Condition to test (default both)")
     args = parser.parse_args()
 
     plan = []
-    for _ in range(args.pairs):
-        plan.extend(["undefended", "defended"])
+    if args.condition == "both":
+        for _ in range(args.pairs):
+            plan.extend(["undefended", "defended"])
+    elif args.condition == "defended":
+        plan = ["defended"] * args.pairs
+    elif args.condition == "undefended":
+        plan = ["undefended"] * args.pairs
     
     completed_runs = []
     discarded_runs = []
