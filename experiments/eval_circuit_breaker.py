@@ -172,8 +172,8 @@ def run_single_eval(run_num, condition, discarded_runs_log):
     setLogLevel("warning")
     net = build_network()
     net.start()
-    enable_rstp(net, wait=0)
     assign_controllers(net)
+    enable_rstp(net, wait=0)
     
     log("Waiting 15s for OpenFlow switch connections...")
     time.sleep(15)

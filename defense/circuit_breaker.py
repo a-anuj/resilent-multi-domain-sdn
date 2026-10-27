@@ -100,10 +100,10 @@ def mitigate(args, pid, trigger_rate, trigger_cpu, log, switches):
     meter_cmd = ["sudo", "ovs-ofctl", "-O", "OpenFlow13", "add-meter", switches[0], "meter=1,pktps,band=type=drop,rate=100"]
     ret = subprocess.run(meter_cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE)
     
-    if ret.returncode != 0 and b"OFPMMFC_OUT_OF_METERS" in ret.stderr:
+    if ret.returncode != 0:
         log("PREVENT: Meter not supported by datapath. Falling back to targeted port drop.")
-        # Fallback: drop PacketIn triggers from host 1 temporarily (60s)
-        subprocess.run(["sudo", "ovs-ofctl", "-O", "OpenFlow13", "add-flow", switches[0], "priority=1,in_port=1,hard_timeout=60,actions=drop"], stderr=subprocess.DEVNULL)
+        # Fallback: drop PacketIn triggers from host 1 temporarily (60s) (h1 is on s1 port 3)
+        subprocess.run(["sudo", "ovs-ofctl", "-O", "OpenFlow13", "add-flow", switches[0], "priority=1,in_port=3,hard_timeout=60,actions=drop"], stderr=subprocess.DEVNULL)
     else:
         flow_cmd = ["sudo", "ovs-ofctl", "-O", "OpenFlow13", "add-flow", switches[0], "priority=1,hard_timeout=60,actions=meter:1,CONTROLLER:65535"]
         subprocess.run(flow_cmd, stderr=subprocess.DEVNULL)

@@ -21,6 +21,7 @@ results/*.csv
 results/*.pcap
 results/eval_pktin/*.log
 results/eval_pktin/*.json
+results/validation/
 
 # Jupyter
 .ipynb_checkpoints/

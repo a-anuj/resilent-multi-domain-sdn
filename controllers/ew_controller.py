@@ -469,8 +469,8 @@ class EWController(app_manager.RyuApp):
 
         known_ports = set(_switch_registry.get(dpid, {}).get('ports', {}).keys())
         if not known_ports:
-            # Fall back to all registered ports minus in_port
-            return [p for p in range(1, 10) if p != in_port]
+            # Safe default fallback for this topology: ports 1-5 (no blind flooding to port 9)
+            known_ports = {1, 2, 3, 4, 5}
 
         output_ports: list[int] = []
 
@@ -521,6 +521,20 @@ class EWController(app_manager.RyuApp):
         actions = [parser.OFPActionOutput(ofp.OFPP_CONTROLLER, ofp.OFPCML_NO_BUFFER)]
         self._add_flow(dp, PRI_MISS, match, actions, idle=0, hard=0)
 
+        # Software spanning tree: block intra-domain triangle hypotenuse to prevent loops
+        # Domain A: s1(p2) ↔ s3(p2)
+        # Domain B: s4(p2) ↔ s6(p2)
+        # Domain C: s7(p2) ↔ s9(p2)
+        hypotenuse_ports = {1: 2, 3: 2, 4: 2, 6: 2, 7: 2, 9: 2}
+        if dpid in hypotenuse_ports:
+            h_port = hypotenuse_ports[dpid]
+            h_match = parser.OFPMatch(in_port=h_port)
+            self._add_flow(dp, 2, h_match, [], idle=0, hard=0)
+
+        # Request port descriptions to populate _switch_registry
+        req = parser.OFPPortDescStatsRequest(dp, 0)
+        dp.send_msg(req)
+
         # Update global topology with this switch
         gt.merge_local_topology(
             DOMAIN_ID,
@@ -568,6 +582,9 @@ class EWController(app_manager.RyuApp):
         src = eth_pkt.src
 
         if eth_pkt.ethertype in (ether_types.ETH_TYPE_LLDP, 0x8809):
+            return
+
+        if eth_pkt.ethertype not in (ether_types.ETH_TYPE_IP, ether_types.ETH_TYPE_ARP):
             return
 
         # Extract IP for host registration

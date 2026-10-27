@@ -247,8 +247,8 @@ def run():
     info('*** Starting network\n')
     net.start()
 
-    enable_rstp(net, wait=30)
     assign_controllers(net)
+    enable_rstp(net, wait=30)
     isolate_domains(net)
 
     info('\n*** Multi-domain topology running.\n')

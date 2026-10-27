@@ -8,8 +8,8 @@ if [[ ${EUID} -ne 0 ]]; then
   exit 1
 fi
 
-echo "[1/3] Stopping only known project attack processes..."
-pkill -f 'attacks/(packetin_flood|eastwest_flood|topology_poison)\.py' 2>/dev/null || true
+echo "[1/3] Stopping only known project attack and defense processes..."
+pkill -f '(attacks/(packetin_flood|eastwest_flood|topology_poison)|defense/circuit_breaker)\.py' 2>/dev/null || true
 
 echo "[2/3] Stopping this project’s EW controller processes..."
 pkill -f 'ryu-manager.*controllers/ew_controller\.py' 2>/dev/null || true
