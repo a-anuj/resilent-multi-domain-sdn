@@ -108,7 +108,17 @@ Building a robust, distributed SDN testbed and an automated defense system prese
 
 ### 4. API Dependency on the Poisoned Controller
 *   **Challenge:** The Circuit Breaker initially relied on querying the controller's REST API (`/te_path`) to confirm it had successfully restarted. However, during recovery, complex routing modules take time to load, causing the API check to timeout and fail the mitigation pipeline.
-*   **Resolution:** Shifted the health-check dependency to a lightweight, core endpoint (`/stats/switches`). This allowed the Circuit Breaker to confirm reconnection instantly and proceed to the Prevention stage without delay.
+*   **Resolution:** Shifted the health-check dependency to a lightweight, core endpoint (`/stats/switches` or `/health`). This allowed the Circuit Breaker to confirm reconnection instantly and proceed to the Prevention stage without delay.
+
+### 5. Broadcast Storm Elimination & Single Surgical Trigger (`commit 28edf42`)
+*   **Challenge:** The Circuit Breaker exhibited false triggers every 18 seconds in baseline (causing 22.67% probe loss), and re-triggered during attacks. Root causes:
+    1. Mininet's `set-controller` reset datapath flows, allowing circular broadcast loops around the Domain A triangle (`s1` $\leftrightarrow$ `s2` $\leftrightarrow$ `s3`) which saturated the controller in baseline (~3,500 pkt/s, 100% CPU).
+    2. During attack mitigation, the fallback drop flow targeted `in_port=1` (inter-switch trunk) instead of `in_port=3` (attacker `h1`), failing to block the flood and causing continuous re-saturation.
+*   **Resolution:**
+    1. Proactively installed OpenFlow drop flows (`priority=2, actions=drop`) on triangle hypotenuses upon switch connection in `controllers/ew_controller.py`, queried port descriptions via `OFPPortDescStatsRequest`, and filtered non-IPv4/ARP storm amplification.
+    2. Corrected the Circuit Breaker datapath rule in `defense/circuit_breaker.py` to `in_port=3, hard_timeout=60, actions=drop` to surgically cut off the attacker at the edge switch datapath.
+    3. Reordered initialization in `experiments/eval_circuit_breaker.py` (`assign_controllers` before `enable_rstp`) and updated cleanup in `experiments/emergency_reset.sh`.
+    4. **Result:** Baseline Packet-In rate dropped to 0 pkt/s (0% baseline probe failures), and the Circuit Breaker triggers **exactly once** per attack with zero flapping.
 
 ---
 
