@@ -57,7 +57,7 @@ from attacks.safety import (
 )
 
 # ── Logging ───────────────────────────────────────────────────────────────────
-RESULTS_DIR = os.path.join(_ROOT, "results")
+RESULTS_DIR = os.environ.get("RESULTS_DIR", os.path.join(_ROOT, "results"))
 os.makedirs(RESULTS_DIR, exist_ok=True)
 
 _ts = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")

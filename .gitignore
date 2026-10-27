@@ -19,6 +19,8 @@ ryu311/
 results/*.log
 results/*.csv
 results/*.pcap
+results/eval_pktin/*.log
+results/eval_pktin/*.json
 
 # Jupyter
 .ipynb_checkpoints/

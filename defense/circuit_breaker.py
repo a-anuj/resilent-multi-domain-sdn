@@ -6,6 +6,7 @@ import psutil
 import requests
 import os
 import sys
+import json
 
 def get_packetin_count(switches):
     total = 0
@@ -37,42 +38,62 @@ def get_controller_pid(port=6633):
 
 def mitigate(args, pid, trigger_rate, trigger_cpu, log, switches):
     t_detect = time.time()
+    log(f"TIMING: t_detect={t_detect:.4f}")
     
+    t_kill = None
     if pid:
         log(f"MITIGATE: Killing affected controller PID {pid}")
         try:
             os.kill(pid, 9)
+            t_kill = time.time()
         except Exception as e:
             log(f"Failed to kill: {e}")
+            t_kill = time.time()
+    else:
+        t_kill = time.time()
+    log(f"TIMING: t_kill={t_kill:.4f} (elapsed={t_kill - t_detect:.3f}s)")
     
     time.sleep(1)
     
     # Restart controller using identical environment vars from testbed
     domain_dpids = args.switches.replace('s', '')
-    cmd = f"DOMAIN_ID={args.domain} DOMAIN_DPIDS={domain_dpids} EW_API_PORT={args.api_port} TE_ENABLED=1 nohup /home/a-anuj/ryu311/bin/python /home/a-anuj/ryu311/bin/ryu-manager controllers/ew_controller.py --ofp-tcp-listen-port {args.port} > results/cb_restart.log 2>&1 &"
+    cb_restart_log = os.path.join(os.path.dirname(args.log) or '.', "cb_restart.log")
+    cmd = (f"DOMAIN_ID={args.domain} DOMAIN_DPIDS={domain_dpids} EW_API_PORT={args.api_port} "
+           f"TE_ENABLED=1 nohup /home/a-anuj/ryu311/bin/python /home/a-anuj/ryu311/bin/ryu-manager "
+           f"controllers/ew_controller.py --ofp-tcp-listen-port {args.port} > {cb_restart_log} 2>&1 &")
     subprocess.Popen(cmd, shell=True)
     
     t_restart = time.time()
     log(f"MITIGATE: Restart initiated. Time from detection to restart: {t_restart - t_detect:.2f}s")
     
-    # Wait for switch reconnection
+    # Wait for switch reconnection - poll /health or /topology, exit on first HTTP 200
     log("MITIGATE: Waiting for controller to reconnect and API to come up...")
     connected = False
+    t_reconnect_confirmed = None
     while time.time() - t_restart < 15:
         try:
-            r = requests.get(f"http://127.0.0.1:{args.api_port}/stats/switches", timeout=1)
+            r = requests.get(f"http://127.0.0.1:{args.api_port}/health", timeout=1)
             if r.status_code == 200:
                 connected = True
+                t_reconnect_confirmed = time.time()
                 break
         except Exception:
-            pass
-        time.sleep(0.5)
+            try:
+                r2 = requests.get(f"http://127.0.0.1:{args.api_port}/topology", timeout=1)
+                if r2.status_code == 200:
+                    connected = True
+                    t_reconnect_confirmed = time.time()
+                    break
+            except Exception:
+                pass
+        time.sleep(0.2)
         
-    t_reconnect = time.time()
-    if connected:
-        log(f"MITIGATE: Reconnection confirmed! Time from restart to recon: {t_reconnect - t_restart:.2f}s")
-    else:
+    if not connected:
+        t_reconnect_confirmed = time.time()
         log(f"MITIGATE: Reconnection NOT confirmed after 15s (API unresponsive)")
+    else:
+        log(f"MITIGATE: Reconnection confirmed! Time from restart to recon: {t_reconnect_confirmed - t_restart:.2f}s")
+    log(f"TIMING: t_reconnect_confirmed={t_reconnect_confirmed:.4f} (elapsed={t_reconnect_confirmed - t_detect:.3f}s)")
 
     # Post-restart Prevent Stage
     log("PREVENT: Installing OpenFlow rate-limit meter on edge switch...")
@@ -87,9 +108,35 @@ def mitigate(args, pid, trigger_rate, trigger_cpu, log, switches):
         flow_cmd = ["sudo", "ovs-ofctl", "-O", "OpenFlow13", "add-flow", switches[0], "priority=1,hard_timeout=60,actions=meter:1,CONTROLLER:65535"]
         subprocess.run(flow_cmd, stderr=subprocess.DEVNULL)
         
+    t_meter_installed = time.time()
+    log(f"TIMING: t_meter_installed={t_meter_installed:.4f} (elapsed={t_meter_installed - t_detect:.3f}s)")
     log("PREVENT: Rule installed. Expires in 60s.")
     log(f"PIPELINE COMPLETE: Total time-to-mitigation: {time.time() - t_detect:.2f}s")
     
+    timings_file = os.path.join(os.path.dirname(args.log) or '.', "circuit_breaker_timings.json")
+    try:
+        events = []
+        if os.path.exists(timings_file):
+            with open(timings_file, "r") as f:
+                events = json.load(f)
+        events.append({
+            "t_detect": t_detect,
+            "t_kill": t_kill,
+            "t_restart": t_restart,
+            "t_reconnect_confirmed": t_reconnect_confirmed,
+            "t_meter_installed": t_meter_installed,
+            "connected": connected,
+            "dt_detect_to_kill_s": round(t_kill - t_detect, 3),
+            "dt_kill_to_restart_s": round(t_restart - t_kill, 3),
+            "dt_restart_to_recon_s": round(t_reconnect_confirmed - t_restart, 3),
+            "dt_recon_to_meter_s": round(t_meter_installed - t_reconnect_confirmed, 3),
+            "total_ttm_s": round(t_meter_installed - t_detect, 3),
+        })
+        with open(timings_file, "w") as f:
+            json.dump(events, f, indent=2)
+    except Exception as e:
+        log(f"Failed to record timings json: {e}")
+
     # Sleep to allow the attack to finish or system to stabilize before re-detecting
     time.sleep(10)
 

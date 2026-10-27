@@ -88,6 +88,12 @@ def _ew_log(direction: str, peer_domain: str, endpoint: str,
 
 # ── Endpoints ─────────────────────────────────────────────────────────────────
 
+@_app.route('/health', methods=['GET'])
+def get_health():
+    """Liveness probe for circuit breaker and testbed monitoring."""
+    return jsonify({'status': 'ok', 'domain_id': _domain_id}), 200
+
+
 @_app.route('/topology', methods=['GET'])
 def get_topology():
     """Return this controller's local topology view."""
