@@ -1,0 +1,15 @@
+[
+  {
+    "t_detect": 1793111440.3345706,
+    "t_kill": 1793111440.3345706,
+    "t_restart": 1793111440.3345706,
+    "t_reconnect_confirmed": 1793111440.3433821,
+    "t_meter_installed": 1793111441.0508351,
+    "connected": true,
+    "dt_detect_to_kill_s": 0.0,
+    "dt_kill_to_restart_s": 0.0,
+    "dt_restart_to_recon_s": 0.009,
+    "dt_recon_to_meter_s": 0.707,
+    "total_ttm_s": 0.716
+  }
+]
