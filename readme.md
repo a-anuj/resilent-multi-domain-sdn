@@ -4,7 +4,7 @@ A comprehensive research platform for studying **multi-controller SDN architectu
 
 ---
 
-## 📖 The Problem
+## The Problem
 
 As Software-Defined Networks (SDNs) scale, relying on a single centralized controller becomes a bottleneck and a single point of failure. To address this, **multi-controller architectures** have become the standard for large-scale deployments, where the network is partitioned into distinct domains managed by separate controllers. 
 
@@ -18,7 +18,7 @@ When a multi-domain SDN is subjected to a **PacketIn Flood attack** (where an at
 
 ---
 
-## 🎯 What We Are Trying to Solve
+## What We Are Trying to Solve
 
 The primary objective of this project is to build an **Automated Circuit Breaker** capable of detecting and mitigating control-plane saturation in real-time, restoring network functionality without requiring manual admin intervention.
 
@@ -30,7 +30,7 @@ Specifically, we aim to:
 
 ---
 
-## 🛠️ How We Are Solving It (The Architecture)
+## How We Are Solving It (The Architecture)
 
 We built the environment and the solution through a phased architectural approach:
 
@@ -90,7 +90,7 @@ python3 defense/topology_guard.py --api-port 8080
 
 ---
 
-## 🚧 Key Challenges Faced & How We Resolved Them
+## Key Challenges Faced & How We Resolved Them
 
 Building a robust, distributed SDN testbed and an automated defense system presented several complex challenges:
 
@@ -122,7 +122,7 @@ Building a robust, distributed SDN testbed and an automated defense system prese
 
 ---
 
-## 📊 Results & Evaluation
+## Results & Evaluation
 
 We executed a comprehensive 10-run evaluation suite (`experiments/eval_circuit_breaker.py`) systematically comparing the undefended network against the defended network (5 undefended runs and 5 defended runs alternating, git commit `28edf42`):
 
@@ -157,7 +157,7 @@ We executed a comprehensive 10-run evaluation suite (`experiments/eval_circuit_b
 
 ---
 
-### 🔬 Southbound PacketIn Flood: Defended vs. Undefended Evaluation (10-Run Suite)
+### Southbound PacketIn Flood: Defended vs. Undefended Evaluation (10-Run Suite)
 
 The evaluation suite was executed following the broadcast loop elimination and single surgical trigger fix (`commit 28edf42`):
 
@@ -177,7 +177,7 @@ The evaluation suite was executed following the broadcast loop elimination and s
 [![End-to-End Latency Dynamics Timeline](results/figures/fig7_attack_timeline_profile.png)](results/figures/fig7_attack_timeline_profile.pdf)
 **Figure 7:** Continuous 150-second latency timeline comparison between a representative undefended run (persistent event queue saturation) and a defended run. The Circuit Breaker detects the flood at $t=44.2\text{s}$, reboots Controller A within 1.0s, reconnects within 3.3s, and installs the datapath drop rule (`in_port=3`) within 0.13s (Total Time-to-Mitigation: **4.42s**), immediately returning latency to baseline.
 
-### 📋 Consolidated Experimental Telemetry (5-Test Averages & Medians)
+### Consolidated Experimental Telemetry (5-Test Averages & Medians)
 
 The table below summarizes the exact arithmetic mean and median across all 5 undefended and all 5 defended test runs:
 
@@ -203,7 +203,7 @@ The table below summarizes the exact arithmetic mean and median across all 5 und
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 sdn-multictrl/
@@ -226,7 +226,7 @@ sdn-multictrl/
 └── requirements.txt    # Python package dependencies
 ```
 
-## 🚀 Usage & Quick Start
+## Usage & Quick Start
 
 **1. Activate the environment:**
 ```bash
