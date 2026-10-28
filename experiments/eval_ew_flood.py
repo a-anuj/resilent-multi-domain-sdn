@@ -78,22 +78,30 @@ def start_controller(defended: bool = False, port: int = 8080, ofp_port: int = 6
 
 
 def make_update_payload(domain: str, seq: int) -> dict:
+    switches = {
+        str(d): {"dpid": d, "domain": domain, "ports": [1, 2, 3, 4, 5]}
+        for d in range(10, 30)
+    }
+    links = [
+        {"src_dpid": d, "src_port": 1, "dst_dpid": d + 1, "dst_port": 2, "domain": domain}
+        for d in range(10, 29)
+    ]
+    hosts = {
+        f"00:00:00:00:00:{d:02x}": {"dpid": d, "port": 3, "ip": f"10.0.{d}.1"}
+        for d in range(10, 25)
+    }
     return {
         "type": "topology",
         "domain_id": domain,
         "seq": seq,
-        "switches": {
-            "10": {"dpid": 10, "domain": domain, "ports": [1, 2, 3]}
-        },
-        "links": [
-            {"src_dpid": 10, "src_port": 1, "dst_dpid": 11, "dst_port": 1}
-        ],
+        "switches": switches,
+        "links": links,
         "inter_links": [],
-        "hosts": {}
+        "hosts": hosts
     }
 
 
-def run_legitimate_prober(stop_event: threading.Event, interval: float = 0.5) -> list[dict]:
+def run_legitimate_prober(stop_event: threading.Event, interval: float = 0.4) -> list[dict]:
     """Simulates legitimate periodic East-West sync from Domain B."""
     samples = []
     session = requests.Session()
@@ -109,7 +117,7 @@ def run_legitimate_prober(stop_event: threading.Event, interval: float = 0.5) ->
                 "http://127.0.0.1:8080/update",
                 json=payload,
                 headers={"Content-Type": "application/json", "X-Domain-Id": "B"},
-                timeout=2.0
+                timeout=3.0
             )
             status = r.status_code
         except Exception as e:
@@ -125,55 +133,69 @@ def run_legitimate_prober(stop_event: threading.Event, interval: float = 0.5) ->
     return samples
 
 
-def run_attack_worker(stop_event: threading.Event, target_rate: int = 150) -> dict:
-    """Sends high-rate ROGUE /update payloads."""
-    session = requests.Session()
-    interval = 1.0 / target_rate
-    seq = 0
-    sent = 0
-    ok = 0
-    blocked_429 = 0
-    errors = 0
-    latencies = []
+def run_attack_worker(stop_event: threading.Event, concurrency: int = 8, thread_rate: int = 40) -> dict:
+    """Sends high-rate concurrent ROGUE /update payloads across multiple threads."""
+    interval = 1.0 / thread_rate if thread_rate > 0 else 0
+    all_latencies = []
+    counters = {"sent": 0, "ok": 0, "blocked_429": 0, "errors": 0}
+    lock = threading.Lock()
 
-    while not stop_event.is_set():
-        t0 = time.time()
-        payload = make_update_payload("ROGUE", seq)
-        seq += 1
-        try:
-            r = session.post(
-                "http://127.0.0.1:8080/update",
-                json=payload,
-                headers={"Content-Type": "application/json", "X-Domain-Id": "ROGUE"},
-                timeout=1.0
-            )
-            dt_ms = (time.time() - t0) * 1000.0
-            latencies.append(dt_ms)
-            sent += 1
-            if r.status_code == 200:
-                ok += 1
-            elif r.status_code == 429:
-                blocked_429 += 1
-            else:
-                errors += 1
-        except Exception:
-            sent += 1
-            errors += 1
+    def _worker(worker_id: int):
+        session = requests.Session()
+        seq = worker_id * 100000
+        lats = []
+        sent = ok = b429 = errs = 0
+        while not stop_event.is_set():
+            t0 = time.time()
+            payload = make_update_payload("ROGUE", seq)
+            seq += 1
+            try:
+                r = session.post(
+                    "http://127.0.0.1:8080/update",
+                    json=payload,
+                    headers={"Content-Type": "application/json", "X-Domain-Id": "ROGUE"},
+                    timeout=2.0
+                )
+                dt_ms = (time.time() - t0) * 1000.0
+                lats.append(dt_ms)
+                sent += 1
+                if r.status_code == 200:
+                    ok += 1
+                elif r.status_code == 429:
+                    b429 += 1
+                else:
+                    errs += 1
+            except Exception:
+                sent += 1
+                errs += 1
 
-        elapsed = time.time() - t0
-        sleep_time = interval - elapsed
-        if sleep_time > 0:
-            time.sleep(sleep_time)
+            elapsed = time.time() - t0
+            sleep_time = interval - elapsed
+            if sleep_time > 0:
+                time.sleep(sleep_time)
 
-    avg_lat = round(sum(latencies) / len(latencies), 2) if latencies else 0.0
+        with lock:
+            counters["sent"] += sent
+            counters["ok"] += ok
+            counters["blocked_429"] += b429
+            counters["errors"] += errs
+            all_latencies.extend(lats)
+
+    threads = [threading.Thread(target=_worker, args=(i,), daemon=True) for i in range(concurrency)]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    avg_lat = round(sum(all_latencies) / len(all_latencies), 2) if all_latencies else 0.0
     return {
-        "sent": sent,
-        "status_200": ok,
-        "status_429": blocked_429,
-        "errors": errors,
+        "sent": counters["sent"],
+        "status_200": counters["ok"],
+        "status_429": counters["blocked_429"],
+        "errors": counters["errors"],
         "avg_lat_ms": avg_lat,
-        "p95_lat_ms": round(sorted(latencies)[int(len(latencies) * 0.95)], 2) if len(latencies) > 20 else avg_lat,
-        "min_lat_ms": round(min(latencies), 2) if latencies else 0.0
+        "p95_lat_ms": round(sorted(all_latencies)[int(len(all_latencies) * 0.95)], 2) if len(all_latencies) > 20 else avg_lat,
+        "min_lat_ms": round(min(all_latencies), 2) if all_latencies else 0.0
     }
 
 
@@ -203,7 +225,7 @@ def evaluate_condition(condition: str, attack_duration: int = 20) -> dict:
     log(f"Baseline Legitimate Sync: count={len(base_lats)}, mean_lat={avg_base_lat}ms")
 
     # Phase 2: Launch East-West REST Flood (Attack 2)
-    log(f"PHASE 2: Launching East-West REST Flood (150 req/s, duration={attack_duration}s)...")
+    log(f"PHASE 2: Launching East-West Concurrent REST Flood (8 workers, ~350 req/s, duration={attack_duration}s)...")
     atk_stop = threading.Event()
     legit_stop = threading.Event()
     
@@ -212,10 +234,10 @@ def evaluate_condition(condition: str, attack_duration: int = 20) -> dict:
 
     def _run_atk():
         nonlocal atk_stats
-        atk_stats = run_attack_worker(atk_stop, target_rate=150)
+        atk_stats = run_attack_worker(atk_stop, concurrency=8, thread_rate=45)
 
     def _run_legit():
-        legit_samples.extend(run_legitimate_prober(legit_stop, interval=0.5))
+        legit_samples.extend(run_legitimate_prober(legit_stop, interval=0.3))
 
     t_atk = threading.Thread(target=_run_atk)
     t_legit = threading.Thread(target=_run_legit)

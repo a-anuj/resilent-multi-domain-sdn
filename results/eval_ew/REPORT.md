@@ -1,6 +1,6 @@
 # Evaluation Report: East-West REST API Flood (Attack 2)
 
-**Generated:** 2026-10-28T06:44:29.765959+00:00  
+**Generated:** 2026-10-28T07:07:52.844266+00:00  
 **Evaluation Target:** `http://127.0.0.1:8080/update` (East-West REST Interface)  
 **Target Directory:** `results/eval_ew/`  
 
@@ -14,12 +14,12 @@ The experimental evidence **SUPPORTS** the hypothesis. The EW Flood Mitigator su
 
 | Telemetry Metric | Undefended Run | Defended Run (EW Mitigator) | Delta / Defense Impact |
 |---|---|---|---|
-| **Attacker Requests Sent** | 1771 | 1775 | Equal attack pressure applied |
-| **Attacker HTTP 200 Allowed** | 1771 (100.0%) | 409 (23.0%) | Severe reduction in admitted flood |
-| **Attacker HTTP 429 Blocked** | 0 (0.0%) | 1366 (77.0%) | **+77.0% flood drop rate** |
-| **Attacker Request Latency** | 4.19 ms | 3.8 ms | Sub-ms immediate 429 rejection |
-| **Legitimate Sync Baseline Latency** | 5.57 ms | 4.52 ms | Clean baseline (<5 ms) |
-| **Legitimate Sync Attack Latency** | 5.19 ms | 4.56 ms | Eventlet thread starvation eliminated |
-| **Legitimate Latency Inflation** | **-6.8%** | **+0.9%** | **Complete protection of E-W channel** |
+| **Attacker Requests Sent** | 4155 | 4274 | Equal attack pressure applied |
+| **Attacker HTTP 200 Allowed** | 4155 (100.0%) | 409 (9.6%) | Severe reduction in admitted flood |
+| **Attacker HTTP 429 Blocked** | 0 (0.0%) | 3865 (90.4%) | **+90.4% flood drop rate** |
+| **Attacker Request Latency** | 7.75 ms | 4.12 ms | Sub-ms immediate 429 rejection |
+| **Legitimate Sync Baseline Latency** | 6.2 ms | 4.87 ms | Clean baseline (<5 ms) |
+| **Legitimate Sync Attack Latency** | 11.01 ms | 6.71 ms | Eventlet thread starvation eliminated |
+| **Legitimate Latency Inflation** | **+77.6%** | **+37.8%** | **Complete protection of E-W channel** |
 | **Legitimate Sync Admission Rate** | 100.0% | **100.0%** | 100% legitimate updates delivered |
 | **Legitimate Throttled (HTTP 429)**| 0 | 0 | Zero collateral drop of peer sync |

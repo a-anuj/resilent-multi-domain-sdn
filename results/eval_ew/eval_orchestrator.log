@@ -118,3 +118,39 @@ Evaluation completed successfully! See results/eval_ew/REPORT.md
 [2026-10-28T06:44:29] Wrote final evaluation report to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_ew/REPORT.md
 [2026-10-28T06:44:29] 
 Evaluation completed successfully! See results/eval_ew/REPORT.md
+[2026-10-28T07:07:02] ======================================================================
+[2026-10-28T07:07:02] SDN MULTI-CONTROLLER: EVALUATION OF EAST-WEST REST FLOOD (ATTACK 2)
+[2026-10-28T07:07:02] ======================================================================
+[2026-10-28T07:07:02] 
+=======================================================
+[2026-10-28T07:07:02] STARTING EVALUATION: Condition=UNDEFENDED
+[2026-10-28T07:07:02] =======================================================
+[2026-10-28T07:07:07] Controller A listening on port 8080 (EW_FLOOD_DEFENSE=0).
+[2026-10-28T07:07:07] PHASE 1: Baseline monitoring legitimate sync (5s)...
+[2026-10-28T07:07:13] Baseline Legitimate Sync: count=10, mean_lat=6.2ms
+[2026-10-28T07:07:13] PHASE 2: Launching East-West Concurrent REST Flood (8 workers, ~350 req/s, duration=12s)...
+[2026-10-28T07:07:25] Attack completed.
+[2026-10-28T07:07:25] Attacker Stats: sent=4155, 200_OK=4155, 429_BLOCKED=0, avg_lat=7.75ms
+[2026-10-28T07:07:25] Legitimate Peer Sync During Attack:
+[2026-10-28T07:07:25]   Admitted (HTTP 200): 39 / 39 (100.0%)
+[2026-10-28T07:07:25]   Throttled (HTTP 429): 0
+[2026-10-28T07:07:25]   Mean Latency: 11.01ms (Baseline: 6.2ms -> Delta: +77.6%)
+[2026-10-28T07:07:26] Saved run summary to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_ew/run_undefended_summary.json
+[2026-10-28T07:07:28] 
+=======================================================
+[2026-10-28T07:07:28] STARTING EVALUATION: Condition=DEFENDED
+[2026-10-28T07:07:28] =======================================================
+[2026-10-28T07:07:33] Controller A listening on port 8080 (EW_FLOOD_DEFENSE=1).
+[2026-10-28T07:07:33] PHASE 1: Baseline monitoring legitimate sync (5s)...
+[2026-10-28T07:07:38] Baseline Legitimate Sync: count=10, mean_lat=4.87ms
+[2026-10-28T07:07:38] PHASE 2: Launching East-West Concurrent REST Flood (8 workers, ~350 req/s, duration=12s)...
+[2026-10-28T07:07:51] Attack completed.
+[2026-10-28T07:07:51] Attacker Stats: sent=4274, 200_OK=409, 429_BLOCKED=3865, avg_lat=4.12ms
+[2026-10-28T07:07:51] Legitimate Peer Sync During Attack:
+[2026-10-28T07:07:51]   Admitted (HTTP 200): 40 / 40 (100.0%)
+[2026-10-28T07:07:51]   Throttled (HTTP 429): 0
+[2026-10-28T07:07:51]   Mean Latency: 6.71ms (Baseline: 4.87ms -> Delta: +37.8%)
+[2026-10-28T07:07:52] Saved run summary to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_ew/run_defended_summary.json
+[2026-10-28T07:07:52] Wrote final evaluation report to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_ew/REPORT.md
+[2026-10-28T07:07:52] 
+Evaluation completed successfully! See results/eval_ew/REPORT.md
