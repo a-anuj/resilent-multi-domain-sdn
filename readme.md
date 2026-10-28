@@ -277,6 +277,41 @@ In multi-controller SDN deployments, controllers exchange inter-domain link stat
 
 ---
 
+## Attack 3: East-West Topology & Link-State Poisoning Guard
+
+### Threat Model & Defense Architecture
+In multi-controller SDN architectures, controllers share link utilization metrics and switch-to-switch inter-domain links to compute optimal global paths.
+* **Attack Mechanism:** Unlike high-volume floods, Topology and Link-State Poisoning is a stealthy, semantic attack. A single crafted HTTP POST can either reroute traffic away from optimal paths (`congestion_lie`) or black-hole traffic (`phantom_link`). In the **Undefended** state, the controller blindly accepts updates into its global topology model, resulting in corrupted Dijkstra routing calculations.
+* **Defense Mechanism (`defense/topology_guard.py`):** A 3-layer validation pipeline intercepts incoming requests at the REST boundary:
+  1. **Layer 1 (HMAC-SHA256 Cryptographic Authentication):** Verifies the `X-EW-Signature` header using constant-time digest comparison (`hmac.compare_digest`), rejecting unsigned or forged requests before any JSON processing.
+  2. **Layer 2 (Structural Schema Validation):** Verifies required fields (`domain_id`, `links`, `ports`), ensures peer domains belong to authorized peer sets (`{"A", "B", "C"}`), and blocks physically impossible port assignments (e.g., phantom ports $\ge 50$).
+  3. **Layer 3 (Semantic State & Delta Anomaly Checking):** Tracks historical utilization ratios per datapath port and detects sudden, physically impossible utilization surges exceeding `MAX_RATIO_DELTA = 0.60`.
+
+### Comparative Evaluation Graphs: Undefended vs. Defended
+
+#### 1. Defense Pipeline Interception Breakdown by Validation Layer
+[![Attack 3 Interception Pipeline Breakdown](results/figures/fig_attack3_validation_layers_v2.png)](results/figures/fig_attack3_validation_layers_v2.pdf)
+**Figure 5:** Multi-layer defense pipeline interception breakdown across 6 test vectors. In the undefended system, all 5 rogue updates are blindly admitted (HTTP 200) into the routing engine. Under the Topology Guard, unsigned and forged updates are blocked at Layer 1 (HMAC), rogue phantom ports are blocked at Layer 2 (Schema), and sudden ratio anomalies are blocked at Layer 3 (Semantic check), while legitimate Domain B peer sync passes all 3 layers with zero false positives.
+
+#### 2. Control Plane Topology State Integrity
+[![Attack 3 State Integrity Comparison](results/figures/fig_attack3_state_integrity_v2.png)](results/figures/fig_attack3_state_integrity_v2.pdf)
+**Figure 6:** Topology state integrity in the SDN control plane. In the undefended system, 2 phantom links and 2 fake congestion ratios are successfully injected into the global topology database. Under the Topology Guard, 100% of attack payloads are neutralized (zero phantom links injected, zero fake ratios merged), guaranteeing untainted traffic engineering and routing calculations.
+
+### Attack 3 Telemetry Summary Table
+
+| Test Case Vector | Attack Vector Description | Undefended Run | Defended Run (Topology Guard) | Defense Validation Layer |
+|---|---|---|---|---|
+| **Test 1: Unsigned Congestion Lie** | Rogue linkstate claiming 0.95 ratio | Allowed (HTTP 200) | **BLOCKED (HTTP 403)** | Layer 1: Missing HMAC Signature |
+| **Test 2: Forged HMAC Attack** | Rogue update with fake HMAC hash | Allowed (HTTP 200) | **BLOCKED (HTTP 403)** | Layer 1: Constant-time HMAC Mismatch |
+| **Test 3: Unsigned Phantom Link** | Bogus link with invalid port 99 | Allowed (HTTP 200) | **BLOCKED (HTTP 403)** | Layer 1 & 2: Missing HMAC / Schema |
+| **Test 4: Signed Phantom Link** | Insider/compromised key declaring port 99 | Allowed (HTTP 200) | **BLOCKED (HTTP 403)** | Layer 2: Port range threshold (>=50) |
+| **Test 5: Signed Congestion Lie** | Insider/compromised key jumping 0.08 $\to$ 0.95 | Allowed (HTTP 200) | **BLOCKED (HTTP 403)** | Layer 3: Semantic ratio delta (>0.60) |
+| **Test 6: Legitimate Peer Sync** | Domain B genuine signed linkstate update | **Admitted (HTTP 200)** | **Admitted (HTTP 200)** | Verified (All 3 layers passed) |
+| **Overall Attack Poisoning Block Rate** | 5 distinct attack vectors | **0.0% (0 / 5 blocked)** | **100.0% (5 / 5 blocked)** | **Complete Control Plane Immunity** |
+| **Legitimate Sync Admission** | Genuine Domain B signed sync | 100.0% Admitted | **100.0% Admitted** | Zero Collateral False Positives |
+
+---
+
 ## Project Structure
 
 ```
@@ -308,7 +343,7 @@ source ~/ryu311/bin/activate
 cd ~/Desktop/multi-controller-attack/sdn-multictrl
 ```
 
-**2. Run the End-to-End Circuit Breaker Evaluation:**
+**2. Run the End-to-End Circuit Breaker Evaluation (Attack 1):**
 This script sets up the network, starts the controllers and Circuit Breaker, launches all three attacks, and measures the recovery metrics.
 ```bash
 sudo python3 experiments/eval_circuit_breaker.py
@@ -321,13 +356,22 @@ python3 experiments/eval_ew_flood.py --duration 15
 ```
 Telemetry reports and run summaries are output to `results/eval_ew/REPORT.md`.
 
-**4. Generate High-Resolution Figures:**
-Processes the JSON results into PDF/PNG charts and CSV tables suitable for research paper insertion (saved to `results/figures/`).
+**4. Run the Topology & Link-State Poisoning Evaluation (Attack 3):**
+Benchmarking undefended vs defended 3-layer validation (HMAC, schema, semantic) on `POST /update`:
+```bash
+python3 experiments/eval_topology_poison.py
+```
+Telemetry reports and run summaries are output to `results/eval_topo/REPORT.md`.
+
+**5. Generate High-Resolution Figures:**
+Processes the JSON results into publication-ready PDF/PNG charts (saved to `results/figures/`):
 ```bash
 python3 experiments/plot_eval_figures.py
+python3 experiments/plot_attack2_figures.py
+python3 experiments/plot_attack3_figures.py
 ```
 
-**5. Emergency Reset:**
+**6. Emergency Reset:**
 If a Mininet run behaves unexpectedly, clean up the environment with:
 ```bash
 sudo ./experiments/emergency_reset.sh
