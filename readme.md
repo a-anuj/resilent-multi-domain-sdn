@@ -278,16 +278,23 @@ cd ~/Desktop/multi-controller-attack/sdn-multictrl
 **2. Run the End-to-End Circuit Breaker Evaluation:**
 This script sets up the network, starts the controllers and Circuit Breaker, launches all three attacks, and measures the recovery metrics.
 ```bash
-sudo python3 experiments/circuit_breaker_eval.py
+sudo python3 experiments/eval_circuit_breaker.py
 ```
 
-**3. Generate High-Resolution Figures:**
+**3. Run the East-West REST Flood Evaluation (Attack 2):**
+Benchmarking undefended vs defended token-bucket rate limiting on `POST /update`:
+```bash
+python3 experiments/eval_ew_flood.py --duration 15
+```
+Telemetry reports and run summaries are output to `results/eval_ew/REPORT.md`.
+
+**4. Generate High-Resolution Figures:**
 Processes the JSON results into PDF/PNG charts and CSV tables suitable for research paper insertion (saved to `results/figures/`).
 ```bash
-python3 experiments/generate_results.py
+python3 experiments/plot_eval_figures.py
 ```
 
-**4. Emergency Reset:**
+**5. Emergency Reset:**
 If a Mininet run behaves unexpectedly, clean up the environment with:
 ```bash
 sudo ./experiments/emergency_reset.sh
