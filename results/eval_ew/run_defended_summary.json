@@ -1,0 +1,18 @@
+{
+  "condition": "defended",
+  "attack_duration_s": 12,
+  "baseline_latency_ms": 4.52,
+  "during_legitimate_mean_ms": 4.56,
+  "during_legitimate_p95_ms": 6.01,
+  "legitimate_latency_delta_pct": 0.9,
+  "legitimate_total_probes": 24,
+  "legitimate_admitted_count": 24,
+  "legitimate_admission_pct": 100.0,
+  "legitimate_throttled_429": 0,
+  "attacker_sent": 1775,
+  "attacker_200_ok": 409,
+  "attacker_429_blocked": 1366,
+  "attacker_block_rate_pct": 77.0,
+  "attacker_avg_lat_ms": 3.8,
+  "attacker_min_lat_ms": 2.99
+}

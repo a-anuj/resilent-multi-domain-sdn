@@ -1,0 +1,1848 @@
+loading app controllers/ew_controller.py
+loading app ryu.controller.ofp_handler
+instantiating app controllers/ew_controller.py of EWController
+[Domain A] EW+TE Controller started. DPIDs=[1, 2, 3] (Standby=[7, 8, 9]) TE=True
+[Domain A] Seeded 3 switches, 3 intra links, 2 inter links
+instantiating app ryu.controller.ofp_handler of OFPHandler
+2026-10-28T12:14:10  INFO      EWFloodMitigator started  per_peer=30 req/s  global=60 req/s  anomaly_threshold=25 req/s  quarantine=60s
+2026-10-28T12:14:10  INFO      EW flood mitigator middleware installed on POST /update.
+[EW-API] EW Flood Mitigator dynamically activated on POST /update.
+[EW-API] GreenThread launched.
+[SyncAgent-A] Starting (interval=5s, peers=['B', 'C'])
+[Domain A] EW infra up: API=8080, TE=True, peers=['B', 'C']
+[EW-API] Starting Flask on 0.0.0.0:8080 (domain=A)
+2026-10-28T12:14:11  INFO      New peer bucket: IP=B
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=B  bytes=227
+[SyncAgent-A] Peer B unreachable at http://127.0.0.1:8081/topology (controller may be down — stale data retained)
+[SyncAgent-A] Peer B unreachable for /linkstate
+[SyncAgent-A] Cannot push topology to peer B (controller may be down)
+[SyncAgent-A] Peer C unreachable at http://127.0.0.1:8082/topology (controller may be down — stale data retained)
+[SyncAgent-A] Peer C unreachable for /linkstate
+[SyncAgent-A] Cannot push topology to peer C (controller may be down)
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:16  INFO      New peer bucket: IP=ROGUE
+[EW-API] /update from domain=ROGUE  bytes=232
+[EW-API] /update from domain=ROGUE  bytes=232
+[EW-API] /update from domain=ROGUE  bytes=232
+[EW-API] /update from domain=ROGUE  bytes=232
+[EW-API] /update from domain=ROGUE  bytes=232
+[EW-API] /update from domain=ROGUE  bytes=232
+[EW-API] /update from domain=ROGUE  bytes=232
+[EW-API] /update from domain=ROGUE  bytes=232
+[EW-API] /update from domain=ROGUE  bytes=232
+[EW-API] /update from domain=ROGUE  bytes=232
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+[EW-API] /update from domain=ROGUE  bytes=233
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=233
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=233
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=ROGUE  bytes=233
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=233
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=233
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=233
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=233
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:16  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:17  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[SyncAgent-A] Peer B unreachable at http://127.0.0.1:8081/topology (controller may be down — stale data retained)
+[SyncAgent-A] Peer B unreachable for /linkstate
+[SyncAgent-A] Cannot push topology to peer B (controller may be down)
+[EW-API] /update from domain=ROGUE  bytes=234
+[SyncAgent-A] Peer C unreachable at http://127.0.0.1:8082/topology (controller may be down — stale data retained)
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[SyncAgent-A] Peer C unreachable for /linkstate
+[SyncAgent-A] Cannot push topology to peer C (controller may be down)
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:18  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:19  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:20  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:21  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=234
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:22  WARNING   ANOMALY [1/10s]: /update rate=27.6 req/s (threshold=25 req/s)
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:22  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[SyncAgent-A] Peer B unreachable at http://127.0.0.1:8081/topology (controller may be down — stale data retained)
+[EW-API] /update from domain=ROGUE  bytes=235
+[SyncAgent-A] Peer B unreachable for /linkstate
+2026-10-28T12:14:23  WARNING   ANOMALY [2/10s]: /update rate=30.6 req/s (threshold=25 req/s)
+[SyncAgent-A] Cannot push topology to peer B (controller may be down)
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[SyncAgent-A] Peer C unreachable at http://127.0.0.1:8082/topology (controller may be down — stale data retained)
+[SyncAgent-A] Peer C unreachable for /linkstate
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[SyncAgent-A] Cannot push topology to peer C (controller may be down)
+2026-10-28T12:14:23  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:24  WARNING   ANOMALY [3/10s]: /update rate=33.6 req/s (threshold=25 req/s)
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:24  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   ANOMALY [4/10s]: /update rate=36.6 req/s (threshold=25 req/s)
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:25  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   ANOMALY [5/10s]: /update rate=32.0 req/s (threshold=25 req/s)
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:26  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=B  bytes=227
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+[EW-API] /update from domain=B  bytes=227
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   ANOMALY [6/10s]: /update rate=32.0 req/s (threshold=25 req/s)
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:27  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+[EW-API] /update from domain=ROGUE  bytes=235
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
+2026-10-28T12:14:28  WARNING   BLOCKED /update from ROGUE — Per-peer rate limit exceeded for ROGUE
