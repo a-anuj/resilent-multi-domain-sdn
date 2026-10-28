@@ -122,12 +122,12 @@ def plot_admission_breakdown(undef: dict, dfnd: dict):
     ax.legend(frameon=True, facecolor="white", edgecolor="#D0D0D0", loc="upper right", fontsize=10.5)
 
     plt.tight_layout()
-    png_path = FIG_DIR / "fig_attack2_admission.png"
-    pdf_path = FIG_DIR / "fig_attack2_admission.pdf"
-    plt.savefig(png_path)
-    plt.savefig(pdf_path)
+    for name in ["fig_attack2_admission.png", "fig_attack2_admission_v2.png"]:
+        plt.savefig(FIG_DIR / name)
+    for name in ["fig_attack2_admission.pdf", "fig_attack2_admission_v2.pdf"]:
+        plt.savefig(FIG_DIR / name)
     plt.close()
-    print(f"[Attack 2] Saved admission figure: {png_path}")
+    print(f"[Attack 2] Saved admission figure to {FIG_DIR}")
 
 
 def plot_latency_comparison(undef: dict, dfnd: dict):
@@ -185,12 +185,12 @@ def plot_latency_comparison(undef: dict, dfnd: dict):
                 bbox=dict(boxstyle="round,pad=0.5", fc="#E8F5E9", ec=C_DEF, lw=1.2))
 
     plt.tight_layout()
-    png_path = FIG_DIR / "fig_attack2_latency.png"
-    pdf_path = FIG_DIR / "fig_attack2_latency.pdf"
-    plt.savefig(png_path)
-    plt.savefig(pdf_path)
+    for name in ["fig_attack2_latency.png", "fig_attack2_latency_v2.png"]:
+        plt.savefig(FIG_DIR / name)
+    for name in ["fig_attack2_latency.pdf", "fig_attack2_latency_v2.pdf"]:
+        plt.savefig(FIG_DIR / name)
     plt.close()
-    print(f"[Attack 2] Saved latency figure: {png_path}")
+    print(f"[Attack 2] Saved latency figure to {FIG_DIR}")
 
 
 def main():

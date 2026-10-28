@@ -254,11 +254,11 @@ In multi-controller SDN deployments, controllers exchange inter-domain link stat
 ### Comparative Evaluation Graphs: Undefended vs. Defended
 
 #### 1. Request Admission & Throttling Breakdown
-[![Attack 2 Request Admission Breakdown](results/figures/fig_attack2_admission.png)](results/figures/fig_attack2_admission.pdf)
+[![Attack 2 Request Admission Breakdown](results/figures/fig_attack2_admission_v2.png)](results/figures/fig_attack2_admission_v2.pdf)
 **Figure 3:** Request admission and throttling breakdown under high-rate concurrent flood (8 parallel workers, ~4,200 total attack requests). In the undefended system, 100% of flood requests (4,155) are admitted into the controller. Under the EW Flood Mitigator, **90.4% (3,865 requests)** are blocked with HTTP 429, while legitimate Domain B peer sync achieves **100% admission (40/40 probes)** with zero collateral drops.
 
 #### 2. East-West Channel Latency & Response Times
-[![Attack 2 Latency Comparison](results/figures/fig_attack2_latency.png)](results/figures/fig_attack2_latency.pdf)
+[![Attack 2 Latency Comparison](results/figures/fig_attack2_latency_v2.png)](results/figures/fig_attack2_latency_v2.pdf)
 **Figure 4:** East-West channel response times. Under undefended flood conditions, worker thread and topology-lock contention surges legitimate sync latency from 6.20 ms to **11.01 ms** (+77.6% surge, p95 peaks at 18.54 ms). Under the EW Flood Mitigator, token-bucket pre-filtering drops excess flood requests in **4.12 ms** before JSON parsing or locks, maintaining legitimate peer sync latency at **6.71 ms (39.1% lower than undefended)**.
 
 ### Attack 2 Telemetry Summary Table
