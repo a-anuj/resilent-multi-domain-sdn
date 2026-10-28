@@ -344,6 +344,15 @@ def start_api(domain_id: str, api_port: int, local_topo_fn,
         install_ew_flood_mitigator(_app)
         log.info('[EW-API] EW Flood Mitigator dynamically activated on POST /update.')
 
+    if os.environ.get('EW_TOPO_DEFENSE', '0') == '1':
+        import sys
+        if _ROOT not in sys.path:
+            sys.path.insert(0, _ROOT)
+        from defense.topology_guard import install_topology_guard, DEFAULT_SHARED_SECRET
+        secret = os.environ.get('EW_SHARED_SECRET', DEFAULT_SHARED_SECRET)
+        install_topology_guard(_app, shared_secret=secret, hmac_required=True)
+        log.info('[EW-API] Topology Guard dynamically activated on POST /update.')
+
     # Suppress Flask's noisy startup banner and request logs
     import logging as _lg
     _lg.getLogger('werkzeug').setLevel(_lg.WARNING)
