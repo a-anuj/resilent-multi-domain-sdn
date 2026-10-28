@@ -343,6 +343,7 @@ class EWController(app_manager.RyuApp):
                 flow_install_fn=self._flow_install_callback,
                 failover_fn=self.failover_takeover,
                 relinquish_fn=self.failover_relinquish,
+                demote_fn=self.failover_demote_to_slave,
             )
             self._sync_agent = start_sync_agent(
                 domain_id=DOMAIN_ID,
@@ -575,6 +576,36 @@ class EWController(app_manager.RyuApp):
         self.logger.info('[Domain %s] HA RELINQUISH: Stepped down from MASTER to SLAVE for DPIDs %s',
                          DOMAIN_ID, relinquished)
         return relinquished
+
+    def failover_demote_to_slave(self) -> list[int]:
+        """
+        HA Demote: Step down from MASTER to SLAVE without process restart.
+        Clears active_dpids so any backlogged PacketIn events in the queue
+        exit immediately at 'if not self._owned(dpid): return', draining in microseconds.
+        Schedules delayed failback timer to reclaim MASTER after 30s stability window.
+        """
+        demoted = list(self.active_dpids)
+        with self.standby_lock:
+            for dpid in list(self.active_dpids):
+                dp = None
+                with _dp_map_lock:
+                    dp = _dp_map.get(dpid)
+                if dp:
+                    ofp = dp.ofproto
+                    parser = dp.ofproto_parser
+                    req = parser.OFPRoleRequest(dp, ofp.OFPCR_ROLE_SLAVE, 0)
+                    dp.send_msg(req)
+                    self.recovering_dps[dpid] = dp
+            self.active_dpids.clear()
+            with _dp_map_lock:
+                _dp_map.clear()
+        self.logger.info('[Domain %s] HA DEMOTE TO SLAVE: Cleared active DPIDs %s (in-memory queue drain)',
+                         DOMAIN_ID, demoted)
+        self.failback_delay = 30
+        self.failback_completed = False
+        self._failback_scheduled = False
+        self._schedule_delayed_failback()
+        return demoted
 
     def _schedule_delayed_failback(self):
         """Wait for the 30s stability window before gracefully reclaiming MASTER."""

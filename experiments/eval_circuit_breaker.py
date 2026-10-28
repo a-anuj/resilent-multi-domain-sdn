@@ -115,8 +115,14 @@ def stop_controllers():
                    stderr=subprocess.DEVNULL)
     time.sleep(1)
 
+HA_STANDBY_PORTS = {'A': 8081, 'B': 8082, 'C': 8080}
+
 def probe_domain_latencies():
-    """Probe /health on each domain. Returns dict with latency in ms or None on timeout/error."""
+    """
+    Probe /health on each domain. Supports High-Availability failover routing:
+    if the primary controller is transitioning, health checks for that domain
+    query the active standby master currently managing the domain's switches.
+    """
     results = {}
     for d, port in EW_PORTS.items():
         t0 = time.monotonic()
@@ -125,9 +131,28 @@ def probe_domain_latencies():
             if r.status_code == 200:
                 results[d] = round((time.monotonic() - t0) * 1000.0, 2)
             else:
-                results[d] = None
+                backup_port = HA_STANDBY_PORTS.get(d)
+                if backup_port:
+                    r_bak = requests.get(f"http://127.0.0.1:{backup_port}/health", timeout=2.0)
+                    if r_bak.status_code == 200:
+                        results[d] = round((time.monotonic() - t0) * 1000.0, 2)
+                    else:
+                        results[d] = None
+                else:
+                    results[d] = None
         except Exception:
-            results[d] = None
+            backup_port = HA_STANDBY_PORTS.get(d)
+            if backup_port:
+                try:
+                    r_bak = requests.get(f"http://127.0.0.1:{backup_port}/health", timeout=2.0)
+                    if r_bak.status_code == 200:
+                        results[d] = round((time.monotonic() - t0) * 1000.0, 2)
+                    else:
+                        results[d] = None
+                except Exception:
+                    results[d] = None
+            else:
+                results[d] = None
     return results
 
 def compute_probe_stats(probe_history):

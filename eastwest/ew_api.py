@@ -69,6 +69,7 @@ _local_topo_fn       = None    # callable() → dict with switches/links/inter_l
 _flow_install_fn     = None    # callable(data: dict) → str  — registered by ew_controller
 _failover_fn         = None    # callable(dpids: list) → list — registered by ew_controller
 _relinquish_fn       = None    # callable(dpids: list) → list — registered by ew_controller
+_demote_fn           = None    # callable() → list — registered by ew_controller (in-memory demotion)
 _seq          : int  = 0
 _seq_lock             = threading.Lock()
 
@@ -305,13 +306,35 @@ def handle_relinquish():
         return jsonify({'error': str(exc)}), 500
 
 
+@_app.route('/demote_to_slave', methods=['POST'])
+def handle_demote_to_slave():
+    """
+    Trigger in-memory HA demotion: step down to SLAVE to drain eventlet queue
+    without process destruction, keeping the REST API port continuously active.
+    """
+    if _demote_fn is None:
+        return jsonify({'error': 'demote_fn not registered'}), 503
+    try:
+        demoted = _demote_fn()
+        return jsonify({
+            'status': 'ok',
+            'action': 'demoted_to_slave',
+            'demoted_dpids': list(demoted),
+            'domain': _domain_id
+        }), 200
+    except Exception as exc:
+        log.error('[EW-API] /demote_to_slave error: %s', exc)
+        return jsonify({'error': str(exc)}), 500
+
+
 # ── Server startup ─────────────────────────────────────────────────────────────
 
 def start_api(domain_id: str, api_port: int, local_topo_fn,
               ew_log_path: str = 'results/eastwest_traffic.log',
               flow_install_fn=None,
               failover_fn=None,
-              relinquish_fn=None):
+              relinquish_fn=None,
+              demote_fn=None):
     """
     Start the Flask REST API in a background daemon thread.
 
@@ -324,8 +347,9 @@ def start_api(domain_id: str, api_port: int, local_topo_fn,
     flow_install_fn: optional callable(data: dict) called by POST /install_path
     failover_fn    : optional callable(dpids: list) called by POST /failover
     relinquish_fn  : optional callable(dpids: list) called by POST /relinquish
+    demote_fn      : optional callable() called by POST /demote_to_slave
     """
-    global _domain_id, _api_port, _ew_log_path, _local_topo_fn, _flow_install_fn, _failover_fn, _relinquish_fn
+    global _domain_id, _api_port, _ew_log_path, _local_topo_fn, _flow_install_fn, _failover_fn, _relinquish_fn, _demote_fn
 
     _domain_id       = domain_id
     _api_port        = api_port
@@ -334,6 +358,7 @@ def start_api(domain_id: str, api_port: int, local_topo_fn,
     _flow_install_fn = flow_install_fn
     _failover_fn     = failover_fn
     _relinquish_fn   = relinquish_fn
+    _demote_fn       = demote_fn
 
     # Dynamic activation of East-West defenses via environment variables:
     if os.environ.get('EW_FLOOD_DEFENSE', '0') == '1':

@@ -66,20 +66,33 @@ def mitigate(args, pid, trigger_rate, trigger_cpu, log, switches):
                     connected = True
                     log(f"MITIGATE [HA SUCCESS]: Standby controller promoted to MASTER for DPIDs {promoted} in {t_reconnect_confirmed - t_detect:.3f}s (Zero-Downtime HA)!")
                     
-                    # Cleanly restart the saturated controller in background with 30s stability delay
-                    if pid:
-                        try:
-                            os.kill(pid, 9)
-                        except Exception:
-                            pass
-                    time.sleep(0.5)
-                    domain_dpids = args.switches.replace('s', '')
-                    cb_restart_log = os.path.join(os.path.dirname(args.log) or '.', "cb_restart.log")
-                    bg_cmd = (f"DOMAIN_ID={args.domain} DOMAIN_DPIDS={domain_dpids} EW_API_PORT={args.api_port} "
-                              f"TE_ENABLED=1 FAILBACK_DELAY=30 PEER_API_PORT={ha_peer_api} nohup /home/a-anuj/ryu311/bin/python /home/a-anuj/ryu311/bin/ryu-manager "
-                              f"controllers/ew_controller.py --ofp-tcp-listen-port {args.port} > {cb_restart_log} 2>&1 &")
-                    subprocess.Popen(bg_cmd, shell=True)
-                    log(f"MITIGATE [HA]: Respawned Controller {args.domain} in background (SLAVE mode, 30s stability delay before failback)")
+                    # Gracefully demote Controller to SLAVE in memory to drain eventlet queue without process destruction
+                    demoted_ok = False
+                    try:
+                        r_demote = requests.post(
+                            f"http://127.0.0.1:{args.api_port}/demote_to_slave",
+                            timeout=0.8
+                        )
+                        if r_demote.status_code == 200:
+                            demoted_ok = True
+                            log(f"MITIGATE [HA SUCCESS]: Controller {args.domain} gracefully demoted to SLAVE (0s process downtime, port {args.api_port} uninterrupted)!")
+                    except Exception as e_demote:
+                        log(f"MITIGATE [HA]: Graceful in-memory demote unreachable ({e_demote}). Falling back to clean respawn.")
+
+                    if not demoted_ok:
+                        if pid:
+                            try:
+                                os.kill(pid, 9)
+                            except Exception:
+                                pass
+                        time.sleep(0.5)
+                        domain_dpids = args.switches.replace('s', '')
+                        cb_restart_log = os.path.join(os.path.dirname(args.log) or '.', "cb_restart.log")
+                        bg_cmd = (f"DOMAIN_ID={args.domain} DOMAIN_DPIDS={domain_dpids} EW_API_PORT={args.api_port} "
+                                  f"TE_ENABLED=1 FAILBACK_DELAY=30 PEER_API_PORT={ha_peer_api} nohup /home/a-anuj/ryu311/bin/python /home/a-anuj/ryu311/bin/ryu-manager "
+                                  f"controllers/ew_controller.py --ofp-tcp-listen-port {args.port} > {cb_restart_log} 2>&1 &")
+                        subprocess.Popen(bg_cmd, shell=True)
+                        log(f"MITIGATE [HA]: Respawned Controller {args.domain} in background (SLAVE mode, 30s stability delay before failback)")
         except Exception as e:
             log(f"MITIGATE [HA]: Standby failover unavailable ({e}). Falling back to local restart.")
 
