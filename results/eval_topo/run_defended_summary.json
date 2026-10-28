@@ -1,0 +1,52 @@
+{
+  "condition": "defended",
+  "attack_tests_total": 5,
+  "attack_tests_blocked": 5,
+  "attack_block_rate_pct": 100.0,
+  "legitimate_admitted": true,
+  "legitimate_latency_ms": 5.52,
+  "detailed_results": [
+    {
+      "test": "unsigned_congestion_lie",
+      "status": 403,
+      "blocked": true,
+      "lat_ms": 5.18,
+      "response": "{\"detail\":\"Missing X-EW-Signature header \\u2014 payload rejected\",\"error\":\"payload rejected\"}\n"
+    },
+    {
+      "test": "forged_hmac_attack",
+      "status": 403,
+      "blocked": true,
+      "lat_ms": 5.63,
+      "response": "{\"detail\":\"HMAC mismatch from domain=ROGUE \\u2014 possible topology poisoning attempt\",\"error\":\"payload rejected\"}\n"
+    },
+    {
+      "test": "unsigned_phantom_link",
+      "status": 403,
+      "blocked": true,
+      "lat_ms": 4.99,
+      "response": "{\"detail\":\"Missing X-EW-Signature header \\u2014 payload rejected\",\"error\":\"payload rejected\"}\n"
+    },
+    {
+      "test": "signed_phantom_link_schema_violation",
+      "status": 403,
+      "blocked": true,
+      "lat_ms": 5.19,
+      "response": "{\"detail\":\"Schema validation failed: Link port out of range (max=64): src_port=99 dst_port=99\",\"error\":\"payload rejected\"}\n"
+    },
+    {
+      "test": "signed_congestion_lie_semantic_violation",
+      "status": 403,
+      "blocked": true,
+      "lat_ms": 4.67,
+      "response": "{\"detail\":\"Semantic anomaly detected: Suspicious util_rate jump on dpid=4 port=3: 0.08 \\u2192 0.95 (delta=0.87 > threshold=0.60); Suspicious util_rate jump on dpid=5 port=3: 0.08 \\u2192 0.95 (delta=0.87 > threshold=0.60)\",\"error\":\"payload rejected\"}\n"
+    },
+    {
+      "test": "legitimate_peer_sync",
+      "status": 200,
+      "admitted": true,
+      "lat_ms": 5.52,
+      "response": "{\"domain\":\"A\",\"status\":\"accepted\"}\n"
+    }
+  ]
+}

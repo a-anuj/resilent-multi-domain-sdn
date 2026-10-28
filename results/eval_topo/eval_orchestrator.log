@@ -1,0 +1,183 @@
+[2026-10-28T07:29:46] ======================================================================
+[2026-10-28T07:29:46] SDN MULTI-CONTROLLER: EVALUATION OF TOPOLOGY POISONING GUARD (ATTACK 3)
+[2026-10-28T07:29:46] ======================================================================
+[2026-10-28T07:29:46] 
+=======================================================
+[2026-10-28T07:29:46] EVALUATION SUITE: Attack 3 - Condition=UNDEFENDED
+[2026-10-28T07:29:46] =======================================================
+[2026-10-28T07:29:51] Controller A listening on port 8080 (EW_TOPO_DEFENSE=0).
+[2026-10-28T07:29:51] 
+[Test 1] Attacker: Unsigned Congestion Lie (ratio=0.95)...
+[2026-10-28T07:29:51]   Result: HTTP 200 (5.55 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:29:51] 
+[Test 2] Attacker: Forged HMAC Signature Attack...
+[2026-10-28T07:29:51]   Result: HTTP 200 (5.39 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:29:51] 
+[Test 3] Attacker: Unsigned Phantom Link Injection (port 99)...
+[2026-10-28T07:29:51]   Result: HTTP 200 (4.89 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:29:51] 
+[Test 4] Attacker: Valid Key Signed Phantom Link (Schema Violation: port 99)...
+[2026-10-28T07:29:51]   Result: HTTP 200 (5.58 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:29:51] 
+[Test 5] Attacker: Valid Key Signed Congestion Lie (Semantic Violation: Sudden 0.95 jump)...
+[2026-10-28T07:29:51]   Result: HTTP 200 (4.85 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:29:51] 
+[Test 6] Legitimate Peer: Domain B Signed Sync Update...
+[2026-10-28T07:29:51]   Result: HTTP 200 (5.55 ms) | Admitted=True | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:29:52] Saved run summary to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_topo/run_undefended_summary.json
+[2026-10-28T07:29:54] 
+=======================================================
+[2026-10-28T07:29:54] EVALUATION SUITE: Attack 3 - Condition=DEFENDED
+[2026-10-28T07:29:54] =======================================================
+[2026-10-28T07:30:00] Controller A listening on port 8080 (EW_TOPO_DEFENSE=1).
+[2026-10-28T07:30:00] 
+[Test 1] Attacker: Unsigned Congestion Lie (ratio=0.95)...
+[2026-10-28T07:30:00]   Result: HTTP 403 (5.42 ms) | Blocked=True | Body={"detail":"Missing X-EW-Signature header \u2014 payload rejected","error":"payload rejecte
+[2026-10-28T07:30:00] 
+[Test 2] Attacker: Forged HMAC Signature Attack...
+[2026-10-28T07:30:00]   Result: HTTP 403 (5.53 ms) | Blocked=True | Body={"detail":"HMAC mismatch from domain=ROGUE \u2014 possible topology poisoning attempt","er
+[2026-10-28T07:30:00] 
+[Test 3] Attacker: Unsigned Phantom Link Injection (port 99)...
+[2026-10-28T07:30:00]   Result: HTTP 403 (7.61 ms) | Blocked=True | Body={"detail":"Missing X-EW-Signature header \u2014 payload rejected","error":"payload rejecte
+[2026-10-28T07:30:00] 
+[Test 4] Attacker: Valid Key Signed Phantom Link (Schema Violation: port 99)...
+[2026-10-28T07:30:00]   Result: HTTP 403 (6.05 ms) | Blocked=True | Body={"detail":"HMAC mismatch from domain=B \u2014 possible topology poisoning attempt","error"
+[2026-10-28T07:30:00] 
+[Test 5] Attacker: Valid Key Signed Congestion Lie (Semantic Violation: Sudden 0.95 jump)...
+[2026-10-28T07:30:00]   Result: HTTP 403 (5.70 ms) | Blocked=True | Body={"detail":"HMAC mismatch from domain=B \u2014 possible topology poisoning attempt","error"
+[2026-10-28T07:30:00] 
+[Test 6] Legitimate Peer: Domain B Signed Sync Update...
+[2026-10-28T07:30:00]   Result: HTTP 403 (6.10 ms) | Admitted=False | Body={"detail":"HMAC mismatch from domain=B \u2014 possible topology poisoning attempt","error"
+[2026-10-28T07:30:01] Saved run summary to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_topo/run_defended_summary.json
+[2026-10-28T07:30:01] Wrote final evaluation report to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_topo/REPORT.md
+[2026-10-28T07:30:01] 
+Evaluation completed successfully! See results/eval_topo/REPORT.md
+[2026-10-28T07:31:40] ======================================================================
+[2026-10-28T07:31:40] SDN MULTI-CONTROLLER: EVALUATION OF TOPOLOGY POISONING GUARD (ATTACK 3)
+[2026-10-28T07:31:40] ======================================================================
+[2026-10-28T07:31:40] 
+=======================================================
+[2026-10-28T07:31:40] EVALUATION SUITE: Attack 3 - Condition=UNDEFENDED
+[2026-10-28T07:31:40] =======================================================
+[2026-10-28T07:31:45] Controller A listening on port 8080 (EW_TOPO_DEFENSE=0).
+[2026-10-28T07:31:45] 
+[Test 1] Attacker: Unsigned Congestion Lie (ratio=0.95)...
+[2026-10-28T07:31:45]   Result: HTTP 200 (5.48 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:31:45] 
+[Test 2] Attacker: Forged HMAC Signature Attack...
+[2026-10-28T07:31:45]   Result: HTTP 200 (5.05 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:31:45] 
+[Test 3] Attacker: Unsigned Phantom Link Injection (port 99)...
+[2026-10-28T07:31:45]   Result: HTTP 200 (4.56 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:31:45] 
+[Test 4] Attacker: Valid Key Signed Phantom Link (Schema Violation: port 99)...
+[2026-10-28T07:31:45]   Result: HTTP 200 (4.57 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:31:45] 
+[Test 5] Attacker: Valid Key Signed Congestion Lie (Semantic Violation: Sudden 0.95 jump)...
+[2026-10-28T07:31:45]   Result: HTTP 200 (5.06 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:31:45] 
+[Test 6] Legitimate Peer: Domain B Signed Sync Update...
+[2026-10-28T07:31:45]   Result: HTTP 200 (6.18 ms) | Admitted=True | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:31:47] Saved run summary to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_topo/run_undefended_summary.json
+[2026-10-28T07:31:49] 
+=======================================================
+[2026-10-28T07:31:49] EVALUATION SUITE: Attack 3 - Condition=DEFENDED
+[2026-10-28T07:31:49] =======================================================
+[2026-10-28T07:31:54] Controller A listening on port 8080 (EW_TOPO_DEFENSE=1).
+[2026-10-28T07:31:54] 
+[Test 1] Attacker: Unsigned Congestion Lie (ratio=0.95)...
+[2026-10-28T07:31:54]   Result: HTTP 403 (5.34 ms) | Blocked=True | Body={"detail":"Missing X-EW-Signature header \u2014 payload rejected","error":"payload rejecte
+[2026-10-28T07:31:54] 
+[Test 2] Attacker: Forged HMAC Signature Attack...
+[2026-10-28T07:31:54]   Result: HTTP 403 (5.58 ms) | Blocked=True | Body={"detail":"HMAC mismatch from domain=ROGUE \u2014 possible topology poisoning attempt","er
+[2026-10-28T07:31:54] 
+[Test 3] Attacker: Unsigned Phantom Link Injection (port 99)...
+[2026-10-28T07:31:54]   Result: HTTP 403 (5.27 ms) | Blocked=True | Body={"detail":"Missing X-EW-Signature header \u2014 payload rejected","error":"payload rejecte
+[2026-10-28T07:31:54] 
+[Test 4] Attacker: Valid Key Signed Phantom Link (Schema Violation: port 99)...
+[2026-10-28T07:31:54]   Result: HTTP 403 (5.73 ms) | Blocked=True | Body={"detail":"Schema validation failed: Link port out of range (max=64): src_port=99 dst_port
+[2026-10-28T07:31:54] 
+[Test 5] Attacker: Valid Key Signed Congestion Lie (Semantic Violation: Sudden 0.95 jump)...
+[2026-10-28T07:31:54]   Result: HTTP 200 (6.74 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:31:54] 
+[Test 6] Legitimate Peer: Domain B Signed Sync Update...
+[2026-10-28T07:31:54]   Result: HTTP 200 (5.18 ms) | Admitted=True | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:31:55] Saved run summary to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_topo/run_defended_summary.json
+[2026-10-28T07:31:55] Wrote final evaluation report to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_topo/REPORT.md
+[2026-10-28T07:31:55] 
+Evaluation completed successfully! See results/eval_topo/REPORT.md
+[2026-10-28T07:32:57] ======================================================================
+[2026-10-28T07:32:57] SDN MULTI-CONTROLLER: EVALUATION OF TOPOLOGY POISONING GUARD (ATTACK 3)
+[2026-10-28T07:32:57] ======================================================================
+[2026-10-28T07:32:57] 
+=======================================================
+[2026-10-28T07:32:57] EVALUATION SUITE: Attack 3 - Condition=UNDEFENDED
+[2026-10-28T07:32:57] =======================================================
+[2026-10-28T07:33:02] Controller A listening on port 8080 (EW_TOPO_DEFENSE=0).
+[2026-10-28T07:33:02] 
+[Test 1] Attacker: Unsigned Congestion Lie (ratio=0.95)...
+[2026-10-28T07:33:02]   Result: HTTP 200 (6.93 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:33:02] 
+[Test 2] Attacker: Forged HMAC Signature Attack...
+[2026-10-28T07:33:02]   Result: HTTP 200 (6.18 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:33:02] 
+[Test 3] Attacker: Unsigned Phantom Link Injection (port 99)...
+[2026-10-28T07:33:02]   Result: HTTP 200 (5.99 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:33:02] 
+[Test 4] Attacker: Valid Key Signed Phantom Link (Schema Violation: port 99)...
+[2026-10-28T07:33:02]   Result: HTTP 200 (6.10 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:33:02] 
+[Test 5] Attacker: Valid Key Signed Congestion Lie (Semantic Violation: Sudden 0.08->0.95 jump)...
+[2026-10-28T07:33:02]   Result: HTTP 200 (5.09 ms) | Blocked=False | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:33:02] 
+[Test 6] Legitimate Peer: Domain B Signed Sync Update...
+[2026-10-28T07:33:02]   Result: HTTP 200 (6.53 ms) | Admitted=True | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:33:04] Saved run summary to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_topo/run_undefended_summary.json
+[2026-10-28T07:33:06] 
+=======================================================
+[2026-10-28T07:33:06] EVALUATION SUITE: Attack 3 - Condition=DEFENDED
+[2026-10-28T07:33:06] =======================================================
+[2026-10-28T07:33:11] Controller A listening on port 8080 (EW_TOPO_DEFENSE=1).
+[2026-10-28T07:33:11] 
+[Test 1] Attacker: Unsigned Congestion Lie (ratio=0.95)...
+[2026-10-28T07:33:11]   Result: HTTP 403 (5.18 ms) | Blocked=True | Body={"detail":"Missing X-EW-Signature header \u2014 payload rejected","error":"payload rejecte
+[2026-10-28T07:33:11] 
+[Test 2] Attacker: Forged HMAC Signature Attack...
+[2026-10-28T07:33:11]   Result: HTTP 403 (5.63 ms) | Blocked=True | Body={"detail":"HMAC mismatch from domain=ROGUE \u2014 possible topology poisoning attempt","er
+[2026-10-28T07:33:11] 
+[Test 3] Attacker: Unsigned Phantom Link Injection (port 99)...
+[2026-10-28T07:33:11]   Result: HTTP 403 (4.99 ms) | Blocked=True | Body={"detail":"Missing X-EW-Signature header \u2014 payload rejected","error":"payload rejecte
+[2026-10-28T07:33:11] 
+[Test 4] Attacker: Valid Key Signed Phantom Link (Schema Violation: port 99)...
+[2026-10-28T07:33:11]   Result: HTTP 403 (5.19 ms) | Blocked=True | Body={"detail":"Schema validation failed: Link port out of range (max=64): src_port=99 dst_port
+[2026-10-28T07:33:11] 
+[Test 5] Attacker: Valid Key Signed Congestion Lie (Semantic Violation: Sudden 0.08->0.95 jump)...
+[2026-10-28T07:33:11]   Result: HTTP 403 (4.67 ms) | Blocked=True | Body={"detail":"Semantic anomaly detected: Suspicious util_rate jump on dpid=4 port=3: 0.08 \u2
+[2026-10-28T07:33:11] 
+[Test 6] Legitimate Peer: Domain B Signed Sync Update...
+[2026-10-28T07:33:11]   Result: HTTP 200 (5.52 ms) | Admitted=True | Body={"domain":"A","status":"accepted"}
+
+[2026-10-28T07:33:12] Saved run summary to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_topo/run_defended_summary.json
+[2026-10-28T07:33:12] Wrote final evaluation report to /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/eval_topo/REPORT.md
+[2026-10-28T07:33:12] 
+Evaluation completed successfully! See results/eval_topo/REPORT.md

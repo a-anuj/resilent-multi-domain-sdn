@@ -1,0 +1,20 @@
+loading app controllers/ew_controller.py
+loading app ryu.controller.ofp_handler
+instantiating app controllers/ew_controller.py of EWController
+[Domain A] EW+TE Controller started. DPIDs=[1, 2, 3] (Standby=[7, 8, 9]) TE=True
+[Domain A] Seeded 3 switches, 3 intra links, 2 inter links
+instantiating app ryu.controller.ofp_handler of OFPHandler
+2026-10-28T13:03:11  INFO      TopologyGuard started. hmac_required=True  trusted_domains=['A', 'B', 'C']  max_ratio_delta=0.60  phantom_port_threshold=50
+2026-10-28T13:03:11  INFO      Topology guard middleware installed on POST /update.
+[EW-API] Topology Guard dynamically activated on POST /update.
+[EW-API] GreenThread launched.
+[SyncAgent-A] Starting (interval=5s, peers=['B', 'C'])
+[Domain A] EW infra up: API=8080, TE=True, peers=['B', 'C']
+[EW-API] Starting Flask on 0.0.0.0:8080 (domain=A)
+2026-10-28T13:03:11  WARNING   GUARD REJECT [hmac_rejected]: Missing X-EW-Signature header — payload rejected
+2026-10-28T13:03:11  WARNING   GUARD REJECT [hmac_rejected]: HMAC mismatch from domain=ROGUE — possible topology poisoning attempt
+2026-10-28T13:03:11  WARNING   GUARD REJECT [hmac_rejected]: Missing X-EW-Signature header — payload rejected
+2026-10-28T13:03:11  WARNING   GUARD REJECT [schema_rejected]: Schema validation failed: Link port out of range (max=64): src_port=99 dst_port=99
+[EW-API] /update from domain=B  bytes=236
+2026-10-28T13:03:11  WARNING   GUARD REJECT [semantic_rejected]: Semantic anomaly detected: Suspicious util_rate jump on dpid=4 port=3: 0.08 → 0.95 (delta=0.87 > threshold=0.60); Suspicious util_rate jump on dpid=5 port=3: 0.08 → 0.95 (delta=0.87 > threshold=0.60)
+[EW-API] /update from domain=B  bytes=179

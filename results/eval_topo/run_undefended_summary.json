@@ -1,0 +1,52 @@
+{
+  "condition": "undefended",
+  "attack_tests_total": 5,
+  "attack_tests_blocked": 0,
+  "attack_block_rate_pct": 0.0,
+  "legitimate_admitted": true,
+  "legitimate_latency_ms": 6.53,
+  "detailed_results": [
+    {
+      "test": "unsigned_congestion_lie",
+      "status": 200,
+      "blocked": false,
+      "lat_ms": 6.93,
+      "response": "{\"domain\":\"A\",\"status\":\"accepted\"}\n"
+    },
+    {
+      "test": "forged_hmac_attack",
+      "status": 200,
+      "blocked": false,
+      "lat_ms": 6.18,
+      "response": "{\"domain\":\"A\",\"status\":\"accepted\"}\n"
+    },
+    {
+      "test": "unsigned_phantom_link",
+      "status": 200,
+      "blocked": false,
+      "lat_ms": 5.99,
+      "response": "{\"domain\":\"A\",\"status\":\"accepted\"}\n"
+    },
+    {
+      "test": "signed_phantom_link_schema_violation",
+      "status": 200,
+      "blocked": false,
+      "lat_ms": 6.1,
+      "response": "{\"domain\":\"A\",\"status\":\"accepted\"}\n"
+    },
+    {
+      "test": "signed_congestion_lie_semantic_violation",
+      "status": 200,
+      "blocked": false,
+      "lat_ms": 5.09,
+      "response": "{\"domain\":\"A\",\"status\":\"accepted\"}\n"
+    },
+    {
+      "test": "legitimate_peer_sync",
+      "status": 200,
+      "admitted": true,
+      "lat_ms": 6.53,
+      "response": "{\"domain\":\"A\",\"status\":\"accepted\"}\n"
+    }
+  ]
+}

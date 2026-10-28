@@ -1,0 +1,17 @@
+loading app controllers/ew_controller.py
+loading app ryu.controller.ofp_handler
+instantiating app controllers/ew_controller.py of EWController
+[Domain A] EW+TE Controller started. DPIDs=[1, 2, 3] (Standby=[7, 8, 9]) TE=True
+[Domain A] Seeded 3 switches, 3 intra links, 2 inter links
+instantiating app ryu.controller.ofp_handler of OFPHandler
+[EW-API] GreenThread launched.
+[SyncAgent-A] Starting (interval=5s, peers=['B', 'C'])
+[Domain A] EW infra up: API=8080, TE=True, peers=['B', 'C']
+[EW-API] Starting Flask on 0.0.0.0:8080 (domain=A)
+[EW-API] /update from domain=ROGUE  bytes=274
+[EW-API] /update from domain=ROGUE  bytes=274
+[EW-API] /update from domain=ROGUE  bytes=352
+[EW-API] /update from domain=B  bytes=296
+[EW-API] /update from domain=B  bytes=236
+[EW-API] /update from domain=B  bytes=241
+[EW-API] /update from domain=B  bytes=179
