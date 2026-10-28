@@ -1,0 +1,26 @@
+2026-10-28T16:41:57  INFO      Validating target IP: 10.0.0.9
+2026-10-28T16:41:57  INFO      Watchdog armed for 60 seconds.
+2026-10-28T16:41:58  INFO      scapy import OK
+2026-10-28T16:41:58  INFO      ============================================================
+2026-10-28T16:41:58  INFO      ATTACK START  2026-10-28T11:11:58.410462+00:00
+2026-10-28T16:41:58  INFO        Target IP       : 10.0.0.9
+2026-10-28T16:41:58  INFO        Interface       : h1-eth0
+2026-10-28T16:41:58  INFO        Target ctrl     : Domain-A controller (port 6633)
+2026-10-28T16:41:58  INFO        Rate ramp       : 500 → 5000 pkt/s  step=1000  interval=5.0s
+2026-10-28T16:41:58  INFO        Max duration    : 60 s
+2026-10-28T16:41:58  INFO        Log file        : /home/a-anuj/Desktop/multi-controller-attack/sdn-multictrl/results/after_ha/attack_packetin_20261028T111157Z.log
+2026-10-28T16:41:58  INFO      ============================================================
+2026-10-28T16:41:58  INFO      Pre-building packet template...
+2026-10-28T16:41:58  INFO        single flood thread started (target=10.0.0.9, iface=h1-eth0)
+2026-10-28T16:41:58  INFO      RAMP STEP — setting rate to 500 pkt/s  (active threads: 3)
+2026-10-28T16:42:03  INFO      RAMP STEP — setting rate to 1500 pkt/s  (active threads: 3)
+2026-10-28T16:42:03  INFO        -> Step 500 pkt/s achieved: 500.0 pkt/s (2500 pkts sent in 5.0s)
+2026-10-28T16:42:08  INFO      RAMP STEP — setting rate to 2500 pkt/s  (active threads: 3)
+2026-10-28T16:42:08  INFO        -> Step 1500 pkt/s achieved: 1506.0 pkt/s (7530 pkts sent in 5.0s)
+2026-10-28T16:42:13  INFO      RAMP STEP — setting rate to 3500 pkt/s  (active threads: 3)
+2026-10-28T16:42:13  INFO        -> Step 2500 pkt/s achieved: 2509.0 pkt/s (12545 pkts sent in 5.0s)
+2026-10-28T16:42:18  INFO      RAMP STEP — setting rate to 4500 pkt/s  (active threads: 3)
+2026-10-28T16:42:18  INFO        -> Step 3500 pkt/s achieved: 3500.0 pkt/s (17500 pkts sent in 5.0s)
+2026-10-28T16:42:23  INFO      RAMP STEP — setting rate to 5000 pkt/s  (active threads: 3)
+2026-10-28T16:42:23  INFO        -> Step 4500 pkt/s achieved: 4500.0 pkt/s (22500 pkts sent in 5.0s)
+2026-10-28T16:42:23  INFO      Holding max rate 5000 pkt/s for 35 more seconds.

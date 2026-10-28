@@ -1,15 +1,15 @@
 [
   {
-    "t_detect": 1793113491.53435,
-    "t_kill": 1793113491.53435,
-    "t_restart": 1793113491.53435,
-    "t_reconnect_confirmed": 1793113491.5547662,
-    "t_meter_installed": 1793113492.2173643,
+    "t_detect": 1793186482.5699794,
+    "t_kill": 1793186482.5699794,
+    "t_restart": 1793186482.5699794,
+    "t_reconnect_confirmed": 1793186482.594112,
+    "t_meter_installed": 1793186482.7918773,
     "connected": true,
     "dt_detect_to_kill_s": 0.0,
     "dt_kill_to_restart_s": 0.0,
-    "dt_restart_to_recon_s": 0.02,
-    "dt_recon_to_meter_s": 0.663,
-    "total_ttm_s": 0.683
+    "dt_restart_to_recon_s": 0.024,
+    "dt_recon_to_meter_s": 0.198,
+    "total_ttm_s": 0.222
   }
 ]

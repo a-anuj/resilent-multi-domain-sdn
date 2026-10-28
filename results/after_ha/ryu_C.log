@@ -8,24 +8,28 @@ instantiating app ryu.controller.ofp_handler of OFPHandler
 [SyncAgent-C] Starting (interval=5s, peers=['A', 'B'])
 [Domain C] EW infra up: API=8082, TE=True, peers=['A', 'B']
 [EW-API] Starting Flask on 0.0.0.0:8082 (domain=C)
-[SyncAgent-C] Merged topology from domain A (0 switches, 3 links)
-[SyncAgent-C] Merged topology from domain B (0 switches, 3 links)
 [EW-API] /update from domain=B  bytes=450
-[EW-API] /update from domain=A  bytes=450
+[SyncAgent-C] Merged topology from domain A (0 switches, 3 links)
 [EW-API] /update from domain=B  bytes=57
+[EW-API] /update from domain=A  bytes=450
 [EW-API] /update from domain=A  bytes=57
+[SyncAgent-C] Merged topology from domain B (0 switches, 3 links)
 [Domain C] Switch connected as STANDBY: dpid=4
 [Domain C] Switch connected as STANDBY: dpid=5
 [Domain C] Switch connected as STANDBY: dpid=6
 [Domain C] Switch connected as MASTER: dpid=7
 [Domain C] Switch connected as MASTER: dpid=8
 [Domain C] Switch connected as MASTER: dpid=9
-[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
-[SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=652
 [EW-API] /update from domain=A  bytes=652
 [EW-API] /update from domain=B  bytes=57
 [EW-API] /update from domain=A  bytes=57
+[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
+[SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
+[EW-API] /update from domain=B  bytes=652
+[EW-API] /update from domain=B  bytes=4865
+[EW-API] /update from domain=A  bytes=652
+[EW-API] /update from domain=A  bytes=4865
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=652
@@ -35,187 +39,188 @@ instantiating app ryu.controller.ofp_handler of OFPHandler
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=652
+[EW-API] /update from domain=B  bytes=4868
 [EW-API] /update from domain=A  bytes=652
-[EW-API] /update from domain=B  bytes=4859
-[EW-API] /update from domain=A  bytes=4854
+[EW-API] /update from domain=A  bytes=4868
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
-[EW-API] /update from domain=B  bytes=652
+[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [EW-API] /update from domain=A  bytes=652
-[EW-API] /update from domain=B  bytes=4862
-[EW-API] /update from domain=A  bytes=4862
-[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
+[EW-API] /update from domain=B  bytes=652
+[EW-API] /update from domain=A  bytes=4863
+[EW-API] /update from domain=B  bytes=4863
 [SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=652
+[EW-API] /update from domain=B  bytes=4864
 [EW-API] /update from domain=A  bytes=652
-[EW-API] /update from domain=B  bytes=4857
-[EW-API] /update from domain=A  bytes=4857
+[EW-API] /update from domain=A  bytes=4864
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=652
-[EW-API] /update from domain=B  bytes=4858
+[EW-API] /update from domain=B  bytes=4866
 [EW-API] /update from domain=A  bytes=652
-[EW-API] /update from domain=A  bytes=4858
+[EW-API] /update from domain=A  bytes=4866
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=652
-[EW-API] /update from domain=B  bytes=4856
+[EW-API] /update from domain=B  bytes=4867
 [EW-API] /update from domain=A  bytes=652
-[EW-API] /update from domain=A  bytes=4856
+[EW-API] /update from domain=A  bytes=4867
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=652
-[EW-API] /update from domain=B  bytes=4857
+[EW-API] /update from domain=B  bytes=4865
 [EW-API] /update from domain=A  bytes=652
-[EW-API] /update from domain=A  bytes=4857
+[EW-API] /update from domain=A  bytes=4865
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=652
-[EW-API] /update from domain=B  bytes=4857
+[EW-API] /update from domain=B  bytes=4871
 [EW-API] /update from domain=A  bytes=652
-[EW-API] /update from domain=A  bytes=4857
+[EW-API] /update from domain=A  bytes=4871
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=652
-[EW-API] /update from domain=B  bytes=4857
-[EW-API] /update from domain=A  bytes=17738
-[EW-API] /update from domain=A  bytes=4857
+[EW-API] /update from domain=B  bytes=4866
+[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
+[EW-API] /update from domain=A  bytes=107900
+[EW-API] /update from domain=A  bytes=4866
+[SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=652
-[EW-API] /update from domain=B  bytes=4879
-[EW-API] /update from domain=A  bytes=205898
-[EW-API] /update from domain=A  bytes=4879
-[SyncAgent-C] Peer A unreachable at http://127.0.0.1:8080/topology (controller may be down — stale data retained)
-[SyncAgent-C] Peer A unreachable for /linkstate
-[SyncAgent-C] Cannot push topology to peer A (controller may be down)
-[SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=415870
+[EW-API] /update from domain=A  bytes=4909
+[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4890
-[SyncAgent-C] Merged topology from domain A (0 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=450
-[EW-API] /update from domain=A  bytes=4888
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
+[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
-[SyncAgent-C] Merged topology from domain A (0 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
+[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
-[EW-API] /update from domain=A  bytes=450
-[EW-API] /update from domain=A  bytes=4888
-[SyncAgent-C] Merged topology from domain A (0 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
-[EW-API] /update from domain=A  bytes=450
-[EW-API] /update from domain=A  bytes=4888
-[SyncAgent-C] Merged topology from domain A (0 switches, 3 links)
-[SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
-[EW-API] /update from domain=A  bytes=450
-[EW-API] /update from domain=A  bytes=4888
-[SyncAgent-C] Merged topology from domain A (0 switches, 3 links)
-[SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
-[EW-API] /update from domain=A  bytes=450
-[EW-API] /update from domain=A  bytes=4888
-[SyncAgent-C] Merged topology from domain A (0 switches, 3 links)
-[SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=450
-[EW-API] /update from domain=A  bytes=4888
-[EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=25930
-[EW-API] /update from domain=A  bytes=4888
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=57930
-[EW-API] /update from domain=A  bytes=4888
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=4909
+[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
+[EW-API] /update from domain=B  bytes=856
+[SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=89930
-[EW-API] /update from domain=A  bytes=4888
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=109450
-[EW-API] /update from domain=A  bytes=4888
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=109450
-[EW-API] /update from domain=A  bytes=4888
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=109450
-[EW-API] /update from domain=A  bytes=4888
+[EW-API] /update from domain=A  bytes=418015
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=A  bytes=4909
+[EW-API] /update from domain=B  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=109450
-[EW-API] /update from domain=A  bytes=4888
+[EW-API] /update from domain=A  bytes=418015
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=A  bytes=4909
+[EW-API] /update from domain=B  bytes=4909
+[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
+[EW-API] /update from domain=B  bytes=856
+[SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=109450
-[EW-API] /update from domain=A  bytes=4888
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=109450
-[EW-API] /update from domain=A  bytes=4888
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
+[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
+[EW-API] /update from domain=B  bytes=856
+[SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=109450
-[EW-API] /update from domain=A  bytes=4888
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
+[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
+[EW-API] /update from domain=B  bytes=856
+[SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=109450
-[EW-API] /update from domain=A  bytes=4888
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=109450
-[EW-API] /update from domain=A  bytes=4888
+[EW-API] /update from domain=A  bytes=418015
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=A  bytes=4909
+[EW-API] /update from domain=B  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=109450
-[EW-API] /update from domain=A  bytes=4888
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=109450
-[EW-API] /update from domain=A  bytes=4888
+[EW-API] /update from domain=A  bytes=418015
 [EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
+[EW-API] /update from domain=A  bytes=4909
+[EW-API] /update from domain=B  bytes=4909
 [SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
+[EW-API] /update from domain=B  bytes=856
 [SyncAgent-C] Merged topology from domain B (6 switches, 3 links)
-[EW-API] /update from domain=A  bytes=109450
-[EW-API] /update from domain=A  bytes=4888
-[EW-API] /update from domain=B  bytes=856
-[EW-API] /update from domain=B  bytes=4888
-[SyncAgent-C] Merged topology from domain A (3 switches, 3 links)
+[EW-API] /update from domain=B  bytes=4909
+[EW-API] /update from domain=A  bytes=418015
+[EW-API] /update from domain=A  bytes=4909

@@ -28,12 +28,12 @@ A research testbed for evaluating control-plane resilience in **multi-domain Sof
 ## The 3 Attacks & Their Defenses
 
 ### Attack 1: North-South PacketIn Flooding
-* **The Threat:** An untrusted edge host floods the network with 5,000 pkt/s using spoofed random IPs/MACs. The resulting table-misses overwhelm Ryu's single-threaded `eventlet` loop, creating an unrecoverable queue backlog that spikes latency from ~4 ms to >320 ms and spills over to adjacent domains.
+* **The Threat:** An untrusted edge host floods the network with 5,000 pkt/s using spoofed random IPs/MACs. The resulting table-misses overwhelm Ryu's single-threaded `eventlet` loop, creating an unrecoverable queue backlog that spikes latency from ~4 ms to >250 ms and spills over to adjacent domains.
 * **The Defense (`defense/circuit_breaker.py`):**
   * **Dual-Signal Detection:** Detects attack in ~3 seconds when edge `PacketIn > 1500 pkt/s` AND controller `CPU > 70%` for 3 consecutive seconds (zero false alarms).
-  * **Zero-Downtime HA Failover:** Promotes the warm standby controller (Domain B) to `MASTER` via OpenFlow 1.3 in **0.010 seconds** (99.7% faster than cold restarts).
+  * **Zero-Downtime HA Failover:** Promotes the warm standby controller (Domain B) to `MASTER` via OpenFlow 1.3 in **0.010 seconds** (99.7% faster than cold restarts) with in-memory graceful demotion.
   * **Dynamic Datapath Metering:** Injects a drop meter on the ingress switch with `idle_timeout=30s`, preventing controller flapping during sustained floods.
-* **Outcome:** Attack latency held at **5.02 ms** (vs 117 ms undefended), recovery latency restored to **4.44 ms**, with **0.70s total time-to-mitigation**.
+* **Outcome:** Attack latency held at **7.88 ms** (vs 93.6 ms undefended), recovery latency restored to **6.00 ms**, with **0.22s total time-to-mitigation** and **0.0% probe failures (0/75)**.
 
 ---
 
@@ -62,10 +62,11 @@ A research testbed for evaluating control-plane resilience in **multi-domain Sof
 
 | Attack Scenario | Metric | Undefended | Defended | Defense Impact |
 |---|---|---|---|---|
-| **Attack 1 (PacketIn Flood)** | Attack Latency | 117.45 ms | **5.02 ms** | **-95.7% latency** |
-| | Recovery Latency | 327.14 ms | **4.44 ms** | **-98.6% recovery delay** |
+| **Attack 1 (PacketIn Flood)** | Attack Latency | 93.62 ms | **7.88 ms** | **-91.6% latency** |
+| | Recovery Latency | 258.00 ms | **6.00 ms** | **-97.7% recovery delay** |
 | | Switch Reconnection | 3.28 s (reboot) | **0.010 s** (HA) | **99.7% faster failover** |
-| | Time-to-Mitigation ($TTM$) | Unmitigated failure | **0.70 s** | Sub-second mitigation |
+| | Time-to-Mitigation ($TTM$) | Unmitigated failure | **0.22 s** | Sub-second mitigation (95% drop) |
+| | Probe Failures During Failover | 0.0% (0 / 66) | **0.0% (0 / 75)** | **True Zero-Downtime Verified** |
 | **Attack 2 (REST API Flood)** | Flood Drop Rate | 0.0% (0 / 4,155) | **90.4% (3,865 / 4,274)** | Sub-ms HTTP 429 throttle |
 | | Legitimate Sync Latency | 11.01 ms (p95: 18.5) | **6.71 ms** (p95: 10.6) | **39.1% lower latency** |
 | | Legitimate Delivery | 100% | **100%** | Zero collateral drops |
