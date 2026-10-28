@@ -352,10 +352,10 @@ def install_ew_flood_mitigator(app, mitigator: "EWFloodMitigator | None" = None,
 
     @wraps(original_view)
     def _guarded_update():
-        peer_ip = request.remote_addr or "unknown"
-        allowed, reason = mitigator.check_request(peer_ip)
+        peer_key = request.headers.get("X-Domain-Id") or request.remote_addr or "unknown"
+        allowed, reason = mitigator.check_request(peer_key)
         if not allowed:
-            log.warning("BLOCKED /update from %s — %s", peer_ip, reason)
+            log.warning("BLOCKED /update from %s — %s", peer_key, reason)
             return jsonify({"error": "rate limit exceeded", "detail": reason}), 429
         return original_view()
 

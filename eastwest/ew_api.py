@@ -42,8 +42,14 @@ Security note
 import json
 import logging
 import os
+import sys
 import threading
 from datetime import datetime
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_ROOT = os.path.dirname(_HERE)
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
 
 from flask import Flask, request, jsonify
 
@@ -328,6 +334,15 @@ def start_api(domain_id: str, api_port: int, local_topo_fn,
     _flow_install_fn = flow_install_fn
     _failover_fn     = failover_fn
     _relinquish_fn   = relinquish_fn
+
+    # Dynamic activation of East-West defenses via environment variables:
+    if os.environ.get('EW_FLOOD_DEFENSE', '0') == '1':
+        import sys
+        if _ROOT not in sys.path:
+            sys.path.insert(0, _ROOT)
+        from defense.ew_flood_mitigator import install_ew_flood_mitigator
+        install_ew_flood_mitigator(_app)
+        log.info('[EW-API] EW Flood Mitigator dynamically activated on POST /update.')
 
     # Suppress Flask's noisy startup banner and request logs
     import logging as _lg
