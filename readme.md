@@ -255,24 +255,24 @@ In multi-controller SDN deployments, controllers exchange inter-domain link stat
 
 #### 1. Request Admission & Throttling Breakdown
 [![Attack 2 Request Admission Breakdown](results/figures/fig_attack2_admission.png)](results/figures/fig_attack2_admission.pdf)
-**Figure 3:** Request admission and throttling breakdown across a 12-second evaluation run (~1,775 total attack requests). In the undefended system, 100% of flood requests are admitted. Under the EW Flood Mitigator, 77.0% (1,366 requests) are immediately blocked with HTTP 429, while legitimate Domain B peer sync achieves 100% admission (24/24 probes) with zero collateral drops.
+**Figure 3:** Request admission and throttling breakdown under high-rate concurrent flood (8 parallel workers, ~4,200 total attack requests). In the undefended system, 100% of flood requests (4,155) are admitted into the controller. Under the EW Flood Mitigator, **90.4% (3,865 requests)** are blocked with HTTP 429, while legitimate Domain B peer sync achieves **100% admission (40/40 probes)** with zero collateral drops.
 
 #### 2. East-West Channel Latency & Response Times
 [![Attack 2 Latency Comparison](results/figures/fig_attack2_latency.png)](results/figures/fig_attack2_latency.pdf)
-**Figure 4:** East-West channel response times. The token bucket drops excess flood traffic in <3.8 ms without worker queue contention. Legitimate peer synchronization from Domain B maintains clean baseline latency (4.52 ms baseline vs. 4.56 ms during attack, a nominal +0.9% delta), demonstrating complete control plane isolation.
+**Figure 4:** East-West channel response times. Under undefended flood conditions, worker thread and topology-lock contention surges legitimate sync latency from 6.20 ms to **11.01 ms** (+77.6% surge, p95 peaks at 18.54 ms). Under the EW Flood Mitigator, token-bucket pre-filtering drops excess flood requests in **4.12 ms** before JSON parsing or locks, maintaining legitimate peer sync latency at **6.71 ms (39.1% lower than undefended)**.
 
 ### Attack 2 Telemetry Summary Table
 
 | Telemetry Metric | Undefended Run | Defended Run (EW Mitigator) | Delta / Defense Impact |
 |---|---|---|---|
-| **Attacker Requests Sent** | 1,771 | 1,775 | High-rate attack pressure (~150 req/s) |
-| **Attacker HTTP 200 Admitted** | 1,771 (100.0%) | 409 (23.0%) | Capped strictly to token bucket rate |
-| **Attacker HTTP 429 Throttled** | 0 (0.0%) | **1,366 (77.0%)** | **+77.0% flood drop rate** |
-| **Attacker Request Latency** | 4.19 ms | **3.80 ms** | Immediate sub-ms 429 rejection |
-| **Legitimate Sync Baseline Latency** | 5.57 ms | 4.52 ms | Clean baseline (<5 ms) |
-| **Legitimate Sync During-Attack Latency** | 5.19 ms | 4.56 ms | WSGI thread starvation eliminated |
-| **Legitimate Latency Delta** | -6.8% | **+0.9%** | **Protected inter-domain channel** |
-| **Legitimate Admission Rate** | 100.0% | **100.0%** (24/24) | 100% peer updates delivered |
+| **Attacker Requests Sent** | 4,155 | 4,274 | High-rate concurrent flood (8 workers, ~350 req/s) |
+| **Attacker HTTP 200 Admitted** | 4,155 (100.0%) | 409 (9.6%) | Capped strictly to token bucket rate |
+| **Attacker HTTP 429 Throttled** | 0 (0.0%) | **3,865 (90.4%)** | **+90.4% flood drop rate** |
+| **Attacker Request Latency** | 7.75 ms | **4.12 ms** | 46.8% faster sub-ms 429 rejection |
+| **Legitimate Sync Baseline Latency** | 6.20 ms | 4.87 ms | Clean baseline (<5 ms) |
+| **Legitimate Sync During-Attack Latency** | **11.01 ms** (p95: 18.54 ms) | **6.71 ms** (p95: 10.69 ms) | **39.1% lower latency under defense** |
+| **Legitimate Latency Delta vs Baseline** | **+77.6% surge** | **+37.8%** | Thread starvation mitigated |
+| **Legitimate Admission Rate** | 100.0% (39/39) | **100.0%** (40/40) | 100% peer updates delivered |
 | **Legitimate Collateral Drops (429)**| 0 | **0** | Zero collateral disruption |
 
 ---
