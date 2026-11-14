@@ -11,6 +11,7 @@ The platform is built with **Mininet**, **Open vSwitch** and **Ryu**. It evaluat
 ## Authors
 
 Dr. N Radhika, Anuj A, Hari Prasath K, Harish J, KVL Narasimha Kushal, Kirla Siva Sai Karthik
+
 Department of Computer Science and Engineering, Amrita School of Computing, Amrita Vishwa Vidyapeetham, Coimbatore, India.
 
 ---
@@ -19,7 +20,7 @@ Department of Computer Science and Engineering, Amrita School of Computing, Amri
 
 * **Topology:** 9 Open vSwitch (OpenFlow 1.3) switches in 3 disjoint domains: **A** (s1-s3), **B** (s4-s6), **C** (s7-s9). Redundant intra-domain links are blocked by priority-2 drop rules to prevent broadcast storms. The attacker host `h1` attaches to `s1` port 3.
 * **Control plane:** 3 Ryu controllers, one per domain, on OpenFlow ports 6633 (A), 6634 (B) and 6653 (C).
-* **High availability:** every switch keeps two concurrent OpenFlow sessions: the domain controller as `MASTER` and a ring-neighbour as warm `SLAVE` (B is standby for s1-s3, C for s4-s6, A for s7-s9).
+* **High availability:** every switch keeps two concurrent OpenFlow sessions: the domain controller as `MASTER` and a ring-neighbour as warm `SLAVE`.
 * **East-West REST protocol** (ports 8080-8082, served by the same eventlet process as the OpenFlow handlers):
   * `GET /topology`: local DPIDs, links, boundary ports
   * `GET /linkstate`: link utilisation ratios in [0, 1]
@@ -28,15 +29,17 @@ Department of Computer Science and Engineering, Amrita School of Computing, Amri
   * `POST /relinquish`: return mastership
 * **Traffic engineering:** Dijkstra over link weights, where a link with utilisation >= 70% gets infinite weight, so traffic is diverted through an alternate transit domain.
 
-```
-[ Domain A: s1, s2, s3 ] <--- E-W REST (8080 <-> 8081) ---> [ Domain B: s4, s5, s6 ]
-      (Primary: Ryu A)                                            (Primary: Ryu B)
-      (Standby: Ryu B)                                            (Standby: Ryu C)
-             \                                                           /
-              \--- E-W REST ---> [ Domain C: s7, s8, s9 ] <-------------/
-                                       (Primary: Ryu C)
-                                       (Standby: Ryu A)
-```
+![Three-domain SDN architecture showing primary MASTER controllers, ring-based SLAVE standby sessions, and East-West REST communication](docs/architecture.png)
+
+**Controller and standby mapping**
+
+| Domain | Switches | Primary controller | Warm standby controller |
+|---|---|---|---|
+| A | s1-s3 | Ryu A | Ryu B |
+| B | s4-s6 | Ryu B | Ryu C |
+| C | s7-s9 | Ryu C | Ryu A |
+
+Each switch maintains concurrent OpenFlow sessions to its primary and standby controllers. The primary holds the `MASTER` role; the standby holds the `SLAVE` role. The standby assignments form a ring (B backs up A, C backs up B, and A backs up C). The controllers exchange topology and link-utilisation information through their East-West REST interfaces. The standby ring describes failover responsibility; it should not be interpreted as proof that the REST communication itself follows a ring.
 
 ---
 
@@ -58,11 +61,13 @@ The attacker cannot read controller memory and does not tamper with the OpenFlow
 ## Attacks and Defences
 
 ### Attack 1: North-South PacketIn Flood -> HA Circuit Breaker
+
 **Threat.** `h1` sends raw frames (AF_PACKET) with a fresh random source MAC/IP per packet, ramping to 5,000 pkt/s. The resulting table-misses fill an unbounded event queue in Ryu's single-threaded loop.
 
-**Root cause.** The backlog survives after the flood stops. Deleting datapath flows does not clear it; destroying the process does. Mitigation must therefore *replace* the controller rather than only filter traffic.
+**Root cause.** The backlog survives after the flood stops. Deleting datapath flows does not clear it; destroying the process does. Mitigation must therefore **replace** the controller rather than only filter traffic.
 
 **Defence (`defense/circuit_breaker.py`)**, an external daemon monitoring domain A out of band:
+
 1. **Dual-signal detection:** edge `PacketIn > 1,500 pkt/s` **and** controller `CPU > 70%`, holding continuously for a 3 s persistence window. (The 3 s is a persistence rule, not an onset-to-trigger latency.)
 2. **Standby promotion:** `POST /failover` to Ryu B, which issues an OpenFlow 1.3 `OFPRoleRequest(MASTER)` for s1-s3.
 3. **Process replacement:** `SIGKILL` the saturated Ryu A, then respawn it in slave mode (with a failback delay) so it does not process PacketIns.
@@ -97,7 +102,6 @@ Relative to undefended medians, attack-phase latency falls 91.6% and recovery la
 
 TTM drops by about 94% and reconnection is 99.7% shorter. Mean latency under defence is of the same order in both designs, so the advantage of HA lies in **availability, TTM and recovery reliability**, not mean latency.
 
-
 **Where the time goes.** Takeover and reconnection are 9-24 ms (4-11% of TTM); the interval from reconnection to meter installation is 0.177-0.229 s (89-96%). The metering stage was not profiled and is the obvious target for further reduction.
 
 **Observation (hypothesis).** In one defended run the topology update from domain A to its peers grew from 652 B to ~418 kB during the flood, consistent with spoofed hosts being registered and served to peers without ageing. This was not isolated from E-W coupling of stalled handlers or host CPU contention.
@@ -105,10 +109,12 @@ TTM drops by about 94% and reconnection is 99.7% shorter. Mean latency under def
 ---
 
 ### Attack 2: East-West REST API Flood -> Token-Bucket Mitigator
+
 **Threat.** ~350 req/s of `POST /update` from 8 parallel workers for 15 s starves WSGI workers and contends on the topology lock while domain B sends legitimate sync updates.
 
 **Defence (`defense/ew_flood_mitigator.py`):**
-* Flask/WSGI middleware applies a **per-peer token bucket** (fill 30 tokens/s, capacity 50) *before* JSON parsing or lock acquisition; excess requests get `HTTP 429` with an empty body.
+
+* Flask/WSGI middleware applies a **per-peer token bucket** (fill 30 tokens/s, capacity 50) **before** JSON parsing or lock acquisition; excess requests get `HTTP 429` with an empty body.
 * A **global limiter** caps aggregate E-W update throughput at 60 req/s across peers.
 
 **Results (one flood run per condition):**
@@ -129,11 +135,14 @@ Legitimate sync latency under attack is 39.1% lower than undefended, with no col
 ---
 
 ### Attack 3: East-West Topology and Link-State Poisoning -> Topology Guard
+
 **Threat.** Low-volume crafted `/update` messages:
+
 * `congestion_lie`: claims 95% utilisation on a link, forcing Dijkstra onto suboptimal paths.
 * `phantom_link`: declares a non-existent switch port (e.g. port 99), black-holing inter-domain traffic.
 
 **Defence (`defense/topology_guard.py`)**, three filters before any `GlobalTopology` change (failure -> `HTTP 403`):
+
 1. **Layer 1, authentication:** HMAC-SHA256 over a canonical JSON serialisation (sorted keys, compact separators) in `X-EW-Signature`, verified with a constant-time comparison.
 2. **Layer 2, schema and bounds:** field types enforced, domain in `{A, B, C}`, and every port must satisfy `1 <= p <= 64`.
 3. **Layer 3, semantic delta:** stores last accepted utilisation per port and rejects updates where `|rho(t) - rho(t-1)| > 0.60`.
@@ -175,35 +184,37 @@ Rogue payloads blocked: **0/5 -> 5/5**. Phantom links / false ratios merged into
 
 ```
 sdn-multictrl/
-├── controllers/          # Ryu OpenFlow 1.3 controller with HA role support & TE
+├── controllers/                # Ryu OpenFlow 1.3 controller with HA role support & TE
 │   └── ew_controller.py
-├── topology/             # Mininet 9-switch, 3-domain topology
+├── topology/                   # Mininet 9-switch, 3-domain topology
 │   └── multi_domain_topo.py
-├── eastwest/             # East-West REST API and Global Topology graph
+├── eastwest/                   # East-West REST API and Global Topology graph
 │   ├── ew_api.py
 │   └── global_topo.py
-├── attacks/              # Attack simulation scripts
-│   ├── packetin_flood.py   # Attack 1: North-South PacketIn flood
-│   ├── eastwest_flood.py   # Attack 2: East-West REST API flood
-│   └── topology_poison.py  # Attack 3: Topology/link-state poisoning
-├── defense/              # Defense modules
-│   ├── circuit_breaker.py    # Defense 1: Dual-signal detection, HA failover & metering
-│   ├── ew_flood_mitigator.py # Defense 2: Token-bucket rate limiter middleware
-│   └── topology_guard.py     # Defense 3: 3-layer HMAC, schema & semantic guard
-├── experiments/          # Test harnesses and plotting scripts
-│   ├── eval_circuit_breaker.py  # Attack 1 evaluation harness
-│   ├── eval_ew_flood.py         # Attack 2 evaluation harness
-│   ├── eval_topology_poison.py  # Attack 3 evaluation harness
-│   ├── plot_eval_figures.py     # Attack 1 plot generator
-│   ├── plot_attack2_figures.py  # Attack 2 plot generator
-│   ├── plot_attack3_figures.py  # Attack 3 plot generator
-│   └── emergency_reset.sh       # Emergency cleanup script
-├── results/              # Logs, telemetry summaries, and publication figures (PNG/PDF)
-│   ├── figures/                 # All generated graphs
-│   ├── eval_ew/                 # Attack 2 evaluation report
-│   └── eval_topo/               # Attack 3 evaluation report
-├── research_paper_helper.md # Paper-drafting notes, math models, N=5 tables
-└── requirements.txt      # Python package dependencies
+├── attacks/                    # Attack simulation scripts
+│   ├── packetin_flood.py       # Attack 1: North-South PacketIn flood
+│   ├── eastwest_flood.py       # Attack 2: East-West REST API flood
+│   └── topology_poison.py      # Attack 3: Topology/link-state poisoning
+├── defense/                    # Defense modules
+│   ├── circuit_breaker.py      # Defense 1: Dual-signal detection, HA failover & metering
+│   ├── ew_flood_mitigator.py   # Defense 2: Token-bucket rate limiter middleware
+│   └── topology_guard.py       # Defense 3: 3-layer HMAC, schema & semantic guard
+├── experiments/                # Test harnesses and plotting scripts
+│   ├── eval_circuit_breaker.py # Attack 1 evaluation harness
+│   ├── eval_ew_flood.py        # Attack 2 evaluation harness
+│   ├── eval_topology_poison.py # Attack 3 evaluation harness
+│   ├── plot_eval_figures.py    # Attack 1 plot generator
+│   ├── plot_attack2_figures.py # Attack 2 plot generator
+│   ├── plot_attack3_figures.py # Attack 3 plot generator
+│   └── emergency_reset.sh      # Emergency cleanup script
+├── results/                    # Logs, telemetry summaries, and publication figures (PNG/PDF)
+│   ├── figures/                # All generated graphs
+│   ├── eval_ew/                # Attack 2 evaluation report
+│   └── eval_topo/              # Attack 3 evaluation report
+├── docs/                       # README assets
+│   └── architecture.png
+├── research_paper_helper.md    # Paper-drafting notes, math models, N=5 tables
+└── requirements.txt            # Python package dependencies
 ```
 
 ---
@@ -211,7 +222,7 @@ sdn-multictrl/
 ## Experimental Methodology
 
 * **Platform:** one Ubuntu 22.04 host running Mininet (>= 2.3), Open vSwitch (>= 2.17), three Ryu controllers (Python 3.11), the attacker, the telemetry sampler and the Circuit Breaker.
-* **Attack 1 protocol:** every run starts from a clean state (all processes reset, fresh controllers and topology, 15 s for switch connections), then a 30 s baseline, 60 s attack and 60 s recovery. Each controller's REST endpoint is probed every 2 s. The metric is the response time of *successful* probes; failed probes are counted separately. A run is discarded if its baseline exceeds 30 ms (none were). Five undefended and five defended runs alternate at one code revision (commit `96c8af6`). The reported value is the median and min-max across runs of the per-run phase mean.
+* **Attack 1 protocol:** every run starts from a clean state (all processes reset, fresh controllers and topology, 15 s for switch connections), then a 30 s baseline, 60 s attack and 60 s recovery. Each controller's REST endpoint is probed every 2 s. The metric is the response time of **successful** probes; failed probes are counted separately. A run is discarded if its baseline exceeds 30 ms (none were). Five undefended and five defended runs alternate at one code revision (commit `96c8af6`). The reported value is the median and min-max across runs of the per-run phase mean.
 * **Attack 2 protocol:** 15 s flood from eight workers against `POST /update` of domain A while domain B sends legitimate sync updates, with and without the mitigator.
 * **Attack 3 protocol:** six vectors (five rogue, one legitimate signed update) sent to `POST /update`; HTTP status, intercepting layer and resulting graph state recorded.
 * **Metric scope:** control-plane responsiveness only, not data-plane latency, loss or throughput.
@@ -221,6 +232,7 @@ sdn-multictrl/
 ## Quick Start & Reproduction
 
 ### 1. Setup Environment
+
 ```bash
 git clone https://github.com/a-anuj/sdn-multictrl.git
 cd sdn-multictrl
@@ -230,30 +242,39 @@ pip install -r requirements.txt
 ```
 
 ### 2. Run Evaluations
+
 * **Attack 1 (PacketIn flood & HA Circuit Breaker):**
+
   ```bash
   sudo python3 experiments/eval_circuit_breaker.py
   ```
+
 * **Attack 2 (East-West REST flood):**
+
   ```bash
   python3 experiments/eval_ew_flood.py --duration 15
   ```
+
 * **Attack 3 (Topology & link-state poisoning):**
+
   ```bash
   python3 experiments/eval_topology_poison.py
   ```
 
-
 ### 3. Generate Evaluation Graphs
+
 ```bash
 python3 experiments/plot_eval_figures.py
 python3 experiments/plot_attack2_figures.py
 python3 experiments/plot_attack3_figures.py
 ```
+
 Generated PNG and PDF charts are stored in `results/figures/`.
 
 ### 4. Emergency Cleanup
+
 Kill any remaining Mininet, Ryu or OVS processes:
+
 ```bash
 sudo ./experiments/emergency_reset.sh
 ```
@@ -280,6 +301,8 @@ sudo ./experiments/emergency_reset.sh
 * A 100% block rate on five hand-chosen vectors does not establish robustness against an adaptive adversary.
 * No experimental comparison against related schemes (AVANT-GUARD, LineSwitch, DoSDefender and others) was performed.
 
+---
+
 ## Future Work
 
 1. Profile and shorten the metering stage that dominates TTM; keep the replaced controller's E-W service reachable.
@@ -292,7 +315,6 @@ sudo ./experiments/emergency_reset.sh
 8. Hardware switches and multi-host deployment.
 
 ---
-
 
 ## Citation
 
