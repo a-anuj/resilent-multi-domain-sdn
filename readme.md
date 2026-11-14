@@ -97,6 +97,7 @@ Relative to undefended medians, attack-phase latency falls 91.6% and recovery la
 
 TTM drops by about 94% and reconnection is 99.7% shorter. Mean latency under defence is of the same order in both designs, so the advantage of HA lies in **availability, TTM and recovery reliability**, not mean latency.
 
+
 **Where the time goes.** Takeover and reconnection are 9-24 ms (4-11% of TTM); the interval from reconnection to meter installation is 0.177-0.229 s (89-96%). The metering stage was not profiled and is the obvious target for further reduction.
 
 **Observation (hypothesis).** In one defended run the topology update from domain A to its peers grew from 652 B to ~418 kB during the flood, consistent with spoofed hosts being registered and served to peers without ageing. This was not isolated from E-W coupling of stalled handlers or host CPU contention.
