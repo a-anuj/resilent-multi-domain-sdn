@@ -55,8 +55,6 @@ The attacker cannot read controller memory and does not tamper with the OpenFlow
 
 ---
 
-
-
 ## Attacks and Defences
 
 ### Attack 1: North-South PacketIn Flood -> HA Circuit Breaker
