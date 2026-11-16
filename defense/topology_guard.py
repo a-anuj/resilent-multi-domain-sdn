@@ -301,52 +301,92 @@ class TopologyGuard:
         max_port:               int        = DEFAULT_MAX_PORT_NUMBER,
         phantom_port_threshold: int        = DEFAULT_PHANTOM_PORT_THRESHOLD,
         hmac_required:          bool       = True,
+        replay_protection:      bool       = True,
     ) -> None:
         self._secret           = shared_secret
         self._trusted          = trusted_domains or DEFAULT_TRUSTED_DOMAINS.copy()
         self._hmac_required    = hmac_required
+        self._replay_protection= replay_protection
         self._max_port         = max_port
         self._phantom_thresh   = phantom_port_threshold
         self._semantic         = SemanticChecker(max_ratio_delta)
+
+        # Stateful anti-replay: tracks highest accepted sequence number per domain
+        self._last_seen_seq: dict[str, int] = {}
+        self._replay_lock      = threading.Lock()
 
         self._stats = {
             "allowed":           0,
             "hmac_rejected":     0,
             "schema_rejected":   0,
             "semantic_rejected": 0,
+            "replay_rejected":   0,
         }
         self._stats_lock = threading.Lock()
 
         log.info(
-            "TopologyGuard started. hmac_required=%s  trusted_domains=%s  "
+            "TopologyGuard started. hmac_required=%s  replay_protection=%s  trusted_domains=%s  "
             "max_ratio_delta=%.2f  phantom_port_threshold=%d",
-            hmac_required, sorted(self._trusted), max_ratio_delta, phantom_port_threshold,
+            hmac_required, replay_protection, sorted(self._trusted), max_ratio_delta, phantom_port_threshold,
         )
 
-    def validate(self, body_bytes: bytes, headers: dict, data: dict) -> None:
+    @property
+    def hmac_required(self) -> bool:
+        return self._hmac_required
+
+    def verify_hmac_layer(self, body_bytes: bytes, headers: dict) -> None:
         """
-        Full three-layer validation.
-
-        Parameters
-        ──────────
-        body_bytes : raw request body (used for HMAC verification)
-        headers    : dict-like of HTTP request headers
-        data       : already-parsed JSON payload
-
-        Raises GuardRejection on any failure.
+        Layer 1 — Cryptographic Authentication on RAW BYTES.
+        
+        Adheres strictly to the Cryptographic Doom Principle:
+        Validates the HMAC-SHA256 signature BEFORE deserialization (json.loads).
+        Never exposes the parser to unauthenticated inputs.
         """
-        # Layer 1 — HMAC
-        if self._hmac_required:
-            sig = headers.get("X-EW-Signature", "")
-            if not sig:
-                self._reject("hmac_rejected",
-                             "Missing X-EW-Signature header — payload rejected")
-            if not verify_hmac(body_bytes, sig, self._secret):
-                self._reject("hmac_rejected",
-                             f"HMAC mismatch from domain={data.get('domain_id','?')} — "
-                             "possible topology poisoning attempt")
+        if not self._hmac_required:
+            return
 
-        # Layer 2 — Schema
+        sig = headers.get("X-EW-Signature", "")
+        if not sig:
+            self._reject("hmac_rejected",
+                         "Missing X-EW-Signature header — payload rejected")
+        if not verify_hmac(body_bytes, sig, self._secret):
+            self._reject("hmac_rejected",
+                         "HMAC mismatch on payload bytes — possible topology poisoning attempt")
+
+    def check_replay(self, domain_id: str, seq: int) -> None:
+        """
+        Anti-Replay Protection: Enforce strictly monotonic sequence numbers per domain.
+        
+        Rejects replayed or out-of-order sequence numbers (seq <= last_accepted_seq).
+        """
+        if not self._replay_protection:
+            return
+        if not domain_id or seq is None:
+            return
+
+        with self._replay_lock:
+            last_seq = self._last_seen_seq.get(domain_id)
+            if last_seq is not None and seq <= last_seq:
+                self._reject(
+                    "replay_rejected",
+                    f"Replay detected from domain='{domain_id}': seq={seq} "
+                    f"<= last_accepted_seq={last_seq}"
+                )
+
+    def commit_seq(self, domain_id: str, seq: int) -> None:
+        """Commit the accepted sequence number after full pipeline validation succeeds."""
+        if not self._replay_protection or not domain_id or seq is None:
+            return
+        with self._replay_lock:
+            self._last_seen_seq[domain_id] = seq
+
+    def validate_payload(self, data: dict) -> None:
+        """
+        Layer 2 (Schema), Anti-Replay, and Layer 3 (Semantic) validation on parsed JSON.
+        
+        Called ONLY after Layer 1 (HMAC) cryptographic authenticity is established.
+        """
+        # Layer 2 — Schema Validation
         try:
             validate_topology_payload(
                 data,
@@ -357,15 +397,50 @@ class TopologyGuard:
         except SchemaError as exc:
             self._reject("schema_rejected", f"Schema validation failed: {exc}")
 
-        # Layer 3 — Semantic cross-check (linkstate only)
+        # Layer 3 — Anti-Replay Check (Monotonic sequence number)
+        domain_id = data.get("domain_id")
+        seq       = data.get("seq")
+        self.check_replay(domain_id, seq)
+
+        # Layer 4 — Semantic cross-check (linkstate only)
         if data.get("type") == "linkstate" and "util_rates" in data:
             anomalies = self._semantic.check_util_rates(data["util_rates"])
             if anomalies:
                 self._reject("semantic_rejected",
                              f"Semantic anomaly detected: {'; '.join(anomalies)}")
 
+        # All checks passed: commit accepted sequence number & record allowed
+        self.commit_seq(domain_id, seq)
         with self._stats_lock:
             self._stats["allowed"] += 1
+
+    def validate(self, body_bytes: bytes, headers: dict, data: dict = None) -> dict:
+        """
+        Full three-layer validation pipeline adhering to Authenticate-then-Parse.
+
+        Parameters
+        ──────────
+        body_bytes : raw request body (used for HMAC verification)
+        headers    : dict-like of HTTP request headers
+        data       : optional parsed dict; if omitted, parsed ONLY after Layer 1 passes
+
+        Returns the validated data dict.
+        Raises GuardRejection on any security failure (HTTP 403).
+        Raises SchemaError on JSON parse failure (HTTP 400).
+        """
+        # 1. Layer 1: Authenticate on raw bytes FIRST
+        self.verify_hmac_layer(body_bytes, headers)
+
+        # 2. Deserialization ONLY after Layer 1 HMAC passes
+        if data is None:
+            try:
+                data = json.loads(body_bytes)
+            except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+                raise SchemaError(f"Invalid JSON: {exc}")
+
+        # 3. Layer 2 (Schema), Anti-Replay, and Layer 3 (Semantic)
+        self.validate_payload(data)
+        return data
 
     def stats_snapshot(self) -> dict:
         with self._stats_lock:
@@ -426,14 +501,24 @@ def install_topology_guard(app, shared_secret: str = DEFAULT_SHARED_SECRET,
     def _guarded_update():
         body    = request.get_data()
         headers = request.headers
+
+        # 1. Strictly Authenticate-then-Parse: Layer 1 HMAC runs on RAW BYTES first.
+        # Unauthenticated inputs never reach the JSON deserializer.
+        try:
+            guard.verify_hmac_layer(body, headers)
+        except GuardRejection as exc:
+            return jsonify({"error": "payload rejected", "detail": str(exc)}), 403
+
+        # 2. Deserialization ONLY after cryptographic authenticity is established
         try:
             data = json.loads(body)
-        except json.JSONDecodeError as exc:
-            log.warning("JSON parse error: %s", exc)
-            return jsonify({"error": "invalid JSON"}), 400
+        except (json.JSONDecodeError, UnicodeDecodeError) as exc:
+            log.warning("JSON parse error on authenticated payload: %s", exc)
+            return jsonify({"error": "invalid JSON", "detail": str(exc)}), 400
 
+        # 3. Layer 2 (Schema), Anti-Replay, and Layer 3 (Semantic)
         try:
-            guard.validate(body, headers, data)
+            guard.validate_payload(data)
         except GuardRejection as exc:
             return jsonify({"error": "payload rejected", "detail": str(exc)}), 403
 
