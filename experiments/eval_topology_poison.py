@@ -89,13 +89,13 @@ def start_controller(defended: bool = False, port: int = 8080, ofp_port: int = 6
 
 # ── Payload Builders ─────────────────────────────────────────────────────────
 
-def build_congestion_lie(src_dpid: int = 3, dst_dpid: int = 4, fake_ratio: float = 0.95, domain: str = "ROGUE") -> dict:
+def build_congestion_lie(src_dpid: int = 3, dst_dpid: int = 4, fake_ratio: float = 0.95, domain: str = "ROGUE", seq: int = 8888) -> dict:
     fake_bps = int(fake_ratio * 10_000_000)
     port_data = {"ratio": fake_ratio, "bps_tx": fake_bps, "bps_rx": fake_bps}
     return {
         "type": "linkstate",
         "domain_id": domain,
-        "seq": 8888,
+        "seq": seq,
         "link_state": {
             str(src_dpid): {"1": {"tx_bytes": fake_bps * 60, "rx_bytes": 0}}
         },
@@ -206,14 +206,14 @@ def run_test_suite(condition: str) -> dict:
     results.append({"test": "signed_phantom_link_schema_violation", "status": r4.status_code, "blocked": blocked4, "lat_ms": round(dt4, 2), "response": r4.text})
 
     # Establish baseline utilization for dpid=4 (ratio=0.08) so jump can be detected
-    base_payload = build_congestion_lie(src_dpid=4, dst_dpid=5, fake_ratio=0.08, domain="B")
+    base_payload = build_congestion_lie(src_dpid=4, dst_dpid=5, fake_ratio=0.08, domain="B", seq=100)
     base_body = json.dumps(base_payload, sort_keys=True, separators=(",", ":")).encode("utf-8")
     base_sig = sign_payload(base_payload, DEFAULT_SHARED_SECRET)
     requests.post(url, data=base_body, headers={"Content-Type": "application/json", "X-Domain-Id": "B", "X-EW-Signature": base_sig}, timeout=3)
 
     # Test Case 5: Signed Congestion Lie (Semantic Violation: Sudden Jump to 0.95 from 0.08)
     log("\n[Test 5] Attacker: Valid Key Signed Congestion Lie (Semantic Violation: Sudden 0.08->0.95 jump)...")
-    payload5 = build_congestion_lie(src_dpid=4, dst_dpid=5, fake_ratio=0.95, domain="B")
+    payload5 = build_congestion_lie(src_dpid=4, dst_dpid=5, fake_ratio=0.95, domain="B", seq=101)
     body5 = json.dumps(payload5, sort_keys=True, separators=(",", ":")).encode("utf-8")
     sig5 = sign_payload(payload5, DEFAULT_SHARED_SECRET)
     headers5 = {

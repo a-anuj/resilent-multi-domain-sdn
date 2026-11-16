@@ -241,12 +241,12 @@ def test_ew_flood_mitigator() -> None:
                           anomaly_window=2,
                           quarantine_rate=2, quarantine_burst=2,
                           quarantine_dur=30)
-    # Fire 50 rapid requests to push the sliding window over threshold
-    for _ in range(50):
-        m6.check_request("10.0.0.1")
-    # Give detector thread time to fire (window=2s, poll=1s → max 3s)
-    _log("  Waiting 4s for anomaly detector to trigger quarantine...")
-    time.sleep(4)
+    # Fire requests sustained across multiple consecutive seconds to satisfy anomaly_window
+    for _ in range(3):
+        for _ in range(20):
+            m6.check_request("10.0.0.1")
+        time.sleep(0.7)
+    time.sleep(1)
     snap = m6.stats_snapshot()
     _assert("Quarantine activates after sustained rate > anomaly_threshold",
             snap.get("quarantines", 0) >= 1,
@@ -428,6 +428,40 @@ def test_topology_guard() -> None:
             r5.status_code == 403,
             f"Got HTTP {r5.status_code}: {r5.text[:100]}")
     _log(f"    Rejection: {r5.json()}")
+
+    # 9d: Authenticate-then-Parse verification:
+    # Send malformed JSON WITHOUT a signature. Must be rejected at Layer 1 HMAC (HTTP 403),
+    # NEVER reaching json.loads (which would have returned HTTP 400).
+    bad_json_body = b"NOT_VALID_JSON{{{{"
+    r_bad = requests.post(url9, data=bad_json_body,
+                          headers={"Content-Type": "application/json",
+                                   "X-Domain-Id": "A"}, timeout=3)
+    _assert("Flask middleware: malformed JSON without HMAC rejected with HTTP 403 (Authenticate-then-Parse)",
+            r_bad.status_code == 403,
+            f"Expected HTTP 403 from Layer 1 HMAC, got HTTP {r_bad.status_code}")
+
+    # 9e: Anti-Replay verification:
+    # Replay identical valid payload from 9a (seq=1). Must be rejected with HTTP 403.
+    r_replay = requests.post(url9, data=body3,
+                             headers={"Content-Type": "application/json",
+                                      "X-Domain-Id": "A",
+                                      "X-EW-Signature": sig3}, timeout=3)
+    _assert("Flask middleware: replayed valid update (seq=1 <= last_seen) → HTTP 403 (Anti-Replay)",
+            r_replay.status_code == 403 and "Replay detected" in r_replay.text,
+            f"Expected HTTP 403 Replay detected, got HTTP {r_replay.status_code}: {r_replay.text[:100]}")
+
+    # 9f: Monotonic sequence progression:
+    # Send new update from Domain A with seq=2 (seq > last_seen). Must be accepted (HTTP 200).
+    topo_seq2 = {**valid_topo, "seq": 2}
+    body_seq2 = json.dumps(topo_seq2, sort_keys=True, separators=(",", ":")).encode()
+    sig_seq2  = sign_payload(topo_seq2, SECRET)
+    r_seq2 = requests.post(url9, data=body_seq2,
+                           headers={"Content-Type": "application/json",
+                                    "X-Domain-Id": "A",
+                                    "X-EW-Signature": sig_seq2}, timeout=3)
+    _assert("Flask middleware: strictly monotonic update (seq=2 > 1) accepted → HTTP 200",
+            r_seq2.status_code == 200,
+            f"Got HTTP {r_seq2.status_code}: {r_seq2.text[:100]}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
